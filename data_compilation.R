@@ -98,3 +98,12 @@ summary(as.factor(murre.flights$ring_number))
 
 
 # maybe plot flights - start to end locations only (i.e. lots of lines)
+
+
+
+
+
+
+
+# GPS point data ----
+# Probably best to do this in a sepperate script
