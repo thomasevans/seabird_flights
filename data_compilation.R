@@ -142,6 +142,7 @@ abline(v=500)
 summary(as.factor(all.flights$species[all.flights.keep & all.flights$interval_min <500]))
 
 all.flights.keep <- all.flights.keep & all.flights$interval_min <500
+summary(as.factor(all.flights$species[all.flights.keep]))
 
 
 # maybe plot flights - start to end locations only (i.e. lots of lines)
@@ -160,37 +161,24 @@ segments(all.flights$start_long[all.flights.keep],
          all.flights$end_lat[all.flights.keep],
          col = as.factor(all.flights$species[all.flights.keep]))
 
-# See if lines cross Gotland
-# install.packages("rgeos")
-library(rgeos)
 
-line_example <- Line(cbind(c(all.flights$start_long[120], all.flights$end_long[120]),
-                                  c(all.flights$start_lat[120], all.flights$end_lat[120])))
+# Save flights data to csv and Rdata object ------
+flights <- all.flights[all.flights.keep,]
 
-line.lst <- list()
-for(i in 1:nrow(all.flights)){
-  l1 <- (Line(cbind(c(all.flights$start_long[i], all.flights$end_long[i]),
-                            c(all.flights$start_lat[i], all.flights$end_lat[i]))))
-  l2 <- Lines(list(l1), ID = i)
-  line.lst[i] <- l2
-  
+# Make new unique flight ID by combining species and original flight_id
+new_id <- function(x,y){
+  if(x == "murre"){return(paste("m",y, sep = ""))} else {
+    return(paste("g",y, sep = ""))
+  }
 }
 
-# lines.lst <- Lines(line.lst, ID = 1)
+flights$flight_id_combined <- mapply(x = flights$species,
+                                     y = flights$flight_id,
+                                     FUN = new_id)
 
-lines.lst.sp <- SpatialLines(list(lines.lst))
-str(lines.lst.sp)
-lines.lst.sp@lines@ID
+# Output to csv
+write.table(flights, file = "flights_all.csv", col.names = TRUE,
+            row.names = FALSE, sep = ",")
 
-proj4string(lines.lst.sp) <- proj4string(gadm)
-x <- over(lines.lst.sp,gadm , fn = sum)
-x
-str(gadm)
-sp_lines_ex <- SpatialLines(list(lines_ex))
-proj4string(sp_lines_ex) <- proj4string(gadm)
-over(sp_lines_ex, gadm , fn = NULL)
-plot(sp_lines_ex, add = TRUE, col = "blue", lwd = 5)
+save(flights, file = "flights.RData")
 
-# ?Line
-# GPS point data ----
-# Probably best to do this in a sepperate script
