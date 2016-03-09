@@ -33,15 +33,19 @@ gull.flights <- gull.flights[gull.flights$gotland_time_prop <0.01,]
 gull.flights <- gull.flights[,1:21]
 
 # Get murre flight data -----
-murre.flights <- sqlQuery(murre.db, query="SELECT guillemots_gps_flights.flight_id, guillemots_gps_flights.n_points, guillemots_gps_flights.device_info_serial, guillemots_gps_flights.trip_id, guillemots_gps_flights.flight_type, guillemots_gps_flights.ring_number, guillemots_gps_flights.start_time, guillemots_gps_flights.end_time, guillemots_gps_flights.duration, guillemots_gps_flights.col_dist_max, guillemots_gps_flights.p2p2_dist, guillemots_gps_flights.interval_mean, guillemots_gps_flights.interval_min, guillemots_gps_flights.long_start, guillemots_gps_flights.lat_start, guillemots_gps_flights.long_end, guillemots_gps_flights.lat_end, guillemots_gps_flights.col_dist_start, guillemots_gps_flights.col_dist_end, guillemots_gps_flights.col_dist_dif, guillemots_gps_flights.dist_straight
+murre.flights <- sqlQuery(murre.db, query="SELECT guillemots_gps_flights.flight_id, guillemots_gps_flights.n_points, guillemots_gps_flights.device_info_serial, guillemots_gps_flights.trip_id, guillemots_gps_flights.flight_type, guillemots_gps_flights.ring_number, guillemots_gps_flights.start_time, guillemots_gps_flights.end_time, guillemots_gps_flights.duration, guillemots_gps_flights.col_dist_max, guillemots_gps_flights.p2p2_dist, guillemots_gps_flights.interval_mean, guillemots_gps_flights.interval_min, guillemots_gps_flights.long_start, guillemots_gps_flights.lat_start, guillemots_gps_flights.long_end, guillemots_gps_flights.lat_end, guillemots_gps_flights.col_dist_start, guillemots_gps_flights.col_dist_end, guillemots_gps_flights.col_dist_dif, guillemots_gps_flights.dist_straight, guillemots_gps_flights.device_type
 FROM guillemots_gps_flights
-WHERE (((guillemots_gps_flights.flight_type)='Final'));
+                          WHERE (((guillemots_gps_flights.flight_type)='Final'));
+                          
 ")
-
+summary(murre.flights$device_type)
 
 # Combine the murre and gull data -----
 names(gull.flights)
 names(murre.flights)
+
+gull.flights$device_type <- "uva"
+
 
 # Which names are different
 names2change <- names(murre.flights) %in% names(gull.flights)
