@@ -14,3 +14,5 @@ vignettes/*.pdf
 .httr-oauth
 .Rproj.user
 SWE_adm0.RData
+flights.RData
+flights_all.csv
