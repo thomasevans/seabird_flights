@@ -59,8 +59,46 @@ murres_igu$flight_id_combined %in% points.murre.igu.df$flight_id_combined
 # Murres - uva -----
 murres_uva <- flights[flights$device_type == "uva" & flights$species == "murre", ]
 
+# unique(murre.flights$device_info_serial)
+# 
+# murres_uva$device_info_serial[i]
+# murres_uva$start_time[i]
+# murres_uva$end_time[i]
 
-unique(murre.flights$device_info_serial)
+
+
+
+points.murres_uva <- list()
+
+for(i in 1:nrow(murres_uva)){
+  
+  sql_query <- paste("SELECT DISTINCT gps_ee_tracking_speed_limited.device_info_serial, gps_ee_tracking_speed_limited.date_time, gps_ee_tracking_speed_limited.latitude, gps_ee_tracking_speed_limited.longitude, gps_ee_tracking_speed_limited.altitude, gps_ee_tracking_speed_limited.speed_2d, gps_ee_tracking_speed_limited.direction, gps_ee_tracking_speed_limited.h_accuracy, gps_ee_tracking_speed_limited.v_accuracy, gps_ee_tracking_speed_limited.satellites_used, gps_ee_tracking_speed_limited.positiondop, guillemots_gps_points_movebank_ecmwf.ecmwf_wind_10m_v, guillemots_gps_points_movebank_ecmwf.ecmwf_surf_roughness, guillemots_gps_points_movebank_ecmwf.ecmwf_charnock, guillemots_gps_points_movebank_ecmwf.ecmwf_boundary_lay_ht, guillemots_gps_points_movebank_ecmwf.ecmwf_temp_2m, guillemots_gps_points_movebank_ecmwf.ecmwf_wind_10m_u
+FROM guillemots_track_session, ((guillemots_gps_points_trip_id INNER JOIN guillemots_gps_points_uva_class ON (guillemots_gps_points_trip_id.device_info_serial = guillemots_gps_points_uva_class.device_info_serial) AND (guillemots_gps_points_trip_id.date_time = guillemots_gps_points_uva_class.date_time)) INNER JOIN gps_ee_tracking_speed_limited ON (guillemots_gps_points_uva_class.device_info_serial = gps_ee_tracking_speed_limited.device_info_serial) AND (guillemots_gps_points_uva_class.date_time = gps_ee_tracking_speed_limited.date_time)) INNER JOIN (guillemots_gps_points_movebank_ecmwf INNER JOIN guillemots_gps_points_flight_id ON (guillemots_gps_points_movebank_ecmwf.device_info_serial = guillemots_gps_points_flight_id.device_info_serial) AND (guillemots_gps_points_movebank_ecmwf.date_time = guillemots_gps_points_flight_id.date_time)) ON (guillemots_gps_points_trip_id.device_info_serial = guillemots_gps_points_movebank_ecmwf.device_info_serial) AND (guillemots_gps_points_trip_id.date_time = guillemots_gps_points_movebank_ecmwf.date_time)
+                     WHERE (((gps_ee_tracking_speed_limited.device_info_serial)= '",
+                     murres_uva$device_info_serial[i],
+                     "' ) AND ((gps_ee_tracking_speed_limited.date_time)>= #",
+                     murres_uva$start_time[i],
+                     "# And (gps_ee_tracking_speed_limited.date_time)<=#",
+                     murres_uva$end_time[i],
+                     "#) AND ((guillemots_track_session.device_info_serial)='",
+                     murres_uva$device_info_serial[i],
+                     "'));",
+                     sep = "")
+  
+  points <- sqlQuery(murre.db, query= gsub("\n", " ", sql_query))
+  points$flight_id_combined <- murres_uva$flight_id_combined[i]
+  points.murres_uva[i] <- list(points)
+  
+  
+}
+
+
+points.murres_uva.df <- do.call(rbind , points.murres_uva)
+
+# Check all flights represented with locations
+murres_uva$flight_id_combined %in% points.murres_uva.df$flight_id_combined
+
+
 
 
 
