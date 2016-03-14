@@ -181,5 +181,23 @@ write.table(points.all, file = "points_all.csv", col.names = TRUE,
 
 save(points.all, file = "points_all.RData")
 
+# hist(points.all$altitude[points.all$altitude >-100], breaks = 200, xlim = c(-50,200))
 
 
+# Calculate mode using function from here: http://stackoverflow.com/a/8189441/1172358
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+flight_ids <- unique(points.all$flight_id_combined)
+
+
+flight.modes <- NULL
+for(i in 1:length(flight_ids)){
+  flight.modes[i] <- Mode(points.all$altitude[points.all$flight_id_combined == flight_ids[i] ])
+}
+
+
+hist(flight.modes, breaks = 100, xlim = c(-200,200))
+hist(points.all$altitude, breaks = 200, xlim = c(-200,200))
