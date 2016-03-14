@@ -109,7 +109,7 @@ points.lbbg_uva <- list()
 
 for(i in 1:nrow(lbbg_uva)){
   
-  sql_query <- paste("SELECT DISTINCT gps_ee_tracking_speed_limited_local.device_info_serial, gps_ee_tracking_speed_limited_local.date_time, gps_ee_tracking_speed_limited_local.latitude, gps_ee_tracking_speed_limited_local.longitude, gps_ee_tracking_speed_limited_local.altitude, gps_ee_tracking_speed_limited_local.speed_2d, gps_ee_tracking_speed_limited_local.direction, gps_ee_tracking_speed_limited_local.h_accuracy, gps_ee_tracking_speed_limited_local.v_accuracy, gps_ee_tracking_speed_limited_local.satellites_used, gps_ee_tracking_speed_limited_local.positiondop, move_bank_variables_all.wind_u_10m, move_bank_variables_all.surface_roughness, move_bank_variables_all.temperature_2m, move_bank_variables_all.wind_u_10m
+  sql_query <- paste("SELECT DISTINCT gps_ee_tracking_speed_limited_local.device_info_serial, gps_ee_tracking_speed_limited_local.date_time, gps_ee_tracking_speed_limited_local.latitude, gps_ee_tracking_speed_limited_local.longitude, gps_ee_tracking_speed_limited_local.altitude, gps_ee_tracking_speed_limited_local.speed_2d, gps_ee_tracking_speed_limited_local.direction, gps_ee_tracking_speed_limited_local.h_accuracy, gps_ee_tracking_speed_limited_local.v_accuracy, gps_ee_tracking_speed_limited_local.satellites_used, gps_ee_tracking_speed_limited_local.positiondop, move_bank_variables_all.wind_v_10m, move_bank_variables_all.surface_roughness, move_bank_variables_all.temperature_2m, move_bank_variables_all.wind_u_10m
 FROM gps_ee_track_session_limited_local, gps_ee_tracking_speed_limited_local INNER JOIN move_bank_variables_all ON (gps_ee_tracking_speed_limited_local.date_time = move_bank_variables_all.date_time) AND (Val(gps_ee_tracking_speed_limited_local.device_info_serial) = move_bank_variables_all.device_info_serial)
                      WHERE (((gps_ee_tracking_speed_limited_local.device_info_serial)= '",
                      lbbg_uva$device_info_serial[i],
@@ -133,13 +133,53 @@ FROM gps_ee_track_session_limited_local, gps_ee_tracking_speed_limited_local INN
 points.lbbg_uva.df <- do.call(rbind , points.lbbg_uva)
 
 # Check all flights represented with locations
-lbbg_uva$flight_id_combined %in% points.lbbg_uva.df$flight_id_combined
-
-
-
+all(lbbg_uva$flight_id_combined %in% points.lbbg_uva.df$flight_id_combined)
 
 
 
 
 # Combine these data ------
-# Put NAs for missing data (e.g. columns not common between the igu and uva GPS devices)
+
+# First give common names to DF fields with common names
+
+# Two UVA tables
+names_same <- names(points.lbbg_uva.df) %in% names(points.murres_uva.df)
+names(points.lbbg_uva.df)[!names_same] <- c("ecmwf_wind_10m_v",
+                                            "ecmwf_surf_roughness",
+                                            "ecmwf_temp_2m",
+                                            "ecmwf_wind_10m_u")
+# points.lbbg_uva.df.2 <- points.lbbg_uva.df[,names(points.murres_uva.df)]
+
+
+
+# Merge UvA data
+library(dplyr)
+points.uva <- bind_rows(points.lbbg_uva.df, points.murres_uva.df)
+# ?bind_rows
+# IGU + UVA data
+names_same <- names(points.murre.igu.df) %in% names(points.uva)
+names(points.murre.igu.df)[!names_same] <- c("altitude",
+                                            "speed_2d",
+                                            "direction",
+                                            "ehpe",
+                                            "satellites_used",
+                                            "timeout",
+                                            "MSVs_QCN",
+                                            "ecmwf_pressure_sea_lev")
+str(points.murre.igu.df)
+
+points.murre.igu.df$device_info_serial <- as.character(points.murre.igu.df$device_info_serial)
+points.uva$device_info_serial <- as.character(points.uva$device_info_serial)
+
+# Merge all data
+points.all <- bind_rows(points.uva, points.murre.igu.df)
+
+
+# Output to csv
+write.table(points.all, file = "points_all.csv", col.names = TRUE,
+            row.names = FALSE, sep = ",")
+
+save(points.all, file = "points_all.RData")
+
+
+
