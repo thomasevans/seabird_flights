@@ -99,6 +99,44 @@ points.murres_uva.df <- do.call(rbind , points.murres_uva)
 murres_uva$flight_id_combined %in% points.murres_uva.df$flight_id_combined
 
 
+# LBBG - uva -----
+lbbg_uva <- flights[flights$device_type == "uva" & flights$species == "gull", ]
+
+
+
+
+points.lbbg_uva <- list()
+
+for(i in 1:nrow(lbbg_uva)){
+  
+  sql_query <- paste("SELECT DISTINCT gps_ee_tracking_speed_limited_local.device_info_serial, gps_ee_tracking_speed_limited_local.date_time, gps_ee_tracking_speed_limited_local.latitude, gps_ee_tracking_speed_limited_local.longitude, gps_ee_tracking_speed_limited_local.altitude, gps_ee_tracking_speed_limited_local.speed_2d, gps_ee_tracking_speed_limited_local.direction, gps_ee_tracking_speed_limited_local.h_accuracy, gps_ee_tracking_speed_limited_local.v_accuracy, gps_ee_tracking_speed_limited_local.satellites_used, gps_ee_tracking_speed_limited_local.positiondop, move_bank_variables_all.wind_u_10m, move_bank_variables_all.surface_roughness, move_bank_variables_all.temperature_2m, move_bank_variables_all.wind_u_10m
+FROM gps_ee_track_session_limited_local, gps_ee_tracking_speed_limited_local INNER JOIN move_bank_variables_all ON (gps_ee_tracking_speed_limited_local.date_time = move_bank_variables_all.date_time) AND (Val(gps_ee_tracking_speed_limited_local.device_info_serial) = move_bank_variables_all.device_info_serial)
+                     WHERE (((gps_ee_tracking_speed_limited_local.device_info_serial)= '",
+                     lbbg_uva$device_info_serial[i],
+                     "') AND ((gps_ee_tracking_speed_limited_local.date_time)>=#",
+                     lbbg_uva$start_time[i],
+                     "# And (gps_ee_tracking_speed_limited_local.date_time)<=#",
+                     lbbg_uva$end_time[i],
+                     "#) AND ((gps_ee_track_session_limited_local.device_info_serial)=",
+                     lbbg_uva$device_info_serial[i],
+                     "));",
+                     sep = "")
+  
+  points <- sqlQuery(gull.db, query= gsub("\n", " ", sql_query))
+  points$flight_id_combined <- lbbg_uva$flight_id_combined[i]
+  points.lbbg_uva[i] <- list(points)
+  
+  
+}
+
+
+points.lbbg_uva.df <- do.call(rbind , points.lbbg_uva)
+
+# Check all flights represented with locations
+lbbg_uva$flight_id_combined %in% points.lbbg_uva.df$flight_id_combined
+
+
+
 
 
 
