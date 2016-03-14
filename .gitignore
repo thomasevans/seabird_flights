@@ -16,3 +16,4 @@ vignettes/*.pdf
 SWE_adm0.RData
 flights.RData
 flights_all.csv
+data_compilation_gps_locations_20160314.RData
