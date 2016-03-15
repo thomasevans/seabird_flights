@@ -199,5 +199,21 @@ for(i in 1:length(flight_ids)){
 }
 
 
+
+
 hist(flight.modes, breaks = 100, xlim = c(-200,200))
 hist(points.all$altitude, breaks = 200, xlim = c(-200,200))
+
+hist(points.all$surface_roughness, breaks = 1000, xlim = c(0,0.1))
+range(points.all$surface_roughness, na.rm = TRUE)
+hist(log(points.all$surface_roughness))
+
+hist(points.all$ecmwf_boundary_lay_ht, breaks = 100)
+hist(points.all$ecmwf_boundary_lay_ht, breaks = 100, xlim = c(0,200))
+
+bound_lay_dist <- points.all$ecmwf_boundary_lay_ht - points.all$altitude
+hist(bound_lay_dist, breaks = 100)
+plot(points.all$ecmwf_boundary_lay_ht~points.all$altitude, xlim = c(-50,150), ylim = c(-50,1500))
+
+
+summary(points.all$altitude < -10)
