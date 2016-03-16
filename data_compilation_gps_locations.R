@@ -65,6 +65,7 @@ murres_uva <- flights[flights$device_type == "uva" & flights$species == "murre",
 # murres_uva$start_time[i]
 # murres_uva$end_time[i]
 
+# i <- 3
 
 
 
@@ -174,6 +175,7 @@ points.uva$device_info_serial <- as.character(points.uva$device_info_serial)
 # Merge all data
 points.all <- bind_rows(points.uva, points.murre.igu.df)
 
+# str(points.uva)
 
 # Output to csv
 write.table(points.all, file = "points_all.csv", col.names = TRUE,
