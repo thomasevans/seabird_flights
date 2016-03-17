@@ -9,8 +9,10 @@ load("points_all.RData")
 # ?merge
 points.info <- merge(points.all, flights, by = "flight_id_combined")
 
-# Wind shear calculations -----
+# ** Wind shear calculations -----
 # Flight height for calculations (NA for extremes, and 1 m for <0.5 m)
+
+# Altitude values ------
 
 points.info$altitude_callib <- NULL
 
@@ -53,6 +55,7 @@ points.info$altitude_callib_extm_05[points.info$altitude_callib_extm < 0.5] <- 0
 hist(points.info$altitude_callib_extm_05)
 
 
-# Wind speed at flight height
+# Wind speed at flight height -----
 
-# Wind speed at 5 and 50 m and differnce between (some index of wind gradient)
+
+# Wind speed at 1 and 100 m and differnce between (some index of wind gradient) -----
