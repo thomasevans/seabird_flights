@@ -260,11 +260,41 @@ hist(deg(alpha_test))
 wind_angle_dif_10m <- points.info$va_flt_10m_bearing - points.info$ecmwf_wind_10m_dir
 hist(wind_angle_dif_10m, breaks = 72)
 
-cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(wind_angle_dif_10m)
-hist(cross_wind_10m)
-head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(wind_angle_dif_10m)
-hist(head_wind_10m)
+points.info$cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_10m))
+
+points.info$head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_10m))
+
+hist(points.info$cross_wind_10m)
+hist(points.info$head_wind_10m)
+
 
 # Add for flight height
+wind_angle_dif_flt_ht <- points.info$va_flt_ht_bearing - points.info$ecmwf_wind_10m_dir
+hist(wind_angle_dif_flt_ht, breaks = 72)
+
+points.info$cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_flt_ht))
+
+points.info$head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_flt_ht))
+
+hist(points.info$cross_wind_flt_ht)
+hist(points.info$head_wind_flt_ht)
+
 
 # And relative to track, not heading
+#****** something wrong with 'direction' column currently - need to check before proceeding!
+wind_angle_dif_track <- points.info$ - points.info$ecmwf_wind_10m_dir
+hist(wind_angle_dif_track, breaks = 72)
+
+x <- wind_angle_dif_track < -360
+
+cbind(points.info$direction[x], points.info$ecmwf_wind_10m_dir[x])
+
+hist(points.info$direction)
+
+points.info$cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_10m))
+
+points.info$head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_10m))
+
+hist(points.info$cross_wind_10m)
+hist(points.info$head_wind_10m)
+
