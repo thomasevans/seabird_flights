@@ -186,4 +186,85 @@ points.info$ecmwf_wind_10m_speed_50m <- t(mapply(wind.dir.speed,
                                                 points.info$ecmwf_wind_10m_v_50m))[,1]
 
 
-# Component calculations -----
+# **Component calculations -----
+calc_hypotenuse <- function(a,b){
+  h <- sqrt((a*a) + (b*b))
+}
+
+library(CircStats)
+
+# Va and Vg vectors ------
+# ?cos
+# Vg in u and v directions
+points.info$vg_v <- points.info$speed_2d*(cos(rad(points.info$direction)))
+hist(points.info$vg_v, xlim = c(-50,50), breaks = 100)
+
+points.info$vg_u <- points.info$speed_2d*(sin(rad(points.info$direction)))
+hist(points.info$vg_u, xlim = c(-50,50), breaks = 100)
+
+# Va in u and v directions
+points.info$va_v_10m <- points.info$vg_v - points.info$ecmwf_wind_10m_v
+hist(points.info$va_v_10m, xlim = c(-50,50), breaks = 400)
+
+points.info$va_u_10m <- points.info$vg_u - points.info$ecmwf_wind_10m_u
+
+points.info$va_v_flt_ht <- points.info$vg_v - points.info$ecmwf_wind_10m_v_flt_ht
+hist(points.info$va_v_flt_ht, xlim = c(-50,50), breaks = 50)
+
+points.info$va_u_flt_ht <- points.info$vg_u - points.info$ecmwf_wind_10m_u_flt_ht
+hist(points.info$va_u_flt_ht, xlim = c(-50,50), breaks = 50)
+
+# Va scalar components
+points.info$va_flt_ht <- calc_hypotenuse(points.info$va_u_flt_ht,
+                                         points.info$va_v_flt_ht)
+points.info$va_10m <- calc_hypotenuse(points.info$va_u_10m,
+                                         points.info$va_v_10m)
+hist(points.info$va_10m, xlim = c(0,50), breaks = 1000)
+
+# Va bear
+points.info$va_flt_ht_bearing <- t(mapply(wind.dir.speed,
+         points.info$va_u_flt_ht,
+         points.info$va_v_flt_ht))[,2]
+
+points.info$va_flt_10m_bearing <- t(mapply(wind.dir.speed,
+                                          points.info$va_u_10m,
+                                          points.info$va_v_10m))[,2]
+
+# Alpha calculation ------
+
+# alpha angle component
+solve_alpha <- function(t, h, w){
+  # Use law of cosines
+  alpha <- acos(-1*(((w*w)-(t*t)-(h*h))/(2*h*t)))
+  
+  # Set a sign for alpha
+  z <- t-h
+  alpha <- sign(z) * alpha
+  
+    return(alpha)
+}
+
+# ?sign()
+
+points.info$alpha_flt_ht <- solve_alpha(points.info$speed_2d,
+                          points.info$va_flt_ht,
+                          points.info$ecmwf_wind_10m_v_flt_ht)
+
+points.info$alpha_10m <- solve_alpha(points.info$speed_2d,
+                                        points.info$va_flt_ht,
+                                        points.info$ecmwf_wind_10m_v)
+
+hist(deg(alpha_test))
+
+# Cross wind calculations -----
+wind_angle_dif_10m <- points.info$va_flt_10m_bearing - points.info$ecmwf_wind_10m_dir
+hist(wind_angle_dif_10m, breaks = 72)
+
+cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(wind_angle_dif_10m)
+hist(cross_wind_10m)
+head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(wind_angle_dif_10m)
+hist(head_wind_10m)
+
+# Add for flight height
+
+# And relative to track, not heading
