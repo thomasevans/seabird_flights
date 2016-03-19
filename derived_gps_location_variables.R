@@ -5,12 +5,58 @@
 load("flights.RData")
 load("points_all.RData")
 
+
 # Connect point data and flight data ----
 # ?merge
 points.info <- merge(points.all, flights, by = "flight_id_combined")
 
+
+# Create new direction column, with common format -----
+hist(points.info$direction[points.info$device_type == "uva"])
+hist(points.info$direction[points.info$device_type == "igu"])
+summary(is.na(points.info$direction[points.info$device_type == "igu"]))
+
+
+points.info$direction_common <- points.info$direction
+
+# Correct UvA to 0 - 360 range
+points.info$direction_common[points.info$device_type == "uva"] <- 
+  points.info$direction[points.info$device_type == "uva"] %% 360
+hist(points.info$direction_common)
+
+
+# Calculate bearings for 2009 IGU data
+
+igu_2009 <- points.info$date_time < as.POSIXct("2010-01-01 00:00:00", tz = "UTC")
+summary(igu_2009)
+
+library(fossil)
+
+n <- sum(igu_2009)
+dir.igu <- earth.bear(points.info$longitude[igu_2009][-n],
+                      points.info$latitude[igu_2009][-n],
+                      points.info$longitude[igu_2009][-1],
+                      points.info$latitude[igu_2009][-1]
+                      )
+dir.igu.2009 <- c(dir.igu, NA)
+hist(dir.igu.2009)
+
+points.info$direction_common[igu_2009] <- dir.igu.2009
+
+flights.murres <- unique(points.info$flight_id_combined[igu_2009])
+
+for(i in 1:length(flights.murres)){
+  np <- length(points.info$direction_common[points.info$flight_id_combined == flights.murres[i]])
+  points.info$direction_common[points.info$flight_id_combined == flights.murres[i]][np] <- NA
+}
+
+hist(points.info$direction_common)
+summary(is.na(points.info$direction_common))
+
 # ** Wind shear calculations -----
 # Flight height for calculations (NA for extremes, and 1 m for <0.5 m)
+
+
 
 # Altitude values ------
 
@@ -40,12 +86,13 @@ t.test(points.info$altitude[murre.igu], points.info$altitude[murre.uva])
 # see all altitudes
 hist(points.info$altitude_callib, breaks = 1000, xlim = c(-50,200))
 summary(points.info$altitude_callib)
-extremes_1 <- (quantile(points.info$altitude_callib, c(0.005, 0.995)))
+extremes_1 <- (quantile(points.info$altitude_callib, c(0.005, 0.995), na.rm = TRUE))
 abline(v=extremes_1, col = "red", lwd = 2)
 
 points.info$altitude_callib_extm <- points.info$altitude_callib
 points.info$altitude_callib_extm[points.info$altitude_callib < extremes_1[1]] <- NA
 points.info$altitude_callib_extm[points.info$altitude_callib > extremes_1[2]] <- NA
+
 
 hist(points.info$altitude_callib_extm)
 
@@ -122,8 +169,10 @@ points.info$ecmwf_wind_10m_u_gradient_01_50_ratio <-
 points.info$ecmwf_wind_10m_u_gradient_01_50_dif <- 
   points.info$ecmwf_wind_10m_u_50m - points.info$ecmwf_wind_10m_u_1m
 
+# x <- points.info$ecmwf_wind_10m_u_gradient_01_50_dif < -2
+# cbind(points.info$ecmwf_wind_10m_u_50m[x], points.info$ecmwf_wind_10m_u_1m[x])
 
-hist(points.info$ecmwf_wind_10m_u_gradient_01_50_dif)
+hist(abs(points.info$ecmwf_wind_10m_u_gradient_01_50_dif))
 hist(points.info$ecmwf_wind_10m_u_gradient_01_50_ratio, breaks = 1000,
      xlim = c(0,2))
 
@@ -185,6 +234,15 @@ points.info$ecmwf_wind_10m_speed_50m <- t(mapply(wind.dir.speed,
                                                 points.info$ecmwf_wind_10m_u_50m,
                                                 points.info$ecmwf_wind_10m_v_50m))[,1]
 
+# wind gradient ratio
+points.info$ecmwf_wind_10m_speed_gradient_01_50_ratio <- 
+  points.info$ecmwf_wind_10m_speed_50m/ points.info$ecmwf_wind_10m_speed_1m
+
+points.info$ecmwf_wind_10m_speed_gradient_01_50_dif <- 
+  points.info$ecmwf_wind_10m_speed_50m - points.info$ecmwf_wind_10m_speed_1m
+
+hist(points.info$ecmwf_wind_10m_speed_gradient_01_50_dif)
+# hist(points.info$ecmwf_wind_10m_speed_gradient_01_50_ratio, xlim = c(0,10), breaks = 1000)
 
 # **Component calculations -----
 calc_hypotenuse <- function(a,b){
@@ -196,10 +254,10 @@ library(CircStats)
 # Va and Vg vectors ------
 # ?cos
 # Vg in u and v directions
-points.info$vg_v <- points.info$speed_2d*(cos(rad(points.info$direction)))
+points.info$vg_v <- points.info$speed_2d*(cos(rad(points.info$direction_common)))
 hist(points.info$vg_v, xlim = c(-50,50), breaks = 100)
 
-points.info$vg_u <- points.info$speed_2d*(sin(rad(points.info$direction)))
+points.info$vg_u <- points.info$speed_2d*(sin(rad(points.info$direction_common)))
 hist(points.info$vg_u, xlim = c(-50,50), breaks = 100)
 
 # Va in u and v directions
@@ -220,6 +278,7 @@ points.info$va_flt_ht <- calc_hypotenuse(points.info$va_u_flt_ht,
 points.info$va_10m <- calc_hypotenuse(points.info$va_u_10m,
                                          points.info$va_v_10m)
 hist(points.info$va_10m, xlim = c(0,50), breaks = 1000)
+hist(points.info$va_flt_ht, xlim = c(0,50), breaks = 100)
 
 # Va bear
 points.info$va_flt_ht_bearing <- t(mapply(wind.dir.speed,
@@ -254,7 +313,8 @@ points.info$alpha_10m <- solve_alpha(points.info$speed_2d,
                                         points.info$va_flt_ht,
                                         points.info$ecmwf_wind_10m_v)
 
-hist(deg(alpha_test))
+hist(deg(points.info$alpha_flt_ht))
+hist(deg(points.info$alpha_10m))
 
 # Cross wind calculations -----
 wind_angle_dif_10m <- points.info$va_flt_10m_bearing - points.info$ecmwf_wind_10m_dir
@@ -281,20 +341,34 @@ hist(points.info$head_wind_flt_ht)
 
 
 # And relative to track, not heading
-#****** something wrong with 'direction' column currently - need to check before proceeding!
-wind_angle_dif_track <- points.info$ - points.info$ecmwf_wind_10m_dir
+wind_angle_dif_track <- points.info$direction_common - points.info$ecmwf_wind_10m_dir
 hist(wind_angle_dif_track, breaks = 72)
 
-x <- wind_angle_dif_track < -360
 
-cbind(points.info$direction[x], points.info$ecmwf_wind_10m_dir[x])
+points.info$track_cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_track))
 
-hist(points.info$direction)
+points.info$track_head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_track))
 
-points.info$cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_10m))
+hist(points.info$track_cross_wind_10m)
+hist(points.info$track_head_wind_10m)
 
-points.info$head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_10m))
 
-hist(points.info$cross_wind_10m)
-hist(points.info$head_wind_10m)
+points.info$track_cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_track))
 
+points.info$track_head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_track))
+
+hist(points.info$track_head_wind_flt_ht)
+
+
+# Wind effect -----
+points.info$wind_effect_10m <- points.info$speed_2d - points.info$va_10m
+points.info$wind_effect_flt_ht <- points.info$speed_2d - points.info$va_flt_ht
+
+hist(points.info$wind_effect_10m)
+hist(points.info$wind_effect_flt_ht)
+hist(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, breaks = 100)
+mean(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, na.rm = TRUE)
+
+
+# Output as new table ----
+# Save points data without the flight columns (can add those again later if needed by merge)
