@@ -219,6 +219,9 @@ wind10 <- t(mapply(wind.dir.speed,
 points.info$ecmwf_wind_10m_dir <- wind10[,2]
 points.info$ecmwf_wind_10m_speed <- wind10[,1]
 
+hist(points.info$ecmwf_wind_10m_dir)
+hist(points.info$ecmwf_wind_10m_speed)
+
 # wind flight height
 points.info$ecmwf_wind_10m_speed_flt_ht <- t(mapply(wind.dir.speed,
                    points.info$ecmwf_wind_10m_u_flt_ht,
@@ -247,15 +250,26 @@ hist(points.info$ecmwf_wind_10m_speed_gradient_01_50_dif)
 # **Component calculations -----
 calc_hypotenuse <- function(a,b){
   h <- sqrt((a*a) + (b*b))
+  return(h)
 }
 
 library(CircStats)
 
 # Va and Vg vectors ------
 # ?cos
+hist(points.info$speed_2d, xlim = c(0,25), breaks = 1000)
 # Vg in u and v directions
 points.info$vg_v <- points.info$speed_2d*(cos(rad(points.info$direction_common)))
 hist(points.info$vg_v, xlim = c(-50,50), breaks = 100)
+
+# 
+# a1 <- points.info$speed_2d[test.na][2]*(cos(rad(points.info$direction_common[test.na][2])))
+# 
+# b1 <- points.info$speed_2d[test.na][2]*(sin(rad(points.info$direction_common[test.na][2])))
+# 
+# calc_hypotenuse(a1,b1)
+
+# (cos(rad(c(0,45,90,270,180))))
 
 points.info$vg_u <- points.info$speed_2d*(sin(rad(points.info$direction_common)))
 hist(points.info$vg_u, xlim = c(-50,50), breaks = 100)
@@ -294,7 +308,10 @@ points.info$va_flt_10m_bearing <- t(mapply(wind.dir.speed,
 # alpha angle component
 solve_alpha <- function(t, h, w){
   # Use law of cosines
-  alpha <- acos(-1*(((w*w)-(t*t)-(h*h))/(2*h*t)))
+  alpha <- acos(((t*t)+(h*h)-(w*w))/(abs(2*h*t)))
+  # ?acos
+  # Convert to degrees
+  alpha <- 180*(alpha)/pi
   
   # Set a sign for alpha
   z <- t-h
@@ -305,16 +322,42 @@ solve_alpha <- function(t, h, w){
 
 # ?sign()
 
+# 
+# test <- solve_alpha(points.info$speed_2d,
+#                     points.info$va_flt_ht,
+#                     points.info$ecmwf_wind_10m_speed_flt_ht)
+# test.na <- is.na(test)
+# summary(test.na)
+# 
+# 
+# 
+# test.df <- cbind.data.frame(points.info$altitude_callib_extm_05[test.na],
+#                             points.info$speed_2d[test.na],
+#                  points.info$va_flt_ht[test.na],
+#                  points.info$ecmwf_wind_10m_v_flt_ht[test.na],
+#                  test[test.na])
+# names(test.df) <- c("alt","t","h","w","alpha")
+# 
+# test.df$calc1 <- ((test.df$t*test.df$t)+(test.df$h*test.df$h
+#                                          )-(test.df$w*test.df$w))/(abs(2*test.df$h*test.df$t))
+# test.df$acos <- acos(test.df$calc1)
+# 
+# calc1 <- -1*(((points.info$ecmwf_wind_10m_v_flt_ht*points.info$ecmwf_wind_10m_v_flt_ht
+#                )-(points.info$speed_2d*points.info$speed_2d)-(points.info$va_flt_ht*points.info$va_flt_ht))/(2*points.info$va_flt_ht*points.info$speed_2d))
+# hist(calc1[!test.na], xlim = c(-5,10))
+# hist(test.df$calc1, xlim = c(-5,10), breaks = 1000)
+# hist(test.df$t)
+
 points.info$alpha_flt_ht <- solve_alpha(points.info$speed_2d,
                           points.info$va_flt_ht,
-                          points.info$ecmwf_wind_10m_v_flt_ht)
+                          points.info$ecmwf_wind_10m_speed_flt_ht)
 
 points.info$alpha_10m <- solve_alpha(points.info$speed_2d,
-                                        points.info$va_flt_ht,
-                                        points.info$ecmwf_wind_10m_v)
+                                        points.info$va_10m,
+                                        points.info$ecmwf_wind_10m_speed)
 
-hist(deg(points.info$alpha_flt_ht))
-hist(deg(points.info$alpha_10m))
+hist((points.info$alpha_flt_ht))
+hist((points.info$alpha_10m))
 
 # Cross wind calculations -----
 wind_angle_dif_10m <- points.info$va_flt_10m_bearing - points.info$ecmwf_wind_10m_dir
@@ -372,3 +415,8 @@ mean(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, na.rm = TRUE)
 
 # Output as new table ----
 # Save points data without the flight columns (can add those again later if needed by merge)
+# names(points.info)
+points.detailed <- points.info[,c(1:22,46:88)]
+
+summary(is.na(points.detailed$alpha_10m))
+summary(is.na(points.detailed$alpha_flt_ht))
