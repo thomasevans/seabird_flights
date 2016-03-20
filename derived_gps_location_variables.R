@@ -320,33 +320,7 @@ solve_alpha <- function(t, h, w){
     return(alpha)
 }
 
-# ?sign()
 
-# 
-# test <- solve_alpha(points.info$speed_2d,
-#                     points.info$va_flt_ht,
-#                     points.info$ecmwf_wind_10m_speed_flt_ht)
-# test.na <- is.na(test)
-# summary(test.na)
-# 
-# 
-# 
-# test.df <- cbind.data.frame(points.info$altitude_callib_extm_05[test.na],
-#                             points.info$speed_2d[test.na],
-#                  points.info$va_flt_ht[test.na],
-#                  points.info$ecmwf_wind_10m_v_flt_ht[test.na],
-#                  test[test.na])
-# names(test.df) <- c("alt","t","h","w","alpha")
-# 
-# test.df$calc1 <- ((test.df$t*test.df$t)+(test.df$h*test.df$h
-#                                          )-(test.df$w*test.df$w))/(abs(2*test.df$h*test.df$t))
-# test.df$acos <- acos(test.df$calc1)
-# 
-# calc1 <- -1*(((points.info$ecmwf_wind_10m_v_flt_ht*points.info$ecmwf_wind_10m_v_flt_ht
-#                )-(points.info$speed_2d*points.info$speed_2d)-(points.info$va_flt_ht*points.info$va_flt_ht))/(2*points.info$va_flt_ht*points.info$speed_2d))
-# hist(calc1[!test.na], xlim = c(-5,10))
-# hist(test.df$calc1, xlim = c(-5,10), breaks = 1000)
-# hist(test.df$t)
 
 points.info$alpha_flt_ht <- solve_alpha(points.info$speed_2d,
                           points.info$va_flt_ht,
@@ -412,11 +386,25 @@ hist(points.info$wind_effect_flt_ht)
 hist(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, breaks = 100)
 mean(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, na.rm = TRUE)
 
+m <- points.info$species == "murre"
+g <- points.info$species == "gull"
+hist(points.info$wind_effect_flt_ht[m] - points.info$wind_effect_10m[m], breaks = 100)
+mean(points.info$wind_effect_flt_ht[m] - points.info$wind_effect_10m[m], na.rm = TRUE)
+hist(points.info$wind_effect_flt_ht[g] - points.info$wind_effect_10m[g], breaks = 100)
+mean(points.info$wind_effect_flt_ht[g] - points.info$wind_effect_10m[g], na.rm = TRUE)
+
 
 # Output as new table ----
 # Save points data without the flight columns (can add those again later if needed by merge)
 # names(points.info)
 points.detailed <- points.info[,c(1:22,46:88)]
 
-summary(is.na(points.detailed$alpha_10m))
-summary(is.na(points.detailed$alpha_flt_ht))
+# summary(is.na(points.detailed$alpha_10m))
+# summary(is.na(points.detailed$alpha_flt_ht))
+names(points.detailed)[2] <- "device_info_serial"
+
+save(points.detailed, file = "points.detailed.RData")
+
+# Output to csv
+write.table(points.detailed, file = "points_detailed.csv", col.names = TRUE,
+            row.names = FALSE, sep = ",")
