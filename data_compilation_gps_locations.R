@@ -27,7 +27,7 @@ points.murre.igu <- list()
 
 for(i in 1:nrow(murres_igu)){
   
-  sql_query <- paste("SELECT guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time, guillemots_gps_points_igu.latitude, guillemots_gps_points_igu.longitude, guillemots_gps_points_igu.elev, guillemots_gps_points_igu.speed_ms, guillemots_gps_points_igu.course, guillemots_gps_points_igu.ehpe, guillemots_gps_points_igu.sat_n, guillemots_gps_points_igu.timeout, guillemots_gps_points_igu.MSVs_QCN, guillemots_gps_points_movebank_ecmwf.ecmwf_wind_10m_v, guillemots_gps_points_movebank_ecmwf.ecmwf_surf_roughness, guillemots_gps_points_movebank_ecmwf.ecmwf_charnock, guillemots_gps_points_movebank_ecmwf.ecmwf_boundary_lay_ht, guillemots_gps_points_movebank_ecmwf.ecmwf_temp_2m, guillemots_gps_points_movebank_ecmwf.ecmwf_wind_10m_u, guillemots_gps_points_movebank_ecmwf.ecmwf_pressure_sea_lev
+  sql_query <- paste("SELECT DISTINCT guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time, guillemots_gps_points_igu.latitude, guillemots_gps_points_igu.longitude, guillemots_gps_points_igu.elev, guillemots_gps_points_igu.speed_ms, guillemots_gps_points_igu.course, guillemots_gps_points_igu.ehpe, guillemots_gps_points_igu.sat_n, guillemots_gps_points_igu.timeout, guillemots_gps_points_igu.MSVs_QCN, guillemots_gps_points_movebank_ecmwf.ecmwf_wind_10m_v, guillemots_gps_points_movebank_ecmwf.ecmwf_surf_roughness, guillemots_gps_points_movebank_ecmwf.ecmwf_charnock, guillemots_gps_points_movebank_ecmwf.ecmwf_boundary_lay_ht, guillemots_gps_points_movebank_ecmwf.ecmwf_temp_2m, guillemots_gps_points_movebank_ecmwf.ecmwf_wind_10m_u, guillemots_gps_points_movebank_ecmwf.ecmwf_pressure_sea_lev
 FROM guillemots_track_session, (guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_igu_class INNER JOIN guillemots_gps_points_igu ON (guillemots_gps_points_igu_class.date_time = guillemots_gps_points_igu.date_time) AND (guillemots_gps_points_igu_class.device_info_serial = guillemots_gps_points_igu.device_info_serial)) ON (guillemots_gps_points_trip_id.date_time = guillemots_gps_points_igu_class.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = guillemots_gps_points_igu_class.device_info_serial)) ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_igu.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_igu.device_info_serial)) INNER JOIN guillemots_gps_points_movebank_ecmwf ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_movebank_ecmwf.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_movebank_ecmwf.device_info_serial)
 WHERE (((guillemots_gps_points_igu.date_time)>= #",
                      murres_igu$start_time[i],
@@ -50,6 +50,8 @@ ORDER BY guillemots_gps_points_igu.date_time;",
 
 
 points.murre.igu.df <- do.call(rbind , points.murre.igu)
+
+# nrow(unique(points.murre.igu.df)) == nrow(points.murre.igu.df)
 
 # Check all flights represented with locations
 murres_igu$flight_id_combined %in% points.murre.igu.df$flight_id_combined
