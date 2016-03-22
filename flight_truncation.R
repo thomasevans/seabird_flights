@@ -35,11 +35,11 @@ n_flights <- nrow(flights)
 # i <- 45
 
 
-i <- c(1:n_flights)[flights$flight_id_combined == "m700"]
+i <- c(1:n_flights)[flights$flight_id_combined == "g3005"]
 
 flight.details <- list()
 points.included <- list()
-
+pdf("flight_plots3.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:10){
@@ -93,8 +93,9 @@ for(i in 1:n_flights){
   
   if((last.point)>5){
       x <- rev(sapply(c(3:(length(d.speed[last.point:1])-2)), d.dif, ds = d.speed[last.point:1]))
+      if(is.infinite(x[1])){ x[1] <- 1}
       x <- c(x,1,1,1,1)
-      length(x) == n
+      # length(x) == n
       z <- x>0.3
       
       z[is.na(z)] <- TRUE
@@ -107,9 +108,25 @@ for(i in 1:n_flights){
   points2include <- c(first.point:last.point)
   np <- length(points2include)
   
+  # If penultimate point is more than 5 km from the island, exlude flight
+  if(island.dist[points2include[np-1]] > 7000){
+    points2include <- rep(FALSE,n)
+    np <- 0
+    
+  }
+  
+  if(np>1){
+    start_time <- pointsx$date_time[points2include[1]]
+    end_time <- pointsx$date_time[points2include[np]]
+    include_flight <- TRUE
+  } else {start_time <- end_time <- NA
+  include_flight <- FALSE}
+
+  
   flight.info <- cbind.data.frame(pointsx$flight_id_combined[1],
-                                  pointsx$date_time[points2include[1]],
-                                  pointsx$date_time[points2include[np]])
+                                  start_time,
+                                  end_time,
+                                  include_flight)
   label.points <- rep(FALSE,n)
   label.points[points2include] <- TRUE
   
@@ -121,16 +138,18 @@ for(i in 1:n_flights){
                                            label.points,
                                            d.dist)
   
-#   plot(pointsx$latitude~pointsx$longitude)
-#   points(pointsx$latitude[!label.points]~pointsx$longitude[!label.points],
-#          col = "red")
-  
+  plot(pointsx$latitude~pointsx$longitude, main = paste(pointsx$flight_id_combined[1]))
+  segments(pointsx$longitude[-1], pointsx$latitude[-1], pointsx$longitude[-n], pointsx$latitude[-n])
+  points(pointsx$latitude[!label.points]~pointsx$longitude[!label.points],
+         col = "red")
+  points(karlso.cen.long, karlso.cen.lat, pch = 4, cex = 2, col = "blue")
 }
 
+dev.off()
 
 flights.details.df <- do.call(rbind , flight.details)
 names(flights.details.df) <- c("flight_id_combined", "date_time_include_start",
-                               "date_time_include_end")
+                               "date_time_include_end", "include_flight")
 
 points.included.df <- do.call(rbind , points.included)
 names(points.included.df) <- c("date_time", "device_info_serial",
