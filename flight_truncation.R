@@ -38,7 +38,7 @@ points_all.ltraj <- as.ltraj(points.detailed[,5:4], points.detailed$date_time,
                                   burst = points.detailed$flight_id_combined,
                                   typeII = TRUE)
 
-plot(points_all.ltraj[2])
+# plot(points_all.ltraj[2])
 
 
 # Resample to new fixed time interval ------
@@ -46,7 +46,7 @@ plot(points_all.ltraj[2])
 # 100 s
 points.100 <- redisltraj(points_all.ltraj, 100, type = "time")
 
-plot(points.100[600])
+# plot(points.100[600])
 
 # Convert data back to data.frame ----
 points.100.df <- ld(points.100)
@@ -67,11 +67,11 @@ n_flights <- nrow(flights)
 # i <- 45
 
 
-i <- c(1:n_flights)[flights$flight_id_combined == "g7208"]
-i <- 2
+# i <- c(1:n_flights)[flights$flight_id_combined == "g7208"]
+# i <- 2
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots9.pdf")
+pdf("flight_plots10.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:10){
