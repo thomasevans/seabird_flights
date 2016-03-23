@@ -22,3 +22,6 @@ points_all.RData
 points_all.csv
 points.detailed.RData
 points_detailed.csv
+flight_plots.pdf
+# Ignore pdf files
+*.pdf
