@@ -12,13 +12,6 @@ load("points.detailed.RData")
 # Flight summary data
 load("flights.RData")
 
-# 
-# points.info <- merge(points.detailed, flights, by = "flight_id_combined")
-# 
-# 
-# 
-# test.df <- points.info[points.info$species == "murre" & points.info$device_type == "igu",]
-# test.df.x <- unique(test.df)
 
 # needed to plot maps
 library(maps)
@@ -34,23 +27,60 @@ points.detailed$point_id <- 1:nrow(points.detailed)
 # Code to calculate distances
 source("deg.dist.R")
 
+# To interpolate flight trajectories to common time interval
+library("adehabitatLT")
+
+
+# Make these into ltraj thing from adehabitat -----
+# Treat each flight as a 'burst'
+points_all.ltraj <- as.ltraj(points.detailed[,5:4], points.detailed$date_time,
+                                  points.detailed$flight_id_combined,
+                                  burst = points.detailed$flight_id_combined,
+                                  typeII = TRUE)
+
+plot(points_all.ltraj[2])
+
+
+# Resample to new fixed time interval ------
+# Process with redisltraj from adehabitatLT
+# 100 s
+points.100 <- redisltraj(points_all.ltraj, 100, type = "time")
+
+plot(points.100[600])
+
+# Convert data back to data.frame ----
+points.100.df <- ld(points.100)
+
+
+# Change radian angles to degrees
+deg.relangle <- deg(points.100.df$rel.angle)
+
+
+points.df.100 <- points.100.df[,c(12,3,2,1,10)]
+names(points.df.100) <- c("flight_id_combined", "date_time", "latitude", "longitude", "turn_angle_rad")
+points.df.100$turn_angle_deg <- deg.relangle
+
+
 # Number of flights
 n_flights <- nrow(flights)
 
 # i <- 45
 
 
-i <- c(1:n_flights)[flights$flight_id_combined == "g3005"]
+i <- c(1:n_flights)[flights$flight_id_combined == "g4160"]
 
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots4.pdf")
+pdf("flight_plots6.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:10){
     
-  # Subset GPS data
-  pointsx <- points.detailed[points.detailed$flight_id_combined == flights$flight_id_combined[i],]
+  # Subset original GPS data
+  points.original <- points.detailed[points.detailed$flight_id_combined == flights$flight_id_combined[i],]
+  
+  # Subset resampled GPS data
+  pointsx <- points.df.100[points.df.100$flight_id_combined == flights$flight_id_combined[i],]
   
   # Number of GPS locations
   n <- nrow(pointsx)
@@ -67,7 +97,7 @@ for(i in 1:n_flights){
   island.dist <- deg.dist(karlso.cen.long, karlso.cen.lat,
                           pointsx$longitude, pointsx$latitude,
                           km = FALSE)
-  # plot(island.dist)
+  plot(island.dist)
   # plot(pointsx$latitude~pointsx$longitude)
   
   # Find first point < 2 km from island
@@ -87,21 +117,22 @@ for(i in 1:n_flights){
   d.dist <- c(0, d.dist)
   
   d.speed <- d.dist/ time_interval
-  # plot(d.speed)
+  plot(d.speed)
+  d.speed <- d.speed*-1
   
   #Change in speed from previous points
   d.dif <- function(ia, ds = ds){
-    mean(ds[(ia ):(ia + 2)]) / mean(ds[(ia - 1):(ia - 3)])
+    mean(ds[(ia ):(ia + 3)]) / mean(ds[(ia - 1):(ia - 4)])
   }
   
   thresh <- 0.3
   
-  if((last.point)>5){
-      x <- rev(sapply(c(3:(length(d.speed[last.point:1])-2)), d.dif, ds = d.speed[last.point:1]))
+  if((last.point)>8){
+      x <- rev(sapply(c(4:(length(d.speed[last.point:1])-4)), d.dif, ds = d.speed[last.point:1]))
       if(is.infinite(x[1])){ x[1] <- 1}
       x <- c(x,1,1,1,1)
       # length(x) == n
-      z <- x>0.3
+      z <- x > thresh
       
       z[is.na(z)] <- TRUE
       first.point <- max((1:length(z))[!z])
@@ -113,45 +144,59 @@ for(i in 1:n_flights){
   points2include <- c(first.point:last.point)
   np <- length(points2include)
   
+  # Real points
+  start_timex <- pointsx$date_time[points2include[1]]
+  end_timex <- pointsx$date_time[points2include[np]]
+  
+  points.original$include <- FALSE
+  points.original$include[points.original$date_time > start_timex &
+                            points.original$date_time < end_timex] <- TRUE
+  points2includex <- c(1:nrow(points.original))[points.original$include]
+  
   # If penultimate point is more than 5 km from the island, exlude flight
-  if(island.dist[points2include[np-1]] > 7000){
-    points2include <- rep(FALSE,n)
+  island.distx <- deg.dist(karlso.cen.long, karlso.cen.lat,
+                           points.original$longitude, points.original$latitude,
+                           km = FALSE)
+  
+  npx <- length(points2includex)
+  # island.distx[points2includex]
+  if(island.distx[points2includex[npx-1]] > 7000){
+    points2includex <- NULL
     np <- 0
     
   }
   
   if(np>1){
-    start_time <- pointsx$date_time[points2include[1]]
-    end_time <- pointsx$date_time[points2include[np]]
+    # start_time <- pointsx$date_time[points2includex[1]]
+    # end_time <- pointsx$date_time[points2includex[npx]]
     include_flight <- TRUE
-  } else {start_time <- end_time <- NA
+  } else {start_timex <- end_timex <- NA
   include_flight <- FALSE}
 
   
-  flight.info <- cbind.data.frame(pointsx$flight_id_combined[1],
-                                  start_time,
-                                  end_time,
+  flight.info <- cbind.data.frame(points.original$flight_id_combined[1],
+                                  start_timex,
+                                  end_timex,
                                   include_flight)
-  label.points <- rep(FALSE,n)
-  label.points[points2include] <- TRUE
+  label.points <- rep(FALSE,nrow(points.original))
+  label.points[points2includex] <- TRUE
   
   flight.details[[i]] <- flight.info
   
-  points.included[[i]] <- cbind.data.frame(pointsx$date_time,
-                                           pointsx$device_info_serial,
-                                           pointsx$point_id,
-                                           label.points,
-                                           d.dist)
+  points.included[[i]] <- cbind.data.frame(points.original$date_time,
+                                           points.original$device_info_serial,
+                                           points.original$point_id,
+                                           label.points)
   
   # Plot data
   
   # Set limits
-  c.xlim <- range(pointsx$longitude)
+  c.xlim <- range(points.original$longitude)
   dif    <- c.xlim[2] - c.xlim[1]
   dif    <- dif *.15
   c.xlim <- c((c.xlim[1] - dif), (c.xlim[2] + dif))
   
-  c.ylim <- range(pointsx$latitude)
+  c.ylim <- range(points.original$latitude)
   dif    <- c.ylim[2] - c.ylim[1]
   dif    <- dif *.15
   c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
@@ -159,12 +204,12 @@ for(i in 1:n_flights){
   # Plot base map
   plot(gadm, xlim = c.xlim,
        ylim = c.ylim, col="grey", bg = "white",
-       main = paste(pointsx$flight_id_combined[1]))
+       main = paste(points.original$flight_id_combined[1], "  included: ", include_flight))
   
   # Add points
-  segments(pointsx$longitude[-1], pointsx$latitude[-1], pointsx$longitude[-n], pointsx$latitude[-n])
-  points(pointsx$latitude~pointsx$longitude)
-  points(pointsx$latitude[!label.points]~pointsx$longitude[!label.points],
+  segments(points.original$longitude[-1], points.original$latitude[-1], points.original$longitude[-n], points.original$latitude[-n])
+  points(points.original$latitude~points.original$longitude)
+  points(points.original$latitude[!label.points]~points.original$longitude[!label.points],
          col = "red")
   points(karlso.cen.long, karlso.cen.lat, pch = 4, cex = 2, col = "blue")
   
