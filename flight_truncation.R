@@ -67,11 +67,11 @@ n_flights <- nrow(flights)
 # i <- 45
 
 
-i <- c(1:n_flights)[flights$flight_id_combined == "g4160"]
-
+i <- c(1:n_flights)[flights$flight_id_combined == "g7208"]
+i <- 2
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots6.pdf")
+pdf("flight_plots9.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:10){
@@ -97,9 +97,9 @@ for(i in 1:n_flights){
   island.dist <- deg.dist(karlso.cen.long, karlso.cen.lat,
                           pointsx$longitude, pointsx$latitude,
                           km = FALSE)
-  plot(island.dist)
+  # plot(island.dist)
   # plot(pointsx$latitude~pointsx$longitude)
-  
+#   
   # Find first point < 2 km from island
   island.buffer <- island.dist <2000
   if(sum(island.buffer) >=1){
@@ -117,7 +117,7 @@ for(i in 1:n_flights){
   d.dist <- c(0, d.dist)
   
   d.speed <- d.dist/ time_interval
-  plot(d.speed)
+  # plot(d.speed)
   d.speed <- d.speed*-1
   
   #Change in speed from previous points
@@ -160,11 +160,12 @@ for(i in 1:n_flights){
   
   npx <- length(points2includex)
   # island.distx[points2includex]
-  if(island.distx[points2includex[npx-1]] > 7000){
-    points2includex <- NULL
-    np <- 0
-    
-  }
+  if(npx>1){
+    if(island.distx[points2includex[npx]] > 10000){
+      points2includex <- NULL
+      np <- 0
+    } else{np <- npx}
+  } else {np <- 0}
   
   if(np>1){
     # start_time <- pointsx$date_time[points2includex[1]]
@@ -205,9 +206,9 @@ for(i in 1:n_flights){
   plot(gadm, xlim = c.xlim,
        ylim = c.ylim, col="grey", bg = "white",
        main = paste(points.original$flight_id_combined[1], "  included: ", include_flight))
-  
+  nx <- nrow(points.original)
   # Add points
-  segments(points.original$longitude[-1], points.original$latitude[-1], points.original$longitude[-n], points.original$latitude[-n])
+  segments(points.original$longitude[-1], points.original$latitude[-1], points.original$longitude[-nx], points.original$latitude[-nx])
   points(points.original$latitude~points.original$longitude)
   points(points.original$latitude[!label.points]~points.original$longitude[!label.points],
          col = "red")
@@ -225,6 +226,12 @@ for(i in 1:n_flights){
 }
 
 dev.off()
+
+
+
+
+
+
 
 flights.details.df <- do.call(rbind , flight.details)
 names(flights.details.df) <- c("flight_id_combined", "date_time_include_start",
