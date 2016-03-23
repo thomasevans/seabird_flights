@@ -20,7 +20,12 @@ load("flights.RData")
 # test.df <- points.info[points.info$species == "murre" & points.info$device_type == "igu",]
 # test.df.x <- unique(test.df)
 
+# needed to plot maps
+library(maps)
 
+
+# Plot base map
+load("SWE_adm0.RData")
 
 points.detailed$point_id <- 1:nrow(points.detailed)
 
@@ -39,7 +44,7 @@ i <- c(1:n_flights)[flights$flight_id_combined == "g3005"]
 
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots3.pdf")
+pdf("flight_plots4.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:10){
@@ -138,11 +143,40 @@ for(i in 1:n_flights){
                                            label.points,
                                            d.dist)
   
-  plot(pointsx$latitude~pointsx$longitude, main = paste(pointsx$flight_id_combined[1]))
+  # Plot data
+  
+  # Set limits
+  c.xlim <- range(pointsx$longitude)
+  dif    <- c.xlim[2] - c.xlim[1]
+  dif    <- dif *.15
+  c.xlim <- c((c.xlim[1] - dif), (c.xlim[2] + dif))
+  
+  c.ylim <- range(pointsx$latitude)
+  dif    <- c.ylim[2] - c.ylim[1]
+  dif    <- dif *.15
+  c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
+  
+  # Plot base map
+  plot(gadm, xlim = c.xlim,
+       ylim = c.ylim, col="grey", bg = "white",
+       main = paste(pointsx$flight_id_combined[1]))
+  
+  # Add points
   segments(pointsx$longitude[-1], pointsx$latitude[-1], pointsx$longitude[-n], pointsx$latitude[-n])
+  points(pointsx$latitude~pointsx$longitude)
   points(pointsx$latitude[!label.points]~pointsx$longitude[!label.points],
          col = "red")
   points(karlso.cen.long, karlso.cen.lat, pch = 4, cex = 2, col = "blue")
+  
+  # Scale bar and axis
+  x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
+  y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/10
+  map.scale(x,y,ratio = FALSE, col="black",col.lab="black")
+  box(col="black",lwd=2)
+  axis(side=(1), las=1, col="black", col.axis="black")
+  axis(side=(2), las=1, col="black", col.axis="black")
+  
+  
 }
 
 dev.off()
