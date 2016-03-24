@@ -66,14 +66,14 @@ n_flights <- nrow(flights)
 
 # i <- 45
 
-i <- c(1:n_flights)[flights$flight_id_combined == "m1139"]
+# i <- c(1:n_flights)[flights$flight_id_combined == "g2953"]
 # i <- 2
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots11.pdf")
+pdf("flight_plots_final.pdf")
 # For each flight do:
 for(i in 1:n_flights){
-  # for(i in 1:10){
+  # for(i in 1:100){
     
   # Subset original GPS data
   points.original <- points.detailed[points.detailed$flight_id_combined == flights$flight_id_combined[i],]
@@ -100,7 +100,7 @@ for(i in 1:n_flights){
   # plot(pointsx$latitude~pointsx$longitude)
 #   
   # Find first point < 2 km from island
-  island.buffer <- island.dist <3000
+  island.buffer <- island.dist <2000
   if(sum(island.buffer) >=1){
     last.point <- min(points.index[island.buffer])
   } else {last.point <- max(points.index)}
@@ -161,14 +161,16 @@ for(i in 1:n_flights){
   # test.df <- points.original[points2includex,]
   npx <- length(points2includex)
   
+  if(npx>2){
   dcrit <- 2000*mean(deg.dist(points.original$longitude[points2includex][-npx],
                            points.original$latitude[points2includex][-npx],
                            points.original$longitude[points2includex][-1],
                            points.original$latitude[points2includex][-1]))
-  if(dcrit > 10000)dcrit <- 10000
-  if(dcrit < 3000)dcrit <- 3000
+  if(dcrit > 14000)dcrit <- 14000
+  if(dcrit < 7000)dcrit <- 7000
+  }else{dcrit <- 7000}
   
-  island.distx[points2includex]
+  # island.distx[points2includex]
   if(npx>1){
     if(island.distx[points2includex[npx]] > dcrit){
       points2includex <- NULL
@@ -177,8 +179,8 @@ for(i in 1:n_flights){
   } else {np <- 0}
   
   if(np>1){
-    # start_time <- pointsx$date_time[points2includex[1]]
-    # end_time <- pointsx$date_time[points2includex[npx]]
+    start_timex <- pointsx$date_time[points2includex[1]]
+    end_timex <- pointsx$date_time[points2includex[npx]]
     include_flight <- TRUE
   } else {start_timex <- end_timex <- NA
   include_flight <- FALSE}
@@ -248,15 +250,14 @@ names(flights.details.df) <- c("flight_id_combined", "date_time_include_start",
 
 points.included.df <- do.call(rbind , points.included)
 names(points.included.df) <- c("date_time", "device_info_serial",
-                               "point_id", "included_points",
-                               "dist_sk_centre_m")
+                               "point_id", "included_points")
 # Are all flights represented in the table?
 all(flights$flight_id_combined %in% as.character(flights.details.df$flight_id_combined))
 all(points.detailed$point_id %in% points.included.df$point_id)
 
-summary(points.included.df$included_points)
+# summary(points.included.df$included_points)
 
-summary(points.included.df$date_time == points.detailed$date_time)
+# summary(points.included.df$date_time == points.detailed$date_time)
 
 
 # Merge with current tables -------
@@ -268,15 +269,32 @@ points.included.df$device_info_serial <- as.character(points.included.df$device_
 points.df <- merge(points.detailed, points.included.df,
                    by = "point_id")
 
-points.df <- points.df[order(c(points.df$device_info_serial,points.df$date_time)),]
+all(points.df$device_info_serial.x == points.df$device_info_serial.y)
+all(points.df$date_time.x == points.df$date_time.y)
 
-# points.df2 <- points.df[!is.na(points.df$date_time),]
+names(points.df)[3:4] <- c("device_info_serial", "date_time")
+points.df <- points.df[,-c(67,68)]
+# points.df <- points.df[!is.na(points.df$device_info_serial),]
+points.df <- points.df[order(points.df$device_info_serial,points.df$date_time),]
 
-# ?merge
+flights.df <- merge(flights, flights.details.df, by = "flight_id_combined")
+names(flights.df)
+
+summary(flights.df$include_flight)
+
 
 # Output the data -----
 
 # Points data
+save(points.df, file = "points.detailed.incl.RData")
 
+# Output to csv
+write.table(points.df, file = "points_detailed_included.csv", col.names = TRUE,
+            row.names = FALSE, sep = ",")
 
 # Flight summary data
+save(flights.df, file = "flights.detailed.incl.RData")
+
+# Output to csv
+write.table(flights.df, file = "flights_detailed_included.csv", col.names = TRUE,
+            row.names = FALSE, sep = ",")
