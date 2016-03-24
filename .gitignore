@@ -25,3 +25,7 @@ points_detailed.csv
 flight_plots.pdf
 # Ignore pdf files
 *.pdf
+flights.detailed.incl.RData
+flights_detailed_included.csv
+points.detailed.incl.RData
+points_detailed_included.csv
