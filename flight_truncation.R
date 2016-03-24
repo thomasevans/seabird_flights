@@ -66,8 +66,7 @@ n_flights <- nrow(flights)
 
 # i <- 45
 
-
-i <- c(1:n_flights)[flights$flight_id_combined == "g5590"]
+i <- c(1:n_flights)[flights$flight_id_combined == "m1139"]
 # i <- 2
 flight.details <- list()
 points.included <- list()
@@ -101,7 +100,7 @@ for(i in 1:n_flights){
   # plot(pointsx$latitude~pointsx$longitude)
 #   
   # Find first point < 2 km from island
-  island.buffer <- island.dist <2000
+  island.buffer <- island.dist <3000
   if(sum(island.buffer) >=1){
     last.point <- min(points.index[island.buffer])
   } else {last.point <- max(points.index)}
@@ -161,9 +160,17 @@ for(i in 1:n_flights){
                            km = FALSE)
   # test.df <- points.original[points2includex,]
   npx <- length(points2includex)
+  
+  dcrit <- 2000*mean(deg.dist(points.original$longitude[points2includex][-npx],
+                           points.original$latitude[points2includex][-npx],
+                           points.original$longitude[points2includex][-1],
+                           points.original$latitude[points2includex][-1]))
+  if(dcrit > 10000)dcrit <- 10000
+  if(dcrit < 3000)dcrit <- 3000
+  
   island.distx[points2includex]
   if(npx>1){
-    if(island.distx[points2includex[npx]] > 7000){
+    if(island.distx[points2includex[npx]] > dcrit){
       points2includex <- NULL
       np <- 0
     } else{np <- npx}
