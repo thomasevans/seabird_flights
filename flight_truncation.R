@@ -67,11 +67,11 @@ n_flights <- nrow(flights)
 # i <- 45
 
 
-# i <- c(1:n_flights)[flights$flight_id_combined == "g7208"]
+i <- c(1:n_flights)[flights$flight_id_combined == "g5590"]
 # i <- 2
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots10.pdf")
+pdf("flight_plots11.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:10){
@@ -115,22 +115,23 @@ for(i in 1:n_flights){
   # Velocity relative to island centre
   d.dist <- island.dist[2:n] - island.dist[1:(n-1)]
   d.dist <- c(0, d.dist)
-  
+  # plot(island.dist)
+  # abline(h = 5000)
   d.speed <- d.dist/ time_interval
   # plot(d.speed)
   d.speed <- d.speed*-1
   
   #Change in speed from previous points
   d.dif <- function(ia, ds = ds){
-    mean(ds[(ia ):(ia + 3)]) / mean(ds[(ia - 1):(ia - 4)])
+    mean(ds[(ia ):(ia + 2)]) / mean(ds[(ia - 1):(ia - 3)])
   }
   
   thresh <- 0.3
-  
-  if((last.point)>8){
-      x <- rev(sapply(c(4:(length(d.speed[last.point:1])-4)), d.dif, ds = d.speed[last.point:1]))
+  # plot(x)
+  if((last.point)>6){
+      x <- rev(sapply(c(3:(length(d.speed[last.point:1])-3)), d.dif, ds = d.speed[last.point:1]))
       if(is.infinite(x[1])){ x[1] <- 1}
-      x <- c(x,1,1,1,1)
+      x <- c(x,1,1,1)
       # length(x) == n
       z <- x > thresh
       
@@ -144,9 +145,10 @@ for(i in 1:n_flights){
   points2include <- c(first.point:last.point)
   np <- length(points2include)
   
+  s50 <- as.difftime(50, units = "secs")
   # Real points
-  start_timex <- pointsx$date_time[points2include[1]]
-  end_timex <- pointsx$date_time[points2include[np]]
+  start_timex <- pointsx$date_time[points2include[1]] - s50
+  end_timex <- pointsx$date_time[points2include[np]] + s50
   
   points.original$include <- FALSE
   points.original$include[points.original$date_time > start_timex &
@@ -157,11 +159,11 @@ for(i in 1:n_flights){
   island.distx <- deg.dist(karlso.cen.long, karlso.cen.lat,
                            points.original$longitude, points.original$latitude,
                            km = FALSE)
-  
+  # test.df <- points.original[points2includex,]
   npx <- length(points2includex)
-  # island.distx[points2includex]
+  island.distx[points2includex]
   if(npx>1){
-    if(island.distx[points2includex[npx]] > 10000){
+    if(island.distx[points2includex[npx]] > 7000){
       points2includex <- NULL
       np <- 0
     } else{np <- npx}
