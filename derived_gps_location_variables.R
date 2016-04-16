@@ -62,20 +62,24 @@ summary(is.na(points.info$direction_common))
 
 points.info$altitude_callib <- NULL
 
-# Correction for gull UvA: +2.820093
+# For selection of correction values see 'altitude_calibration.R' and
+# supplementary document describing altitude calibration, precision,
+# and filtering
+
+# Correction for gull UvA: +2.84
 gulls.uva <- points.info$device_type == "uva" & points.info$species == "gull"
-points.info$altitude_callib[gulls.uva] <- points.info$altitude[gulls.uva] +2.820093
+points.info$altitude_callib[gulls.uva] <- points.info$altitude[gulls.uva] +2.84
 hist(points.info$altitude_callib[gulls.uva], breaks = 1000, xlim = c(-20,100))
 
-# Correction for murre UvA: +1.279747
+# Correction for murre UvA: +1.28
 murre.uva <- points.info$device_type == "uva" & points.info$species == "murre"
-points.info$altitude_callib[murre.uva] <- points.info$altitude[murre.uva] +1.279747
+points.info$altitude_callib[murre.uva] <- points.info$altitude[murre.uva] +1.28
 hist(points.info$altitude_callib[murre.uva], breaks = 1000, xlim = c(-20,100))
 
 
-# Correction for murre IGU: -0.07854506
+# Correction for murre IGU: -0.18
 murre.igu <- points.info$device_type == "igu" & points.info$species == "murre"
-points.info$altitude_callib[murre.igu] <- points.info$altitude[murre.igu] -0.07854506
+points.info$altitude_callib[murre.igu] <- points.info$altitude[murre.igu] -0.18
 hist(points.info$altitude_callib[murre.igu], breaks = 1000, xlim = c(-20,100))
 
 # Difference reduced between the two tags, though still significant at p<0.05 with simple t-test
@@ -94,7 +98,7 @@ points.info$altitude_callib_extm[points.info$altitude_callib < extremes_1[1]] <-
 points.info$altitude_callib_extm[points.info$altitude_callib > extremes_1[2]] <- NA
 
 
-hist(points.info$altitude_callib_extm)
+hist(points.info$altitude_callib_extm, breaks = 100)
 
 # For wind at flight altitude calculations set altitudes below 0.5 to 0.5
 points.info$altitude_callib_extm_05 <- points.info$altitude_callib_extm
@@ -138,7 +142,7 @@ points.info$ecmwf_wind_10m_v_gradient_01_50_ratio <-
   points.info$ecmwf_wind_10m_v_50m/ points.info$ecmwf_wind_10m_v_1m
 
 points.info$ecmwf_wind_10m_v_gradient_01_50_dif <- 
-  points.info$ecmwf_wind_10m_v_50m - points.info$ecmwf_wind_10m_v_1m
+  abs(points.info$ecmwf_wind_10m_v_50m) - abs(points.info$ecmwf_wind_10m_v_1m)
 
 
 hist(points.info$ecmwf_wind_10m_v_gradient_01_50_dif)
@@ -167,7 +171,7 @@ points.info$ecmwf_wind_10m_u_gradient_01_50_ratio <-
   points.info$ecmwf_wind_10m_u_50m/ points.info$ecmwf_wind_10m_u_1m
 
 points.info$ecmwf_wind_10m_u_gradient_01_50_dif <- 
-  points.info$ecmwf_wind_10m_u_50m - points.info$ecmwf_wind_10m_u_1m
+  abs(points.info$ecmwf_wind_10m_u_50m) - abs(points.info$ecmwf_wind_10m_u_1m)
 
 # x <- points.info$ecmwf_wind_10m_u_gradient_01_50_dif < -2
 # cbind(points.info$ecmwf_wind_10m_u_50m[x], points.info$ecmwf_wind_10m_u_1m[x])
@@ -237,15 +241,16 @@ points.info$ecmwf_wind_10m_speed_50m <- t(mapply(wind.dir.speed,
                                                 points.info$ecmwf_wind_10m_u_50m,
                                                 points.info$ecmwf_wind_10m_v_50m))[,1]
 
+
 # wind gradient ratio
 points.info$ecmwf_wind_10m_speed_gradient_01_50_ratio <- 
   points.info$ecmwf_wind_10m_speed_50m/ points.info$ecmwf_wind_10m_speed_1m
 
 points.info$ecmwf_wind_10m_speed_gradient_01_50_dif <- 
-  points.info$ecmwf_wind_10m_speed_50m - points.info$ecmwf_wind_10m_speed_1m
+  (points.info$ecmwf_wind_10m_speed_50m) - points.info$ecmwf_wind_10m_speed_1m
 
 hist(points.info$ecmwf_wind_10m_speed_gradient_01_50_dif)
-# hist(points.info$ecmwf_wind_10m_speed_gradient_01_50_ratio, xlim = c(0,10), breaks = 1000)
+hist(points.info$ecmwf_wind_10m_speed_gradient_01_50_ratio, xlim = c(0,10), breaks = 1000)
 
 # **Component calculations -----
 calc_hypotenuse <- function(a,b){
@@ -370,6 +375,7 @@ hist(points.info$track_cross_wind_10m)
 hist(points.info$track_head_wind_10m)
 
 
+
 points.info$track_cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_track))
 
 points.info$track_head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_track))
@@ -394,10 +400,43 @@ hist(points.info$wind_effect_flt_ht[g] - points.info$wind_effect_10m[g], breaks 
 mean(points.info$wind_effect_flt_ht[g] - points.info$wind_effect_10m[g], na.rm = TRUE)
 
 
+
+names(points.info)
+
+# Altitude filter ----------
+points.info$altitude_filter_included <- TRUE
+
+# IGU (2014 & 2015)
+points.info$altitude_filter_included[
+  points.info$device_type == "igu"  & !igu_2009 &
+  (points.info$MSVs_QCN %in% c(128,136,151,161,163,164,166,
+                              176,177,178,179,180,181,183,
+                              192,193,194,195,196,198,199,
+                              200,202,203))] <- FALSE
+# UvA BiTs - Murres
+points.info$altitude_filter_included[
+  points.info$device_type == "uva"  & points.info$species == "murre" &
+    points.info$satellites_used <8] <- FALSE
+
+# UvA BiTs - Gulls - with no satellite info
+points.info$altitude_filter_included[
+  points.info$device_type == "uva"  & points.info$species == "gull" &
+    is.na(points.info$satellites_used) &
+    points.info$positiondop >3] <- FALSE
+
+# UvA BiTs - Gulls - with satellite info
+points.info$altitude_filter_included[
+  points.info$device_type == "uva"  & points.info$species == "gull" &
+    !is.na(points.info$satellites_used) &
+    points.info$satellites_used <7] <- FALSE
+
+summary(points.info$altitude_filter_included)
+
+
 # Output as new table ----
 # Save points data without the flight columns (can add those again later if needed by merge)
 # names(points.info)
-points.detailed <- points.info[,c(1:22,46:88)]
+points.detailed <- points.info[,c(1:22,46:89)]
 
 # summary(is.na(points.detailed$alpha_10m))
 # summary(is.na(points.detailed$alpha_flt_ht))
