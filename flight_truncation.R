@@ -70,7 +70,7 @@ n_flights <- nrow(flights)
 # i <- 2
 flight.details <- list()
 points.included <- list()
-pdf("flight_plots_final.pdf")
+# pdf("flight_plots_final2.pdf")
 # For each flight do:
 for(i in 1:n_flights){
   # for(i in 1:100){
@@ -200,43 +200,43 @@ for(i in 1:n_flights){
                                            points.original$point_id,
                                            label.points)
   
-  # Plot data
-  
-  # Set limits
-  c.xlim <- range(points.original$longitude)
-  dif    <- c.xlim[2] - c.xlim[1]
-  dif    <- dif *.15
-  c.xlim <- c((c.xlim[1] - dif), (c.xlim[2] + dif))
-  
-  c.ylim <- range(points.original$latitude)
-  dif    <- c.ylim[2] - c.ylim[1]
-  dif    <- dif *.15
-  c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
-  
-  # Plot base map
-  plot(gadm, xlim = c.xlim,
-       ylim = c.ylim, col="grey", bg = "white",
-       main = paste(points.original$flight_id_combined[1], "  included: ", include_flight))
-  nx <- nrow(points.original)
-  # Add points
-  segments(points.original$longitude[-1], points.original$latitude[-1], points.original$longitude[-nx], points.original$latitude[-nx])
-  points(points.original$latitude~points.original$longitude)
-  points(points.original$latitude[!label.points]~points.original$longitude[!label.points],
-         col = "red")
-  points(karlso.cen.long, karlso.cen.lat, pch = 4, cex = 2, col = "blue")
-  
-  # Scale bar and axis
-  x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
-  y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/10
-  map.scale(x,y,ratio = FALSE, col="black",col.lab="black")
-  box(col="black",lwd=2)
-  axis(side=(1), las=1, col="black", col.axis="black")
-  axis(side=(2), las=1, col="black", col.axis="black")
-  
+#   # Plot data
+#   
+#   # Set limits
+#   c.xlim <- range(points.original$longitude)
+#   dif    <- c.xlim[2] - c.xlim[1]
+#   dif    <- dif *.15
+#   c.xlim <- c((c.xlim[1] - dif), (c.xlim[2] + dif))
+#   
+#   c.ylim <- range(points.original$latitude)
+#   dif    <- c.ylim[2] - c.ylim[1]
+#   dif    <- dif *.15
+#   c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
+#   
+#   # Plot base map
+#   plot(gadm, xlim = c.xlim,
+#        ylim = c.ylim, col="grey", bg = "white",
+#        main = paste(points.original$flight_id_combined[1], "  included: ", include_flight))
+#   nx <- nrow(points.original)
+#   # Add points
+#   segments(points.original$longitude[-1], points.original$latitude[-1], points.original$longitude[-nx], points.original$latitude[-nx])
+#   points(points.original$latitude~points.original$longitude)
+#   points(points.original$latitude[!label.points]~points.original$longitude[!label.points],
+#          col = "red")
+#   points(karlso.cen.long, karlso.cen.lat, pch = 4, cex = 2, col = "blue")
+#   
+#   # Scale bar and axis
+#   x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
+#   y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/10
+#   map.scale(x,y,ratio = FALSE, col="black",col.lab="black")
+#   box(col="black",lwd=2)
+#   axis(side=(1), las=1, col="black", col.axis="black")
+#   axis(side=(2), las=1, col="black", col.axis="black")
+#   
   
 }
 
-dev.off()
+# dev.off()
 
 
 
