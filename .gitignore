@@ -33,3 +33,5 @@ MSVs_QCN_quality.png
 # Ignore image files
 *.png
 *.wmf
+flight_details.RData
+flight_details.csv
