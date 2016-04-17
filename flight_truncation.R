@@ -235,7 +235,7 @@ for(i in 1:n_flights){
 #   
   
 }
-
+# warnings()
 # dev.off()
 
 
