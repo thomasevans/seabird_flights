@@ -229,43 +229,45 @@ for(i in 1:n_flights){
     
     flight_summary_df$wind_effect_flt_ht[i] <-
       median(na.rm = TRUE, points.flight$wind_effect_flt_ht)                                          
-                                          
-                               
-    
-
-    #
-    
+           
     
     }
 
 
 
-
+# See how many are lacking altitude
 summary(flight_summary_df$altitude_filter_n == 0)
-# hist(flight_summary_df)
-
-# If we want straightness etc should do this too - ignore for now
-# # To reduce scale dependence, recalculate for fixed time interval
-# trunc_seg_dist_p2p_resample_100s
-# # Here should calculate A to B distance again too, as will differ a bit from original locations
-# trunc_seg_dist_straightness_resample_100s
 
 
-# Flight variables ------
-names(points.df)
+
+# Combine summary table with essential columns from flights.df -----
+# Merge tables (only columns required)
+
+flight.details <- merge(flight_summary_df,
+                        flights.df,
+                        by = "flight_id_combined")
+
+all(flight.details$flight_id_combined == flight_summary_df$flight_id_combined)
 
 
-  
+flight.details <- flight.details[order(flight.details$flight_id_combined),]
 
 
-# Mean/ median for wind conditions, and calculated wind dependent information
-# e.g. alpha...
+str(flight.details)
 
-
-# Get airspeed (probably median??)
-
-
-# Get altitude (include quality criteria in this selection)
+as.POSIXct(flight.details$trunc_seg_date_time_end[1], origin = "1970-01-01 00:00:00",
+           tz = "UTC")
+# as.POSIXct()
+flight.details <- flight.details[,-which(names(flight.details) %in% c("trunc_seg_date_time_start","trunc_seg_date_time_end"))]
 
 
 # Output to new table ----
+
+# Flight summary data
+save(flight.details, file = "flight_details.RData")
+
+# Output to csv
+write.table(flight.details, file = "flight_details.csv", col.names = TRUE,
+            row.names = FALSE, sep = ",")
+
+
