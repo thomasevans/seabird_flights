@@ -273,7 +273,7 @@ all(points.df$device_info_serial.x == points.df$device_info_serial.y)
 all(points.df$date_time.x == points.df$date_time.y)
 
 names(points.df)[3:4] <- c("device_info_serial", "date_time")
-points.df <- points.df[,-c(67,68)]
+points.df <- points.df[,-c(68,69)]
 # points.df <- points.df[!is.na(points.df$device_info_serial),]
 points.df <- points.df[order(points.df$device_info_serial,points.df$date_time),]
 
