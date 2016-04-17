@@ -67,7 +67,7 @@ n_flights <- nrow(flights)
 # i <- 45
 
 # i <- c(1:n_flights)[flights$flight_id_combined == "g2953"]
-# i <- 2
+# i <- 1
 flight.details <- list()
 points.included <- list()
 # pdf("flight_plots_final2.pdf")
@@ -179,8 +179,8 @@ for(i in 1:n_flights){
   } else {np <- 0}
   
   if(np>1){
-    start_timex <- pointsx$date_time[points2includex[1]]
-    end_timex <- pointsx$date_time[points2includex[npx]]
+    start_timex <- points.original$date_time[points2includex[1]]
+    end_timex <- points.original$date_time[points2includex[npx]]
     include_flight <- TRUE
   } else {start_timex <- end_timex <- NA
   include_flight <- FALSE}
