@@ -18,6 +18,9 @@ flight_id <- "g32684"
 points.sub <- points.df[points.df$flight_id_combined == flight_id,]
 flight.details.sub <- flight.details[flight.details$flight_id_combined == flight_id,]
 
+# example point
+pid <- 6
+
 # 1. Flight map ------
 # Base map with land on
 
@@ -45,7 +48,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 
   # Plot base map
   par(mfrow = c(1,1))
-  par(mar=c(5, 4, 4, 2) + 0.1)   
+  par(mar=c(2, 3, 1, 1) + 0.1)   
   plot(gadm, xlim = c.xlim,
        ylim = c.ylim, col="grey", bg = "white",
        main = "")
@@ -129,7 +132,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   
   # Mark example point representing aproximately a median point/ 
   # representative location - maybe an X
-  points(points.sub$longitude[6], points.sub$latitude[6], pch = 4, cex = 2, col = "black",
+  points(points.sub$longitude[pid], points.sub$latitude[pid], pch = 4, cex = 2, col = "black",
          lwd = 2)
   
   
@@ -160,7 +163,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   # ?pdf
   par(mfrow = c(3,1))
   
-  par(mar=c(0,5,1,4))   
+  par(mar=c(0,5,1,2))   
   
   
 # Panel A - Height (GPS + calibrated)
@@ -183,12 +186,14 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   points(points.sub$altitude_callib~ points.sub$date_time,
          pch = 21, bg = points.col, cex = 1.5)
   abline(h = flight.details.sub$altitude_callib)
+  points(points.sub$altitude_callib[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
+         lwd = 1.5)
   
   # This is the same - so OK
   # abline(h=median(points.sub$altitude_callib[points.sub$included_points == TRUE]))
   
 # Panel B - Vg (GPS speed) over time
-  par(mar=c(0,5,1,4))         # no top spacing
+  par(mar=c(0,5,1,2))         # no top spacing
   
 # - common time axis
 # - horizontal line to indicate median value during flight
@@ -208,6 +213,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            lwd = 2, lty = line.lty, col = line.col)
   points(points.sub$speed_2d~ points.sub$date_time,
          pch = 21, bg = points.col, cex = 1.5)
+  points(points.sub$speed_2d[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
+         lwd = 1.5)
+  
 
   # Add line for median ground speed
     abline(h = sqrt((flight.details.sub$vg_v*flight.details.sub$vg_v)+(
@@ -224,7 +232,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # - plot distance over time
 
   source("deg.dist.R")
-  par(mar=c(5,5,1,4))         
+  par(mar=c(5,5,1,2))         
   # ?par
   # Calculate distance from island
   island_dist <- deg.dist(karlso.cen.long, karlso.cen.lat,
@@ -248,6 +256,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   points(island_dist~ points.sub$date_time,
          pch = 21, bg = points.col, cex = 1.5)
   
+  points(island_dist[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
+         lwd = 1.5)
+  
   # Add line for median ground speed
   abline(h = 2, lwd = 2, col = "red", lty = 2)
   
@@ -257,6 +268,67 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # 3. Wind shear illustration ------
 # Altitude vs. wind-speed - for example track
 
+  altitude_increments <- seq(0.1, 100, 0.1)
+  
+  
+  # wind speed at 10 m reference altitude
+  wind.shear <- function(wind10, alt, roughness){
+    a <- log(alt/roughness)
+    b <- log(10/roughness)
+    c <- a/b
+    wind10*c  
+  }
+  # This equation from: Ragheb, M. (2012). Wind Shear, Roughness Classes and Turbine Energy Production.
+  # http://mragheb.com/NPRE%20475%20Wind%20Power%20Systems/Wind%20Shear%20Roughness%20Classes%20and%20Turbine%20Energy%20Production.pdf
+  
+  wind.speed <- wind.shear(points.sub$ecmwf_wind_10m_speed[pid],
+                           altitude_increments,
+                           points.sub$ecmwf_surf_roughness[pid])
+  
+  
+  pdf("wind_shear_example_test_illustration.pdf", width = 5, height = 4)
+  
+  
+  par(mfrow = c(1,1))
+  par(mar=c(5, 5, 4, 2) + 0.1)   
+  
+  plot(wind.speed,altitude_increments,
+       ylab = "Altitude (m)",
+       xlab = expression("Wind speed ("~ms^{-1}~")"),
+       pch = 21, bg = points.col, cex = 1.5,
+       type = "n",
+       cex.lab = 1.5,
+       las = 1,
+       lwd = 3
+       # cex.axis = 1.2
+       )
+    grid()
+    
+    points(wind.speed,altitude_increments,
+           lwd = 3, type = "l")
+    
+    # Add sea-surface
+    alt_sea <- sin(seq(-pi, pi, 0.1))
+    alt_sea <- rep(alt_sea,100)
+    wind.speed_sea <- seq(2,5,0.001)
+    # wind.speed_sea <- rep(wind.speed_sea,10)
+  
+    points(0.4*alt_sea[1:length(wind.speed_sea)]~ wind.speed_sea,
+           col = addalpha("light blue", 0.8), lwd = 3, type = "l")
+    
+    abline(h = points.sub$altitude_callib[pid], lwd = 2,
+           lty = 2, col = points.col[pid])
+    abline(v = points.sub$ecmwf_wind_10m_speed_flt_ht[pid], lwd = 2,
+           lty = 2, col = points.col[pid])
+    
+    abline(h = 10, lwd = 2,
+           lty = 2, col = "dark red")
+    abline(v = points.sub$ecmwf_wind_10m_speed[pid], lwd = 2,
+           lty = 2, col = "dark red")
+    
+    dev.off()
+    
+    # ?pi
 # Wind speed on x-axis (so that altitude is on y-axis)
 
 # Height on y-axis, with range 0-100 m
@@ -271,6 +343,60 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # similar to figure 2 in Tarroux et al.
 # Could use common notation, for simplicity etc.
 
+    par(mfrow = c(1,1))
+    par(mar=c(3, 3, 2, 2) + 0.1)   
+    
+    dummy_x <- dummy_y <- seq(-15,15,1)
+    plot(dummy_y~dummy_x, type = "n",
+         cex.lab = 1.5,
+         las = 1,
+         xlab = "",
+         ylab = "",
+         xlim = c(-15,10),
+         ylim = c(-5,15))
+    grid()    
+    
+    abline(lwd = 2, col = "dark grey", h = 0)    
+    abline(lwd = 2, col = "dark grey", v = 0)    
+    
+    # ?arrows
+    
+    # Vg
+    arrows(0, 0, points.sub$vg_u[pid], points.sub$vg_v[pid],
+           lwd = 2,
+           length = 0.15)
+    text(points.sub$vg_u[pid], points.sub$vg_v[pid] + 1, "Vg")
+    
+    # Vw
+    arrows(0, 0, points.sub$ecmwf_wind_10m_u_flt_ht[pid],
+           points.sub$ecmwf_wind_10m_v_flt_ht[pid],
+           lwd = 2,
+           length = 0.15,
+           col = "red")
+    text(points.sub$ecmwf_wind_10m_u_flt_ht[pid], points.sub$ecmwf_wind_10m_v_flt_ht[pid] + 1, "Vw",
+         col = "red")
+    
+    
+    # Va
+    arrows(0, 0, points.sub$va_u_flt_ht[pid],
+           points.sub$va_v_flt_ht[pid],
+           lwd = 2,
+           length = 0.15,
+           col = "orange",
+           lty = 2)
+    text( points.sub$va_u_flt_ht[pid],
+          points.sub$va_v_flt_ht[pid] + 1, "Va",
+         col = "orange")
+    
+    arrows(points.sub$ecmwf_wind_10m_u_flt_ht[pid],
+           points.sub$ecmwf_wind_10m_v_flt_ht[pid],
+           points.sub$vg_u[pid], points.sub$vg_v[pid],
+           lwd = 2,
+           length = 0.15,
+           col = "orange",
+           lty = 2)
+    
+    
 # Do for same example flight as all above.
 
 
