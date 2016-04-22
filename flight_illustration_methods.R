@@ -41,7 +41,7 @@ dif    <- dif *.25
 c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 
 
-
+  pdf("map_illustration_figure.pdf", width = 5, height = 6)
 
   # Plot base map
   par(mfrow = c(1,1))
@@ -146,6 +146,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   axis(side=(1), las=1, col="black", col.axis="black")
   axis(side=(2), las=1, col="black", col.axis="black")
   
+  
+  
+  dev.off()
   
 
 # 2. Multi-panel figure of components over time -----
