@@ -114,11 +114,12 @@ for(i in 1:n_flights){
   
   
   # flight segment distance
-  flight_summary_df$trunc_seg_dist_a_b[i] <- deg.dist(flight_summary_df$trunc_seg_long_start[i],
-                                 flight_summary_df$trunc_seg_lat_start[i],
-                                 flight_summary_df$trunc_seg_long_end[i],
-                                 flight_summary_df$trunc_seg_lat_end[i],
-                                 km = FALSE)
+  flight_summary_df$trunc_seg_dist_a_b[i] <- deg.dist(
+    flight_summary_df$trunc_seg_long_start[i],
+    flight_summary_df$trunc_seg_lat_start[i],
+    flight_summary_df$trunc_seg_long_end[i],
+    flight_summary_df$trunc_seg_lat_end[i],
+    km = FALSE)
   
   
   # Various flight variables
@@ -133,37 +134,49 @@ for(i in 1:n_flights){
     
     # If points meeting altitude requirements get values (otherwise NAs)
     if(sum(alt_incl) >0){
-      flight_summary_df$altitude_callib[i] <- median(na.rm = TRUE, points.flight$altitude_callib[alt_incl])
-      flight_summary_df$altitude_callib_extm[i] <- median(na.rm = TRUE, points.flight$altitude_callib_extm[alt_incl])
-      flight_summary_df$altitude_callib_extm_05[i] <- median(na.rm = TRUE, points.flight$altitude_callib_extm_05[alt_incl])
+      flight_summary_df$altitude_callib[i] <-
+        median(na.rm = TRUE, points.flight$altitude_callib[alt_incl])
+      
+      flight_summary_df$altitude_callib_extm[i] <-
+        median(na.rm = TRUE, points.flight$altitude_callib_extm[alt_incl])
+      
+      flight_summary_df$altitude_callib_extm_05[i] <-
+        median(na.rm = TRUE, points.flight$altitude_callib_extm_05[alt_incl])
+      
     }
     
 
-    flight_summary_df$altitude_callib_no_filter[i] <- median(na.rm = TRUE, points.flight$altitude_callib)
-    flight_summary_df$altitude_callib_extm_no_filter[i] <- median(na.rm = TRUE, points.flight$altitude_callib_extm)
-    flight_summary_df$altitude_callib_extm_05_no_filter[i] <- median(na.rm = TRUE, points.flight$altitude_callib_extm_05)
+    flight_summary_df$altitude_callib_no_filter[i] <-
+      median(na.rm = TRUE, points.flight$altitude_callib)
+    
+    flight_summary_df$altitude_callib_extm_no_filter[i] <-
+      median(na.rm = TRUE, points.flight$altitude_callib_extm)
+    
+    flight_summary_df$altitude_callib_extm_05_no_filter[i] <-
+      median(na.rm = TRUE, points.flight$altitude_callib_extm_05)
     
 
   # Wind variables
-    flight_summary_df$ecmwf_wind_10m_dir[i] <- deg(circ.mean(rad(points.flight$ecmwf_wind_10m_dir)))
+    flight_summary_df$ecmwf_wind_10m_dir[i] <-
+      deg(circ.mean(rad(points.flight$ecmwf_wind_10m_dir)))
     
     flight_summary_df$ecmwf_wind_10m_speed[i] <-
-      mean(points.flight$ecmwf_wind_10m_speed)
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed)
       
     flight_summary_df$ecmwf_wind_10m_speed_flt_ht[i] <-
-      mean(points.flight$ecmwf_wind_10m_speed_flt_ht)  
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_flt_ht)  
     
     flight_summary_df$ecmwf_wind_10m_speed_50m[i] <-
-      mean(points.flight$ecmwf_wind_10m_speed_50m)  
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_50m)  
     
     flight_summary_df$ecmwf_wind_10m_speed_1m[i] <-
-      mean(points.flight$ecmwf_wind_10m_speed_1m)  
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_1m)  
       
     flight_summary_df$ecmwf_wind_10m_speed_gradient_01_50_ratio[i] <-
-      mean(points.flight$ecmwf_wind_10m_speed_gradient_01_50_ratio)  
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_gradient_01_50_ratio)  
     
     flight_summary_df$ecmwf_wind_10m_speed_gradient_01_50_dif[i] <-
-      mean(points.flight$ecmwf_wind_10m_speed_gradient_01_50_dif)  
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_gradient_01_50_dif)  
     
     
     
