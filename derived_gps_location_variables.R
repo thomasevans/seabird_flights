@@ -265,7 +265,7 @@ library(CircStats)
 hist(points.info$speed_2d, xlim = c(0,25), breaks = 1000)
 # Vg in u and v directions
 points.info$vg_v <- points.info$speed_2d*(cos(rad(points.info$direction_common)))
-hist(points.info$vg_v, xlim = c(-50,50), breaks = 100)
+hist(points.info$vg_v, xlim = c(-50,50), breaks = 400)
 
 # 
 # a1 <- points.info$speed_2d[test.na][2]*(cos(rad(points.info$direction_common[test.na][2])))
@@ -392,6 +392,7 @@ hist(points.info$wind_effect_10m)
 hist(points.info$wind_effect_flt_ht)
 hist(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, breaks = 100)
 mean(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, na.rm = TRUE)
+median(points.info$wind_effect_flt_ht - points.info$wind_effect_10m, na.rm = TRUE)
 
 m <- points.info$species == "murre"
 g <- points.info$species == "gull"
