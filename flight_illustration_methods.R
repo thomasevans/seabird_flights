@@ -44,7 +44,7 @@ dif    <- dif *.25
 c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 
 
-  pdf("map_illustration_figure.pdf", width = 5, height = 6)
+  pdf("map_illustration_figure.pdf", width = 7, height = 9)
 
   # Plot base map
   par(mfrow = c(1,1))
@@ -159,7 +159,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # For all vertical lines to indicate section of flight included
 # No x-axis for A + B, but common range as for C, so can use common X-axis
 
-  pdf("gps_plot_test_illustration.pdf", width = 5, height = 8)
+  pdf("gps_plot_test_illustration.pdf", width = 4, height = 9)
   # ?pdf
   par(mfrow = c(3,1))
   
@@ -185,7 +185,8 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            lwd = 2, lty = line.lty, col = line.col)
   points(points.sub$altitude_callib~ points.sub$date_time,
          pch = 21, bg = points.col, cex = 1.5)
-  abline(h = flight.details.sub$altitude_callib)
+  abline(h = flight.details.sub$altitude_callib,
+         lwd = 2, col = "dark grey", lty = 2)
   points(points.sub$altitude_callib[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
          lwd = 1.5)
   
@@ -220,11 +221,12 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   # Add line for median ground speed
     abline(h = sqrt((flight.details.sub$vg_v*flight.details.sub$vg_v)+(
     flight.details.sub$vg_u*flight.details.sub$vg_u
-  )))
+  )), lwd = 2, col = "dark grey", lty = 2)
   # Recalculated median
-  abline(h=median(points.sub$speed_2d[points.sub$included_points == TRUE]))
-  abline(h=mean(points.sub$speed_2d[points.sub$included_points == TRUE]))
-  
+#   abline(h=median(points.sub$speed_2d[points.sub$included_points == TRUE]))
+#   abline(h=mean(points.sub$speed_2d[points.sub$included_points == TRUE]))
+#     abline(h = 2, lwd = 2, col = "red", lty = 2)
+
   # abline(h=median(points.sub$speed_2d))
   
   
@@ -290,16 +292,18 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   
   
   par(mfrow = c(1,1))
-  par(mar=c(5, 5, 4, 2) + 0.1)   
+  par(mar=c(5, 5, 1, 1) + 0.1)   
+  # par(mar=c(2, 3, 1, 1) + 0.1)   
   
   plot(wind.speed,altitude_increments,
        ylab = "Altitude (m)",
        xlab = expression("Wind speed ("~ms^{-1}~")"),
-       pch = 21, bg = points.col, cex = 1.5,
+       pch = 21, bg = points.col,
        type = "n",
-       cex.lab = 1.5,
        las = 1,
-       lwd = 3
+       lwd = 3,
+       cex = 1.5,
+       cex.lab = 1.5
        # cex.axis = 1.2
        )
     grid()
@@ -317,14 +321,14 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            col = addalpha("light blue", 0.8), lwd = 3, type = "l")
     
     abline(h = points.sub$altitude_callib[pid], lwd = 2,
-           lty = 2, col = points.col[pid])
+           lty = 2, col = "#1b9e77")
     abline(v = points.sub$ecmwf_wind_10m_speed_flt_ht[pid], lwd = 2,
-           lty = 2, col = points.col[pid])
+           lty = 2, col = "#1b9e77")
     
     abline(h = 10, lwd = 2,
-           lty = 2, col = "dark red")
+           lty = 2, col = "dark grey")
     abline(v = points.sub$ecmwf_wind_10m_speed[pid], lwd = 2,
-           lty = 2, col = "dark red")
+           lty = 2, col = "dark grey")
     
     dev.off()
     
@@ -347,8 +351,10 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
     
     pid <- 4
     
+    
+    pdf("vector_decompose_illustration.pdf", width = 5, height = 5)
     par(mfrow = c(1,1))
-    par(mar=c(3, 3, 2, 2) + 0.1)   
+    par(mar=c(3, 3, 1, 1) + 0.1)   
     
     dummy_x <- dummy_y <- seq(-15,15,1)
     plot(dummy_y~dummy_x, type = "n",
@@ -357,7 +363,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
          xlab = "",
          ylab = "",
          xlim = c(-15,10),
-         ylim = c(-5,15))
+         ylim = c(-5,20))
     grid()    
     
     abline(lwd = 2, col = "dark grey", h = 0)    
@@ -368,17 +374,21 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
     # Vg
     arrows(0, 0, points.sub$vg_u[pid], points.sub$vg_v[pid],
            lwd = 2,
-           length = 0.15)
-    text(points.sub$vg_u[pid], points.sub$vg_v[pid] + 1, "Vg")
+           length = 0.15,
+           col = "#7570b3")
+    text(points.sub$vg_u[pid] + sign(points.sub$vg_u[pid])* 1,
+         points.sub$vg_v[pid] + sign(points.sub$vg_v[pid])* 1,
+         "Vg", col = "#7570b3")
     
     # Vw
     arrows(0, 0, points.sub$ecmwf_wind_10m_u_flt_ht[pid],
            points.sub$ecmwf_wind_10m_v_flt_ht[pid],
            lwd = 2,
            length = 0.15,
-           col = "red")
-    text(points.sub$ecmwf_wind_10m_u_flt_ht[pid], points.sub$ecmwf_wind_10m_v_flt_ht[pid] + 1, "Vw",
-         col = "red")
+           col = "#1b9e77")
+    text(points.sub$ecmwf_wind_10m_u_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_u_flt_ht[pid])*1,
+         points.sub$ecmwf_wind_10m_v_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_v_flt_ht[pid])*1, "Vw",
+         col = "#1b9e77")
     
     
     # Va
@@ -386,39 +396,54 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            points.sub$va_v_flt_ht[pid],
            lwd = 2,
            length = 0.15,
-           col = "orange",
+           col = "#d95f02",
            lty = 2)
-    text( points.sub$va_u_flt_ht[pid],
-          points.sub$va_v_flt_ht[pid] + 1, "Va",
-         col = "orange")
+    text( points.sub$va_u_flt_ht[pid] + sign(points.sub$va_u_flt_ht[pid])*1,
+          points.sub$va_v_flt_ht[pid] + sign(points.sub$va_v_flt_ht[pid])*1, "Va",
+         col = "#d95f02")
     
     arrows(points.sub$ecmwf_wind_10m_u_flt_ht[pid],
            points.sub$ecmwf_wind_10m_v_flt_ht[pid],
            points.sub$vg_u[pid], points.sub$vg_v[pid],
            lwd = 2,
            length = 0.15,
-           col = "orange",
+           col = "#d95f02",
            lty = 2)
     
     # Cross-wind
     arrows(0,0,
-           -(sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid],
-           -(cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid],
+           (sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid],
+           (cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid],
            
            lwd = 2,
            length = 0.15,
-           col = "red",
+           col = "#1b9e77",
            lty = 2)
+    
+    text(((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1),
+         ((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid]
+          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1), expression("Vw"["c"]),
+         col = "#1b9e77")
     
     
     arrows(0,0,
            (sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid],
            (cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid],
-           
            lwd = 2,
            length = 0.15,
-           col = "red",
+           col = "#1b9e77",
            lty = 2)
+    
+    text(((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*1),
+         ((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid]
+          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*1), expression("Vw"["s"]),
+         col = "#1b9e77")
+    
+    text(c(-14,2,2,9),c(1,20,-5,1),
+         c("West", "North", "South", "East"),
+         col = "dark grey")
+    
+    dev.off()
     
 # Do for same example flight as all above.
 
@@ -429,5 +454,6 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # Could either combine all, using layout etc, or print 4 panels sepperatly then combine
 # with another program, e.g. illustrator, GIMP etc.
 # Best option is probably 4 sepperatly, then can combine to single pdf using
-# Inkscape, following workflow described here
+# Inkscape, following workflow described here:
+# http://b.nanes.org/figures/
 
