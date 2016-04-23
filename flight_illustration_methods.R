@@ -343,6 +343,10 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # similar to figure 2 in Tarroux et al.
 # Could use common notation, for simplicity etc.
 
+    library(CircStats)
+    
+    pid <- 4
+    
     par(mfrow = c(1,1))
     par(mar=c(3, 3, 2, 2) + 0.1)   
     
@@ -396,6 +400,25 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            col = "orange",
            lty = 2)
     
+    # Cross-wind
+    arrows(0,0,
+           -(sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid],
+           -(cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid],
+           
+           lwd = 2,
+           length = 0.15,
+           col = "red",
+           lty = 2)
+    
+    
+    arrows(0,0,
+           (sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid],
+           (cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid],
+           
+           lwd = 2,
+           length = 0.15,
+           col = "red",
+           lty = 2)
     
 # Do for same example flight as all above.
 
