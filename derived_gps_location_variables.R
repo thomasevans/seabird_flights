@@ -342,9 +342,9 @@ hist((points.info$alpha_10m))
 wind_angle_dif_10m <- points.info$va_flt_10m_bearing - points.info$ecmwf_wind_10m_dir
 hist(wind_angle_dif_10m, breaks = 72)
 
-points.info$cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_10m))
+points.info$cross_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_10m))
 
-points.info$head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_10m))
+points.info$head_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_10m))
 
 hist(points.info$cross_wind_10m)
 hist(points.info$head_wind_10m)
@@ -354,9 +354,9 @@ hist(points.info$head_wind_10m)
 wind_angle_dif_flt_ht <- points.info$va_flt_ht_bearing - points.info$ecmwf_wind_10m_dir
 hist(wind_angle_dif_flt_ht, breaks = 72)
 
-points.info$cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_flt_ht))
+points.info$cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_flt_ht))
 
-points.info$head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_flt_ht))
+points.info$head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_flt_ht))
 
 hist(points.info$cross_wind_flt_ht)
 hist(points.info$head_wind_flt_ht)
@@ -367,18 +367,18 @@ wind_angle_dif_track <- points.info$direction_common - points.info$ecmwf_wind_10
 hist(wind_angle_dif_track, breaks = 72)
 
 
-points.info$track_cross_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_track))
+points.info$track_cross_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_track))
 
-points.info$track_head_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_track))
+points.info$track_head_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_track))
 
 hist(points.info$track_cross_wind_10m)
 hist(points.info$track_head_wind_10m)
 
 
 
-points.info$track_cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_track))
+points.info$track_cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_track))
 
-points.info$track_head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_track))
+points.info$track_head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_track))
 
 hist(points.info$track_head_wind_flt_ht)
 
