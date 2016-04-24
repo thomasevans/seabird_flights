@@ -13,13 +13,13 @@ load("flight_details.RData")
 # **** Figures -----
 
 # Pick example flight -----
-flight_id <- "g32684"
+flight_id <- "g37478"
 
 points.sub <- points.df[points.df$flight_id_combined == flight_id,]
 flight.details.sub <- flight.details[flight.details$flight_id_combined == flight_id,]
 
 # example point
-pid <- 6
+pid <- 11
 
 # 1. Flight map ------
 # Base map with land on
@@ -44,7 +44,7 @@ dif    <- dif *.25
 c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 
 
-  pdf("map_illustration_figure.pdf", width = 7, height = 9)
+  pdf(paste("map_illustration_figure_", flight_id, ".pdf", sep = ""), width = 7, height = 9)
 
   # Plot base map
   par(mfrow = c(1,1))
@@ -143,13 +143,15 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   # Borders scale etc
   # Scale bar and axis
   x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
-  y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/10
-  map.scale(x,y,ratio = FALSE, col="black",col.lab="black")
+  y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/20
+  map.scale(x,y, ratio = FALSE,
+            col="black", col.lab="black",
+            rel.width = 0.3)
   box(col="black",lwd=2)
   axis(side=(1), las=1, col="black", col.axis="black")
   axis(side=(2), las=1, col="black", col.axis="black")
   
-  
+  # ?map.scale
   
   dev.off()
   
@@ -159,7 +161,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # For all vertical lines to indicate section of flight included
 # No x-axis for A + B, but common range as for C, so can use common X-axis
 
-  pdf("gps_plot_test_illustration.pdf", width = 4, height = 9)
+  pdf(paste("gps_plot_test_illustration_", flight_id, ".pdf", sep = ""), width = 4, height = 9)
   # ?pdf
   par(mfrow = c(3,1))
   
@@ -288,7 +290,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
                            points.sub$ecmwf_surf_roughness[pid])
   
   
-  pdf("wind_shear_example_test_illustration.pdf", width = 5, height = 4)
+  pdf(paste("wind_shear_example_test_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 4)
   
   
   par(mfrow = c(1,1))
@@ -312,9 +314,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            lwd = 3, type = "l")
     
     # Add sea-surface
-    alt_sea <- sin(seq(-pi, pi, 0.1))
+    alt_sea <- sin(seq(-pi, pi, 0.5))
     alt_sea <- rep(alt_sea,100)
-    wind.speed_sea <- seq(2,5,0.001)
+    wind.speed_sea <- seq(0,10,0.01)
     # wind.speed_sea <- rep(wind.speed_sea,10)
   
     points(0.4*alt_sea[1:length(wind.speed_sea)]~ wind.speed_sea,
@@ -349,10 +351,10 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 
     library(CircStats)
     
-    pid <- 4
+    # pid <- 4
     
     
-    pdf("vector_decompose_illustration.pdf", width = 5, height = 5)
+    pdf(paste("vector_decompose_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 5)
     par(mfrow = c(1,1))
     par(mar=c(3, 3, 1, 1) + 0.1)   
     
