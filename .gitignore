@@ -35,3 +35,5 @@ MSVs_QCN_quality.png
 *.wmf
 flight_details.RData
 flight_details.csv
+gps_plot_test_illustration_g37478.svg
+*.svg
