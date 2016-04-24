@@ -27,6 +27,7 @@ pid <- 11
 # needed to plot maps
 library(maps)
 library(mapproj)
+library(raster) 
 
 # Plot base map
 load("SWE_adm0.RData")
@@ -43,13 +44,29 @@ dif    <- c.ylim[2] - c.ylim[1]
 dif    <- dif *.25
 c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 
+# Set global par
+par(ps = 14, cex = 1.5, cex.lab = 2)
 
-  pdf(paste("map_illustration_figure_", flight_id, ".pdf", sep = ""), width = 7, height = 9)
-
+  svg(paste("map_illustration_figure_", flight_id, ".svg", sep = ""),
+      width = 7, height = 9, family = "serif")
+# ?cairo_ps
   # Plot base map
   par(mfrow = c(1,1))
   par(mar=c(2, 3, 1, 1) + 0.1)   
-  plot(gadm, xlim = c.xlim,
+  
+  # str(gadm)
+  
+ range.x <-  c.xlim[2]-c.xlim[1]
+ range.y <-  c.ylim[2]-c.ylim[1]
+ dif.co <- max(c(range.x,range.y))
+ 
+  gadm_clip <- crop(gadm, extent(c.xlim[1]-1*(dif.co),
+                                 c.xlim[2]+1*(dif.co),
+                                 c.ylim[1]-1*(dif.co),
+                                 c.ylim[2]+1*(dif.co)))
+  
+  
+  plot(gadm_clip, xlim = c.xlim,
        ylim = c.ylim, col="grey", bg = "white",
        main = "")
   grid()
@@ -146,12 +163,14 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/20
   map.scale(x,y, ratio = FALSE,
             col="black", col.lab="black",
-            rel.width = 0.3)
+            relwidth = 0.3)
   box(col="black",lwd=2)
   axis(side=(1), las=1, col="black", col.axis="black")
   axis(side=(2), las=1, col="black", col.axis="black")
   
   # ?map.scale
+  
+  legend("topleft", "(a)", bty="n", cex = 1.2) 
   
   dev.off()
   
@@ -161,9 +180,11 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # For all vertical lines to indicate section of flight included
 # No x-axis for A + B, but common range as for C, so can use common X-axis
 
-  pdf(paste("gps_plot_test_illustration_", flight_id, ".pdf", sep = ""), width = 4, height = 9)
+  # pdf(paste("gps_plot_test_illustration_", flight_id, ".pdf", sep = ""), width = 4, height = 9)
+  svg(paste("gps_plot_test_illustration_", flight_id, ".svg", sep = ""),
+      width = 5, height = 9, family = "serif")
   # ?pdf
-  par(mfrow = c(3,1))
+  par(mfrow = c(3,1),cex=1)
   
   par(mar=c(0,5,1,2))   
   
@@ -171,11 +192,12 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # Panel A - Height (GPS + calibrated)
 # - horizontal line to indicate median value during flight
   plot(points.sub$altitude_callib~ points.sub$date_time,
-       pch = 21, bg = points.col, cex = 1.5,
+       pch = 21, bg = points.col,
        type = "n",
        xlab = "Time (minutes)",
        ylab = "Altitude (m)",
-       cex.lab = 1.5,
+       cex.lab = 1.3,
+       # cex = 1.5,
        las = 1,
        xaxt = "n",
        ylim = c(0,(max(points.sub$altitude_callib) + 0.2*max(points.sub$altitude_callib)))
@@ -192,6 +214,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   points(points.sub$altitude_callib[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
          lwd = 1.5)
   
+  legend("topleft", "(b)", bty="n", cex = 1.2) 
+  
+  
   # This is the same - so OK
   # abline(h=median(points.sub$altitude_callib[points.sub$included_points == TRUE]))
   
@@ -201,12 +226,13 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
 # - common time axis
 # - horizontal line to indicate median value during flight
   plot(points.sub$speed_2d~ points.sub$date_time,
-       pch = 21, bg = points.col, cex = 1.5,
+       pch = 21, bg = points.col,
+       # cex = 1.5,
        type = "n",
        xlab = "Time (minutes)",
        ylab = expression("Ground speed ("~ms^{-1}~")"),
        las = 1,
-       cex.lab = 1.5,
+       cex.lab = 1.3,
        ylim = c(0,(max(points.sub$speed_2d) + 0.2*max(points.sub$speed_2d))),
        xaxt = "n")
   grid()
@@ -215,7 +241,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            points.sub$speed_2d[-nrow(points.sub)],
            lwd = 2, lty = line.lty, col = line.col)
   points(points.sub$speed_2d~ points.sub$date_time,
-         pch = 21, bg = points.col, cex = 1.5)
+         pch = 21, bg = points.col,
+         cex = 1.5
+         )
   points(points.sub$speed_2d[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
          lwd = 1.5)
   
@@ -224,6 +252,9 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
     abline(h = sqrt((flight.details.sub$vg_v*flight.details.sub$vg_v)+(
     flight.details.sub$vg_u*flight.details.sub$vg_u
   )), lwd = 2, col = "dark grey", lty = 2)
+    
+    legend("topleft", "(c)", bty="n", cex = 1.2) 
+    
   # Recalculated median
 #   abline(h=median(points.sub$speed_2d[points.sub$included_points == TRUE]))
 #   abline(h=mean(points.sub$speed_2d[points.sub$included_points == TRUE]))
@@ -244,11 +275,12 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            km = TRUE)
   
     plot(island_dist~ points.sub$date_time,
-       pch = 21, bg = points.col, cex = 1.5,
+       pch = 21, bg = points.col,
+       # cex = 1.5,
        type = "n",
        xlab = "Time (minutes)",
-       ylab = "Distance from island (km)",
-       cex.lab = 1.5,
+       ylab = "Displacement (km)",
+       cex.lab = 1.3,
        las = 1,
        ylim = c(0,(max(island_dist) + 0.2*max(island_dist))),
        )
@@ -265,6 +297,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   
   # Add line for median ground speed
   abline(h = 2, lwd = 2, col = "red", lty = 2)
+  legend("topleft", "(d)", bty="n", cex = 1.2) 
   
 
   dev.off()
@@ -290,7 +323,10 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
                            points.sub$ecmwf_surf_roughness[pid])
   
   
-  pdf(paste("wind_shear_example_test_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 4)
+  # pdf(paste("wind_shear_example_test_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 4)
+  
+  svg(paste("wind_shear_example_test_illustration_", flight_id, ".svg", sep = ""),
+      width = 5, height = 4, family = "serif")
   
   
   par(mfrow = c(1,1))
@@ -304,8 +340,8 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
        type = "n",
        las = 1,
        lwd = 3,
-       cex = 1.5,
-       cex.lab = 1.5
+       # cex = 1.5,
+       cex.lab = 1.3
        # cex.axis = 1.2
        )
     grid()
@@ -331,6 +367,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
            lty = 2, col = "dark grey")
     abline(v = points.sub$ecmwf_wind_10m_speed[pid], lwd = 2,
            lty = 2, col = "dark grey")
+    legend("topleft", "(f)", bty="n", cex = 1.2) 
     
     dev.off()
     
@@ -354,13 +391,17 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
     # pid <- 4
     
     
-    pdf(paste("vector_decompose_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 5)
+    # pdf(paste("vector_decompose_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 5)
+    
+    svg(paste("vector_decompose_illustration_", flight_id, ".svg", sep = ""),
+        width = 5, height = 5, family = "serif")
+    
     par(mfrow = c(1,1))
     par(mar=c(3, 3, 1, 1) + 0.1)   
     
     dummy_x <- dummy_y <- seq(-15,15,1)
     plot(dummy_y~dummy_x, type = "n",
-         cex.lab = 1.5,
+         # cex.lab = 1.5,
          las = 1,
          xlab = "",
          ylab = "",
@@ -444,6 +485,7 @@ c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
     text(c(-14,2,2,9),c(1,20,-5,1),
          c("West", "North", "South", "East"),
          col = "dark grey")
+    legend("topleft", "(e)", bty="n", cex = 1.2) 
     
     dev.off()
     
