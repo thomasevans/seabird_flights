@@ -96,7 +96,7 @@ for(i in 1:n_flights){
   
   
   # Non-flight points exclude
-  fp <- points.flight$speed_2d > 3
+  fp <- points.flight$speed_2d > 3  & !is.na(points.flight$speed_2d)
   
   # Start/ end latitude
   flight_summary_df$trunc_seg_lat_start[i] <- points.flight$latitude[1]
