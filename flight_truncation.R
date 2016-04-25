@@ -12,13 +12,20 @@ load("points.detailed.RData")
 # Flight summary data
 load("flights.RData")
 
+# 
+# # needed to plot maps
+# library(maps)
 
 # needed to plot maps
 library(maps)
-
+library(mapproj)
+library(raster) 
 
 # Plot base map
 load("SWE_adm0.RData")
+# 
+# # Plot base map
+# load("SWE_adm0.RData")
 
 points.detailed$point_id <- 1:nrow(points.detailed)
 
@@ -71,15 +78,26 @@ n_flights <- nrow(flights)
 flight.details <- list()
 points.included <- list()
 pdf("flight_plots_final2.pdf")
+svg("map_illustration_truncation_example.svg",
+    width = 15, height = 10, family = "serif")
+par(mfrow=c(2,3), cex = 1.0)
+par(ps = 14, cex = 1, cex.lab = 1.5)
+flight_sub <- c("g2782", "g34145", "g37777",
+                "m378", "m1152", "m1180")
+l <- c("a","b","c",
+       "d","e","f")
 # For each flight do:
-for(i in 1:n_flights){
-  # for(i in 1:100){
-    
+# for(i in 1:n_flights){
+  for(i in 1:6){
+    # i <- 1
   # Subset original GPS data
-  points.original <- points.detailed[points.detailed$flight_id_combined == flights$flight_id_combined[i],]
+  points.original <- points.detailed[points.detailed$flight_id_combined == flight_sub[i],]
+  
+  # Subset original GPS data
+  points.original <- points.detailed[points.detailed$flight_id_combined == flight_sub[i],]
   
   # Subset resampled GPS data
-  pointsx <- points.df.100[points.df.100$flight_id_combined == flights$flight_id_combined[i],]
+  pointsx <- points.df.100[points.df.100$flight_id_combined == flight_sub[i],]
   
   # Number of GPS locations
   n <- nrow(pointsx)
@@ -202,21 +220,61 @@ for(i in 1:n_flights){
   
   # Plot data
   
+  
+  
+
+  
+  
   # Set limits
   c.xlim <- range(points.original$longitude)
   dif    <- c.xlim[2] - c.xlim[1]
-  dif    <- dif *.15
+  dif    <- dif *.25
   c.xlim <- c((c.xlim[1] - dif), (c.xlim[2] + dif))
   
   c.ylim <- range(points.original$latitude)
   dif    <- c.ylim[2] - c.ylim[1]
-  dif    <- dif *.15
+  dif    <- dif *.25
   c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
   
+  # Set global par
+  par(mar=c(3, 3, 1, 1) + 0.1)   
+  
+#   
+#   # Set limits
+#   c.xlim <- range(points.original$longitude)
+#   dif    <- c.xlim[2] - c.xlim[1]
+#   dif    <- dif *.15
+#   c.xlim <- c((c.xlim[1] - dif), (c.xlim[2] + dif))
+#   
+#   c.ylim <- range(points.original$latitude)
+#   dif    <- c.ylim[2] - c.ylim[1]
+#   dif    <- dif *.15
+#   c.ylim <- c((c.ylim[1] - dif), (c.ylim[2] + dif))
+#   
   # Plot base map
-  plot(gadm, xlim = c.xlim,
+  
+  range.x <-  c.xlim[2]-c.xlim[1]
+  range.y <-  c.ylim[2]-c.ylim[1]
+  dif.co <- max(c(range.x,range.y))
+  
+  gadm_clip <- crop(gadm, extent(c.xlim[1]-1*(dif.co),
+                                 c.xlim[2]+1*(dif.co),
+                                 c.ylim[1]-1*(dif.co),
+                                 c.ylim[2]+1*(dif.co)))
+  
+  
+  plot(gadm_clip, xlim = c.xlim,
        ylim = c.ylim, col="grey", bg = "white",
-       main = paste(points.original$flight_id_combined[1], "  included: ", include_flight))
+       main ="")
+       # main = paste(points.original$flight_id_combined[1],
+                    # "  included: ", include_flight))
+  # main = paste(points.original$flight_id_combined[1]))
+  grid()
+  
+  
+#   plot(gadm, xlim = c.xlim,
+#        ylim = c.ylim, col="grey", bg = "white",
+#        main = paste(points.original$flight_id_combined[1], "  included: ", include_flight))
   nx <- nrow(points.original)
   # Add points
   segments(points.original$longitude[-1], points.original$latitude[-1], points.original$longitude[-nx], points.original$latitude[-nx])
@@ -228,11 +286,15 @@ for(i in 1:n_flights){
   # Scale bar and axis
   x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
   y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/10
-  map.scale(x,y,ratio = FALSE, col="black",col.lab="black")
+  map.scale(ratio = FALSE, relwidth = 0.3, col="black",col.lab="black")
+  # ?map.scale
   box(col="black",lwd=2)
   axis(side=(1), las=1, col="black", col.axis="black")
   axis(side=(2), las=1, col="black", col.axis="black")
   
+  legend("topleft", paste("(",l[i],")",sep = ""), bty="n", cex = 1.2) 
+  
+#   dev.off()
   
 }
 # warnings()
