@@ -67,7 +67,36 @@ df_names <- c("flight_id_combined",
               "track_cross_wind_flt_ht",
               "track_head_wind_flt_ht",
               "wind_effect_10m",
-              "wind_effect_flt_ht"
+              "wind_effect_flt_ht",
+              "ecmwf_wind_10m_dir_alt_filter",
+              "ecmwf_wind_10m_speed_alt_filter",
+              "ecmwf_wind_10m_speed_flt_ht_alt_filter",
+              "ecmwf_wind_10m_speed_50m_alt_filter",
+              "ecmwf_wind_10m_speed_1m_alt_filter",
+              "ecmwf_wind_10m_speed_gradient_01_50_ratio_alt_filter",
+              "ecmwf_wind_10m_speed_gradient_01_50_dif_alt_filter",
+              "vg_v_alt_filter",
+              "vg_u_alt_filter",
+              "va_v_10m_alt_filter",
+              "va_u_10m_alt_filter",
+              "va_v_flt_ht_alt_filter",
+              "va_u_flt_ht_alt_filter",
+              "va_flt_ht_alt_filter",
+              "va_10m_alt_filter",
+              "va_flt_ht_bearing_alt_filter",
+              "va_flt_10m_bearing_alt_filter",
+              "alpha_flt_ht_alt_filter",
+              "alpha_10m_alt_filter",
+              "cross_wind_10m_alt_filter",
+              "head_wind_10m_alt_filter",
+              "cross_wind_flt_ht_alt_filter",
+              "head_wind_flt_ht_alt_filter",
+              "track_cross_wind_10m_alt_filter",
+              "track_head_wind_10m_alt_filter",
+              "track_cross_wind_flt_ht_alt_filter",
+              "track_head_wind_flt_ht_alt_filter",
+              "wind_effect_10m_alt_filter",
+              "wind_effect_flt_ht_alt_filter"
               
 )
 
@@ -246,7 +275,96 @@ for(i in 1:n_flights){
     
     flight_summary_df$wind_effect_flt_ht[i] <-
       median(na.rm = TRUE, points.flight$wind_effect_flt_ht[fp])                                          
-           
+
+    
+    # With altitude filter thing
+    # Wind variables
+    flight_summary_df$ecmwf_wind_10m_dir_alt_filter[i] <-
+      deg(circ.mean(rad(points.flight$ecmwf_wind_10m_dir[alt_incl & fp])))
+    
+    flight_summary_df$ecmwf_wind_10m_speed_alt_filter[i] <-
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed[alt_incl & fp])
+    
+    flight_summary_df$ecmwf_wind_10m_speed_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$ecmwf_wind_10m_speed_50m_alt_filter[i] <-
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_50m[alt_incl & fp])  
+    
+    flight_summary_df$ecmwf_wind_10m_speed_1m_alt_filter[i] <-
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_1m[alt_incl & fp])  
+    
+    flight_summary_df$ecmwf_wind_10m_speed_gradient_01_50_ratio_alt_filter[i] <-
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_gradient_01_50_ratio[alt_incl & fp])  
+    
+    flight_summary_df$ecmwf_wind_10m_speed_gradient_01_50_dif_alt_filter[i] <-
+      median(na.rm = TRUE,points.flight$ecmwf_wind_10m_speed_gradient_01_50_dif[alt_incl & fp])  
+    
+    
+    
+    
+    # Calculate variables
+    flight_summary_df$vg_v_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$vg_v[alt_incl & fp])  
+    
+    flight_summary_df$vg_u_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$vg_u[alt_incl & fp])  
+    
+    flight_summary_df$va_v_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_v_10m[alt_incl & fp])  
+    
+    flight_summary_df$va_u_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_u_10m[alt_incl & fp])  
+    
+    flight_summary_df$va_v_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_v_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$va_u_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_u_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$va_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$va_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_10m[alt_incl & fp])  
+    
+    flight_summary_df$va_flt_ht_bearing_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_flt_ht_bearing[alt_incl & fp])  
+    
+    flight_summary_df$va_flt_10m_bearing_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_flt_10m_bearing[alt_incl & fp])                                                                       
+    flight_summary_df$alpha_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$alpha_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$alpha_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$alpha_10m[alt_incl & fp])                                                              
+    flight_summary_df$cross_wind_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$cross_wind_10m[alt_incl & fp])  
+    
+    flight_summary_df$head_wind_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$head_wind_10m[alt_incl & fp])                                                                  
+    flight_summary_df$cross_wind_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$cross_wind_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$head_wind_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$head_wind_flt_ht[alt_incl & fp])                                              
+    
+    flight_summary_df$track_cross_wind_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$track_cross_wind_10m[alt_incl & fp])  
+    
+    flight_summary_df$track_head_wind_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$track_head_wind_10m[alt_incl & fp])                                                          
+    flight_summary_df$track_cross_wind_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$track_cross_wind_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$track_head_wind_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$track_head_wind_flt_ht[alt_incl & fp])                                                     
+    flight_summary_df$wind_effect_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$wind_effect_10m[alt_incl & fp])  
+    
+    flight_summary_df$wind_effect_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$wind_effect_flt_ht[alt_incl & fp])                                          
+               
     
     }
 
@@ -270,10 +388,17 @@ all(flight.details$flight_id_combined == flight_summary_df$flight_id_combined)
 flight.details <- flight.details[order(flight.details$flight_id_combined),]
 
 
-str(flight.details)
+# str(flight.details)
 
-as.POSIXct(flight.details$trunc_seg_date_time_end[1], origin = "1970-01-01 00:00:00",
-           tz = "UTC")
+# flight.details$trunc_seg_date_time_end <- as.POSIXct(
+#   flight.details$trunc_seg_date_time_end, origin = "1970-01-01 00:00:00",
+#            tz = "UTC")
+# 
+# 
+# flight.details$trunc_seg_date_time_start <- as.POSIXct(
+#   flight.details$trunc_seg_date_time_start, origin = "1970-01-01 00:00:00",
+#   tz = "UTC")
+
 # as.POSIXct()
 flight.details <- flight.details[,-which(names(flight.details) %in% c("trunc_seg_date_time_start","trunc_seg_date_time_end"))]
 
