@@ -5,22 +5,42 @@
 # Load in data -----
 
 # Load flight summary data
-
+load("flight_details.RData")
 
 # Make data subsets ----
 # For using wind @10 m (i.e. ignoring altitude)
-
+flight_10m <- flight.details
 
 # For using altitude data - calculated wind at flight height
 # (excluding those with low Q altitude values)
-
+flight_alt_ok <- flight.details[flight.details$altitude_filter_n >= 1,]
 
 # Using altitude data - but all - calculated wind at flight height
-
+flight_alt <- flight.details
 
 # Frequency distributions for Va for two species (fig. 6 in MS plan) ------
 # Make in ggplot - adapt previous made one for WSC
 # Maybe add dashed lines for Vg, or some such??
+library(ggplot2)
+flight_alt$vg <- sqrt(flight_alt$vg_v*flight_alt$vg_v + flight_alt$vg_u*flight_alt$vg_u)
+ggplot(flight_alt, aes(va_flt_ht, fill = as.factor(species))) +
+  geom_density(alpha = 0.2) +
+  geom_density(data = flight_alt, aes(vg, fill = as.factor(species)
+                                      ),alpha = 0.2, lty = 2)
+# ?geom_density
+
+hist(flight_alt$va_flt_ht[flight_alt$species == "gull"],
+     breaks = 20)
+hist(flight_alt$va_flt_ht[flight_alt$species == "murre"], breaks = 20)
+
+
+hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "gull"],
+     breaks = 20)
+hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "murre"], breaks = 20)
+
+
+
+
 
 # Explore how this differs using the different data sub-sets
 # - maybe add some as suplementary
