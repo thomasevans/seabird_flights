@@ -30,47 +30,49 @@ flight_alt <- flight.details
 # Make in ggplot - adapt previous made one for WSC
 # Maybe add dashed lines for Vg, or some such??
 library(ggplot2)
-
-# Airspeed and ground-speed for two species
-# - for flights with good altitude data only + good quality locations
-ggplot(flight_alt_ok, aes(va_flt_ht_alt_filter,
-                          col = as.factor(species))) +
-  geom_line(stat="density", alpha = 0.6, lwd = 2) +
-  geom_line(stat="density", data = flight_alt_ok, aes(vg_alt_filter, col = as.factor(species)
-  ),alpha = 0.6, lty = 2, lwd = 2) +
-  theme_bw()
-
-# Cross and head wind components for two species
-# - for flights with good altitude data only + good quality locations
-gg <- ggplot(flight_alt_ok, aes(cross_wind_flt_ht_alt_filter,
-                          col = as.factor(species))) +
-  geom_line(stat="density", alpha = 0.6, lwd = 2) +
-  geom_line(stat="density", data = flight_alt_ok, aes(
-    head_wind_flt_ht_alt_filter, col = as.factor(species)
-  ),alpha = 0.6, lty = 2, lwd = 2) +
-  theme_bw(base_size = 14, base_family = "serif")
-?theme_bw
-
-gg2 <- gg +
-  annotate("text",  x= layer_scales(gg)$x$range$range[1],
-           y = layer_scales(gg)$y$range$range[2], label = "(b)", vjust=1, hjust=1)
-#
-
-layer_scales(gg)$y$range$range[2]
-
-# library(cowplot)
-# gg
-# gg + draw_figure_label("(a)", position = "top.left")
-
-hist(flight_alt$va_flt_ht[flight_alt$species == "gull"],  breaks = 20)
-hist(flight_alt$va_flt_ht[flight_alt$species == "murre"], breaks = 20)
+library(cowplot)
 
 
-hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "gull"],
-     breaks = 20)
-hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "murre"], breaks = 20)
-
-
+# # Airspeed and ground-speed for two species
+# # - for flights with good altitude data only + good quality locations
+# ggplot(flight_alt_ok, aes(va_flt_ht_alt_filter,
+#                           col = as.factor(species))) +
+#   geom_line(stat="density", alpha = 0.6, lwd = 2) +
+#   geom_line(stat="density", data = flight_alt_ok, aes(vg_alt_filter, col = as.factor(species)
+#   ),alpha = 0.6, lty = 2, lwd = 2) +
+#   theme_bw()
+# 
+# # Cross and head wind components for two species
+# # - for flights with good altitude data only + good quality locations
+# gg <- ggplot(flight_alt_ok, aes(cross_wind_flt_ht_alt_filter,
+#                           col = as.factor(species))) +
+#   geom_line(stat="density", alpha = 0.6, lwd = 2) +
+#   geom_line(stat="density", data = flight_alt_ok, aes(
+#     head_wind_flt_ht_alt_filter, col = as.factor(species)
+#   ),alpha = 0.6, lty = 2, lwd = 2) +
+#   theme_bw(base_size = 14, base_family = "serif")
+# ?theme_bw
+# 
+# gg2 <- gg +
+#   annotate("text",  x= layer_scales(gg)$x$range$range[1],
+#            y = layer_scales(gg)$y$range$range[2], label = "(b)", vjust=1, hjust=1)
+# #
+# 
+# layer_scales(gg)$y$range$range[2]
+# 
+# # library(cowplot)
+# # gg
+# # gg + draw_figure_label("(a)", position = "top.left")
+# 
+# hist(flight_alt$va_flt_ht[flight_alt$species == "gull"],  breaks = 20)
+# hist(flight_alt$va_flt_ht[flight_alt$species == "murre"], breaks = 20)
+# 
+# 
+# hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "gull"],
+#      breaks = 20)
+# hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "murre"], breaks = 20)
+# 
+# 
 
 
 
@@ -112,7 +114,7 @@ p <-  ggplot(flight_alt_ok, aes(altitude_callib_extm,
 p <- p + theme_new
 p <- p + labs(y = "Density", x = "Altitude (m)")
 p <- p + scale_x_continuous(breaks = seq(-20,120,20), minor_breaks = seq(-50, 150, 10))
-
+p <- p + geom_rug(alpha = 0.3, show.legend = FALSE)
 # Add legend for species in top right corner
 # see: https://rpubs.com/folias/A-simple-example-on-ggplot2-legend-options
 # and: http://stackoverflow.com/a/10747608/1172358
@@ -122,11 +124,11 @@ p <- p + scale_x_continuous(breaks = seq(-20,120,20), minor_breaks = seq(-50, 15
 p <- p +
   annotate("text",  x= layer_scales(p)$x$range$range[2],
            y = layer_scales(p)$y$range$range[1], label = "(a)",
-           vjust=1, hjust=0, size = 8)
+           vjust=0, hjust=0, size = 8)
 plot_altitude <- p
-ggsave("plot_altitude.svg", plot = plot_altitude, width = 4, height = 8, units = "in")
+ggsave("plot_altitude2.svg", plot = plot_altitude, width = 4, height = 8, units = "in")
 
-
+# install.packages("svglite")
 # 2. Va and Vg X species --------
 library(reshape2)
 # Make df in form for ggplot:
@@ -199,12 +201,24 @@ p <- p +
 plot_winds <- p
 ggsave("plot_winds.svg", plot = plot_winds, width = 6, height = 4, units = "in")
 
-
+# plot_winds + geom_rug(alpha = 0.2)
 
 
 # Explore how this differs using the different data sub-sets
 # - maybe add some as suplementary
 
+
+p <-  ggplot(flight_alt, aes(altitude_callib_extm_no_filter,
+                                col = sp_name,
+                                fill = sp_name)) +
+  # geom_line(stat="density", alpha = 0.6, lwd = 2) +
+  geom_density(alpha = 0.4, lwd = 1) +
+  coord_flip()
+p <- p + theme_new
+p <- p + labs(y = "Density", x = "Altitude (m)")
+p <- p + scale_x_continuous(breaks = seq(-20,120,20), minor_breaks = seq(-50, 150, 10))
+p + geom_rug(alpha = 0.2)
+# p + geom_rug()
 
 
 # Statistical analysis -----
