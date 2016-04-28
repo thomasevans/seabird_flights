@@ -37,3 +37,6 @@ flight_details.RData
 flight_details.csv
 gps_plot_test_illustration_g37478.svg
 *.svg
+gull_va_model_fit_table.csv
+murre_va_model_fit_table.csv
+packages_20160428.RData
