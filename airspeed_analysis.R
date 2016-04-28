@@ -244,11 +244,14 @@ ggplot(flight_alt_ok, aes(y = va_flt_ht_alt_filter, x = head_wind_flt_ht_alt_fil
   geom_point(alpha = 0.6, show.legend = TRUE)
 
 
-# Statistical analysis -----
+# ********** Statistical analysis -----
 library(lme4)
 library(arm)
 library(lattice)
 library(MuMIn)
+
+# ***** Statistical analysis - gulls -------
+# * Flight height with filter -----
 
 # Make km version of distance
 flight_alt_ok$trunc_seg_dist_a_b_km <- flight_alt_ok$trunc_seg_dist_a_b / 1000
@@ -428,6 +431,385 @@ names(models.gull.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 
 
 
+# * Flight_height_unfiltered ------
+# Make km version of distance
+flight_alt$trunc_seg_dist_a_b_km <- flight_alt$trunc_seg_dist_a_b / 1000
+hist(flight_alt$trunc_seg_dist_a_b_km)
+
+# Type of wind assistance
+flight_alt$head_wind_flt_ht_type <- sign(flight_alt$head_wind_flt_ht)
+summary(as.factor(flight_alt$head_wind_flt_ht_type))
+flight_alt$head_wind_flt_ht_type <- factor(
+  flight_alt$head_wind_flt_ht_type, levels = c(-1, 1),
+  labels = c("head", "tail")
+)
+summary(flight_alt$head_wind_flt_ht_type)
+
+# Wind assistance absolute value
+flight_alt$head_wind_flt_ht_abs<- abs(flight_alt$head_wind_flt_ht)
+hist(flight_alt$head_wind_flt_ht_abs)
+
+
+# Type of wind side
+flight_alt$cross_wind_flt_ht_type <- sign(flight_alt$cross_wind_flt_ht)
+summary(as.factor(flight_alt$cross_wind_flt_ht_type))
+flight_alt$cross_wind_flt_ht_type <- factor(
+  flight_alt$cross_wind_flt_ht_type, levels = c(-1, 1),
+  labels = c("to left", "to right")
+)
+summary(flight_alt$cross_wind_flt_ht_type)
+
+# Wind assistance absolute value
+flight_alt$cross_wind_flt_ht_abs<- abs(flight_alt$cross_wind_flt_ht)
+hist(flight_alt$cross_wind_flt_ht_abs)
+
+# Species subsets
+flight_alt_gull <- flight_alt[flight_alt$species == "gull",]
+flight_alt_murre <- flight_alt[flight_alt$species == "murre",]
+
+
+# Fit possible models (18):
+models.gull.flt_ht_no_filter <- list()
+
+models.gull.flt_ht_no_filter[[14]] <- glmer(va_flt_ht ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_abs*cross_wind_flt_ht_type +
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[18]] <- glmer(va_flt_ht ~
+                             
+                             cross_wind_flt_ht_abs*cross_wind_flt_ht_type +
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type
+                           + (1|ring_number),
+                           data = flight_alt_gull)
+
+
+models.gull.flt_ht_no_filter[[17]] <- glmer(va_flt_ht ~
+                             
+                             cross_wind_flt_ht_abs + cross_wind_flt_ht_type +
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type
+                           + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[16]] <- glmer(va_flt_ht ~
+                             
+                             cross_wind_flt_ht_type +
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type
+                           + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[15]] <- glmer(va_flt_ht ~
+                             
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type
+                           + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[13]] <- glmer(va_flt_ht ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_abs+cross_wind_flt_ht_type +
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[12]] <- glmer(va_flt_ht ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_type +
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[11]] <- glmer(va_flt_ht ~
+                             trunc_seg_dist_a_b_km +
+                             
+                             head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[10]] <- glmer(va_flt_ht ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_abs*cross_wind_flt_ht_type
+                           
+                           + (1|ring_number),
+                           data = flight_alt_gull)
+
+
+models.gull.flt_ht_no_filter[[9]] <- glmer(va_flt_ht ~
+                            trunc_seg_dist_a_b_km +
+                            cross_wind_flt_ht_abs+cross_wind_flt_ht_type +
+                            (1|ring_number),
+                          data = flight_alt_gull)
+
+
+models.gull.flt_ht_no_filter[[8]] <- glmer(va_flt_ht ~
+                            trunc_seg_dist_a_b_km +
+                            cross_wind_flt_ht_type +
+                            (1|ring_number),
+                          data = flight_alt_gull)
+
+
+models.gull.flt_ht_no_filter[[7]] <- glmer(va_flt_ht ~
+                            head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                            + (1|ring_number),
+                          data = flight_alt_gull)
+
+
+models.gull.flt_ht_no_filter[[6]] <- glmer(va_flt_ht ~
+                            
+                            cross_wind_flt_ht_abs*cross_wind_flt_ht_type +
+                            (1|ring_number),
+                          data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[5]] <- glmer(va_flt_ht ~
+                            
+                            cross_wind_flt_ht_abs+cross_wind_flt_ht_type 
+                          + (1|ring_number),
+                          data = flight_alt_gull)
+
+
+models.gull.flt_ht_no_filter[[4]] <- glmer(va_flt_ht ~
+                            cross_wind_flt_ht_type +
+                            (1|ring_number),
+                          data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[3]] <- glmer(va_flt_ht ~
+                            
+                            cross_wind_flt_ht_abs
+                          + (1|ring_number),
+                          data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[2]] <- glmer(va_flt_ht ~
+                            trunc_seg_dist_a_b_km +
+                            (1|ring_number),
+                          data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[1]] <- glmer(va_flt_ht ~ 1 +
+                            (1|ring_number),
+                          data = flight_alt_gull)
+#
+
+# Standardize models
+models.gull.flt_ht_no_filter.stdz <- list()
+models.gull.flt_ht_no_filter.stdz[[1]] <- models.gull.flt_ht_no_filter[[1]]
+for(i in 2:18){
+  models.gull.flt_ht_no_filter.stdz[[i]] <- standardize(models.gull.flt_ht_no_filter[[i]], standardize.y=FALSE)
+}
+
+models.gull.flt_ht_no_filter.aicc <- sapply(models.gull.flt_ht_no_filter.stdz, AICc)
+models.gull.flt_ht_no_filter.aicc.dif <- models.gull.flt_ht_no_filter.aicc-min(models.gull.flt_ht_no_filter.aicc)
+models.gull.flt_ht_no_filter.r2m <- sapply(models.gull.flt_ht_no_filter.stdz, r.squaredGLMM)
+t(models.gull.flt_ht_no_filter.r2m)
+
+models.gull.flt_ht_no_filter.fit.df <- cbind.data.frame(c(1:18),models.gull.flt_ht_no_filter.aicc,
+                                       models.gull.flt_ht_no_filter.aicc.dif,
+                                       t(models.gull.flt_ht_no_filter.r2m))
+names(models.gull.flt_ht_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+
+
+
+
+
+
+
+# * 10m_unfiltered ------
+# Make km version of distance
+flight_10m$trunc_seg_dist_a_b_km <- flight_10m$trunc_seg_dist_a_b / 1000
+hist(flight_10m$trunc_seg_dist_a_b_km)
+
+# Type of wind assistance
+flight_10m$head_wind_10m_type <- sign(flight_10m$head_wind_10m)
+summary(as.factor(flight_10m$head_wind_10m_type))
+flight_10m$head_wind_10m_type <- factor(
+  flight_10m$head_wind_10m_type, levels = c(-1, 1),
+  labels = c("head", "tail")
+)
+summary(flight_10m$head_wind_10m_type)
+
+# Wind assistance absolute value
+flight_10m$head_wind_10m_abs<- abs(flight_10m$head_wind_10m)
+hist(flight_10m$head_wind_10m_abs)
+
+
+# Type of wind side
+flight_10m$cross_wind_10m_type <- sign(flight_10m$cross_wind_10m)
+summary(as.factor(flight_10m$cross_wind_10m_type))
+flight_10m$cross_wind_10m_type <- factor(
+  flight_10m$cross_wind_10m_type, levels = c(-1, 1),
+  labels = c("to left", "to right")
+)
+summary(flight_10m$cross_wind_10m_type)
+
+# Wind assistance absolute value
+flight_10m$cross_wind_10m_abs<- abs(flight_10m$cross_wind_10m)
+hist(flight_10m$cross_wind_10m_abs)
+
+# Species subsets
+flight_10m_gull <- flight_10m[flight_10m$species == "gull",]
+flight_10m_murre <- flight_10m[flight_10m$species == "murre",]
+
+
+# Fit possible models (18):
+models.gull.10m_no_filter <- list()
+
+models.gull.10m_no_filter[[14]] <- glmer(va_10m ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_10m_abs*cross_wind_10m_type +
+                                              head_wind_10m_abs*head_wind_10m_type +
+                                              + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[18]] <- glmer(va_10m ~
+                                              
+                                              cross_wind_10m_abs*cross_wind_10m_type +
+                                              head_wind_10m_abs*head_wind_10m_type
+                                            + (1|ring_number),
+                                            data = flight_10m_gull)
+
+
+models.gull.10m_no_filter[[17]] <- glmer(va_10m ~
+                                              
+                                              cross_wind_10m_abs + cross_wind_10m_type +
+                                              head_wind_10m_abs*head_wind_10m_type
+                                            + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[16]] <- glmer(va_10m ~
+                                              
+                                              cross_wind_10m_type +
+                                              head_wind_10m_abs*head_wind_10m_type
+                                            + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[15]] <- glmer(va_10m ~
+                                              
+                                              head_wind_10m_abs*head_wind_10m_type
+                                            + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[13]] <- glmer(va_10m ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_10m_abs+cross_wind_10m_type +
+                                              head_wind_10m_abs*head_wind_10m_type +
+                                              + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[12]] <- glmer(va_10m ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_10m_type +
+                                              head_wind_10m_abs*head_wind_10m_type +
+                                              + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[11]] <- glmer(va_10m ~
+                                              trunc_seg_dist_a_b_km +
+                                              
+                                              head_wind_10m_abs*head_wind_10m_type +
+                                              + (1|ring_number),
+                                            data = flight_10m_gull)
+
+models.gull.10m_no_filter[[10]] <- glmer(va_10m ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_10m_abs*cross_wind_10m_type
+                                            
+                                            + (1|ring_number),
+                                            data = flight_10m_gull)
+
+
+models.gull.10m_no_filter[[9]] <- glmer(va_10m ~
+                                             trunc_seg_dist_a_b_km +
+                                             cross_wind_10m_abs+cross_wind_10m_type +
+                                             (1|ring_number),
+                                           data = flight_10m_gull)
+
+
+models.gull.10m_no_filter[[8]] <- glmer(va_10m ~
+                                             trunc_seg_dist_a_b_km +
+                                             cross_wind_10m_type +
+                                             (1|ring_number),
+                                           data = flight_10m_gull)
+
+
+models.gull.10m_no_filter[[7]] <- glmer(va_10m ~
+                                             head_wind_10m_abs*head_wind_10m_type +
+                                             + (1|ring_number),
+                                           data = flight_10m_gull)
+
+
+models.gull.10m_no_filter[[6]] <- glmer(va_10m ~
+                                             
+                                             cross_wind_10m_abs*cross_wind_10m_type +
+                                             (1|ring_number),
+                                           data = flight_10m_gull)
+
+models.gull.10m_no_filter[[5]] <- glmer(va_10m ~
+                                             
+                                             cross_wind_10m_abs+cross_wind_10m_type 
+                                           + (1|ring_number),
+                                           data = flight_10m_gull)
+
+
+models.gull.10m_no_filter[[4]] <- glmer(va_10m ~
+                                             cross_wind_10m_type +
+                                             (1|ring_number),
+                                           data = flight_10m_gull)
+
+models.gull.10m_no_filter[[3]] <- glmer(va_10m ~
+                                             
+                                             cross_wind_10m_abs
+                                           + (1|ring_number),
+                                           data = flight_10m_gull)
+
+models.gull.10m_no_filter[[2]] <- glmer(va_10m ~
+                                             trunc_seg_dist_a_b_km +
+                                             (1|ring_number),
+                                           data = flight_10m_gull)
+
+models.gull.10m_no_filter[[1]] <- glmer(va_10m ~ 1 +
+                                             (1|ring_number),
+                                           data = flight_10m_gull)
+#
+
+# Standardize models
+models.gull.10m_no_filter.stdz <- list()
+models.gull.10m_no_filter.stdz[[1]] <- models.gull.10m_no_filter[[1]]
+for(i in 2:18){
+  models.gull.10m_no_filter.stdz[[i]] <- standardize(models.gull.10m_no_filter[[i]], standardize.y=FALSE)
+}
+
+models.gull.10m_no_filter.aicc <- sapply(models.gull.10m_no_filter.stdz, AICc)
+models.gull.10m_no_filter.aicc.dif <- models.gull.10m_no_filter.aicc-min(models.gull.10m_no_filter.aicc)
+models.gull.10m_no_filter.r2m <- sapply(models.gull.10m_no_filter.stdz, r.squaredGLMM)
+t(models.gull.10m_no_filter.r2m)
+
+models.gull.10m_no_filter.fit.df <- cbind.data.frame(c(1:18),models.gull.10m_no_filter.aicc,
+                                                        models.gull.10m_no_filter.aicc.dif,
+                                                        t(models.gull.10m_no_filter.r2m))
+names(models.gull.10m_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+
+
+# * merge gull glmm summary table -----
+
+names(models.gull.10m_no_filter.fit.df) <- paste(
+  "no_filter_10m_", names(models.gull.10m_no_filter.fit.df), sep = "")
+
+names(models.gull.flt_ht_no_filter.fit.df) <- paste(
+  "no_filter_flt_ht_", names(models.gull.flt_ht_no_filter.fit.df), sep = "")
+
+names(models.gull.fit.df) <- paste(
+  "filter_flt_ht_", names(models.gull.fit.df), sep = "")
+
+# Combine
+models.gull.fit.all <- cbind(models.gull.fit.df,
+                             models.gull.flt_ht_no_filter.fit.df[,2:5],
+                             models.gull.10m_no_filter.fit.df[,2:5])
+
+write.csv(models.gull.fit.all, file = "gull_va_model_fit_table.csv")
+#
+
+summary(models.gull[[2]])
+summary(models.gull.flt_ht_no_filter[[2]])
+summary(models.gull.10m_no_filter[[2]])
 
 
 
@@ -439,25 +821,575 @@ names(models.gull.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 
 
 
+# ***** Statistical analysis - murres -------
+# * Flight height with filter -----
+
+# Fit possible models (18):
+models.murre <- list()
+
+models.murre[[14]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs*cross_wind_flt_ht_alt_filter_type +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+
+# flight_alt_ok_murre$trunc_seg_dist_a_b_km[1:10]
+# flight_alt_ok_murre$cross_wind_flt_ht_alt_filter_abs[1:10]
+# flight_alt_ok_murre$cross_wind_flt_ht_alt_filter_type[1:10]
+# flight_alt_ok_murre$head_wind_flt_ht_alt_filter_abs[1:10]
+# flight_alt_ok_murre$head_wind_flt_ht_alt_filter_type[1:10]
+# flight_alt_ok_murre$ring_number[1:10]
+# flight_alt_ok_murre$va_flt_ht_alt_filter[1:10]
+
+models.murre[[18]] <- glmer(va_flt_ht_alt_filter ~
+                             
+                             cross_wind_flt_ht_alt_filter_abs*cross_wind_flt_ht_alt_filter_type +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type
+                           + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+
+models.murre[[17]] <- glmer(va_flt_ht_alt_filter ~
+                             
+                             cross_wind_flt_ht_alt_filter_abs + cross_wind_flt_ht_alt_filter_type +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type
+                           + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[16]] <- glmer(va_flt_ht_alt_filter ~
+                             
+                             cross_wind_flt_ht_alt_filter_type +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type
+                           + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[15]] <- glmer(va_flt_ht_alt_filter ~
+                             
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type
+                           + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[13]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs+cross_wind_flt_ht_alt_filter_type +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[12]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_type +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[11]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[10]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs*cross_wind_flt_ht_alt_filter_type
+                           
+                           + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+
+models.murre[[9]] <- glmer(va_flt_ht_alt_filter ~
+                            trunc_seg_dist_a_b_km +
+                            cross_wind_flt_ht_alt_filter_abs+cross_wind_flt_ht_alt_filter_type +
+                            (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+
+models.murre[[8]] <- glmer(va_flt_ht_alt_filter ~
+                            trunc_seg_dist_a_b_km +
+                            cross_wind_flt_ht_alt_filter_type +
+                            (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+
+models.murre[[7]] <- glmer(va_flt_ht_alt_filter ~
+                            head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                            + (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+
+models.murre[[6]] <- glmer(va_flt_ht_alt_filter ~
+                            
+                            cross_wind_flt_ht_alt_filter_abs*cross_wind_flt_ht_alt_filter_type +
+                            (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+models.murre[[5]] <- glmer(va_flt_ht_alt_filter ~
+                            
+                            cross_wind_flt_ht_alt_filter_abs+cross_wind_flt_ht_alt_filter_type 
+                          + (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+
+models.murre[[4]] <- glmer(va_flt_ht_alt_filter ~
+                            cross_wind_flt_ht_alt_filter_type +
+                            (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+models.murre[[3]] <- glmer(va_flt_ht_alt_filter ~
+                            
+                            cross_wind_flt_ht_alt_filter_abs
+                          + (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+models.murre[[2]] <- glmer(va_flt_ht_alt_filter ~
+                            trunc_seg_dist_a_b_km +
+                            (1|ring_number),
+                          data = flight_alt_ok_murre)
+
+models.murre[[1]] <- glmer(va_flt_ht_alt_filter ~ 1 +
+                            (1|ring_number),
+                          data = flight_alt_ok_murre)
+#
+
+# Standardize models
+models.murre.stdz <- list()
+models.murre.stdz[[1]] <- models.murre[[1]]
+for(i in 2:18){
+  models.murre.stdz[[i]] <- standardize(models.murre[[i]], standardize.y=FALSE)
+}
+
+models.murre.aicc <- sapply(models.murre.stdz, AICc)
+models.murre.aicc.dif <- models.murre.aicc-min(models.murre.aicc)
+models.murre.r2m <- sapply(models.murre.stdz, r.squaredGLMM)
+t(models.murre.r2m)
+
+models.murre.fit.df <- cbind.data.frame(c(1:18),models.murre.aicc,
+                                       models.murre.aicc.dif,
+                                       t(models.murre.r2m))
+names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+
+
+
+
+
+# * Flight_height_unfiltered ------
+
+# Fit possible models (18):
+models.murre.flt_ht_no_filter <- list()
+
+models.murre.flt_ht_no_filter[[14]] <- glmer(va_flt_ht ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_flt_ht_abs*cross_wind_flt_ht_type +
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[18]] <- glmer(va_flt_ht ~
+                                              
+                                              cross_wind_flt_ht_abs*cross_wind_flt_ht_type +
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type
+                                            + (1|ring_number),
+                                            data = flight_alt_murre)
+
+
+models.murre.flt_ht_no_filter[[17]] <- glmer(va_flt_ht ~
+                                              
+                                              cross_wind_flt_ht_abs + cross_wind_flt_ht_type +
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type
+                                            + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[16]] <- glmer(va_flt_ht ~
+                                              
+                                              cross_wind_flt_ht_type +
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type
+                                            + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[15]] <- glmer(va_flt_ht ~
+                                              
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type
+                                            + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[13]] <- glmer(va_flt_ht ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_flt_ht_abs+cross_wind_flt_ht_type +
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[12]] <- glmer(va_flt_ht ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_flt_ht_type +
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[11]] <- glmer(va_flt_ht ~
+                                              trunc_seg_dist_a_b_km +
+                                              
+                                              head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[10]] <- glmer(va_flt_ht ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_flt_ht_abs*cross_wind_flt_ht_type
+                                            
+                                            + (1|ring_number),
+                                            data = flight_alt_murre)
+
+
+models.murre.flt_ht_no_filter[[9]] <- glmer(va_flt_ht ~
+                                             trunc_seg_dist_a_b_km +
+                                             cross_wind_flt_ht_abs+cross_wind_flt_ht_type +
+                                             (1|ring_number),
+                                           data = flight_alt_murre)
+
+
+models.murre.flt_ht_no_filter[[8]] <- glmer(va_flt_ht ~
+                                             trunc_seg_dist_a_b_km +
+                                             cross_wind_flt_ht_type +
+                                             (1|ring_number),
+                                           data = flight_alt_murre)
+
+
+models.murre.flt_ht_no_filter[[7]] <- glmer(va_flt_ht ~
+                                             head_wind_flt_ht_abs*head_wind_flt_ht_type +
+                                             + (1|ring_number),
+                                           data = flight_alt_murre)
+
+
+models.murre.flt_ht_no_filter[[6]] <- glmer(va_flt_ht ~
+                                             
+                                             cross_wind_flt_ht_abs*cross_wind_flt_ht_type +
+                                             (1|ring_number),
+                                           data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[5]] <- glmer(va_flt_ht ~
+                                             
+                                             cross_wind_flt_ht_abs+cross_wind_flt_ht_type 
+                                           + (1|ring_number),
+                                           data = flight_alt_murre)
+
+
+models.murre.flt_ht_no_filter[[4]] <- glmer(va_flt_ht ~
+                                             cross_wind_flt_ht_type +
+                                             (1|ring_number),
+                                           data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[3]] <- glmer(va_flt_ht ~
+                                             
+                                             cross_wind_flt_ht_abs
+                                           + (1|ring_number),
+                                           data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[2]] <- glmer(va_flt_ht ~
+                                             trunc_seg_dist_a_b_km +
+                                             (1|ring_number),
+                                           data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[1]] <- glmer(va_flt_ht ~ 1 +
+                                             (1|ring_number),
+                                           data = flight_alt_murre)
+#
+
+# Standardize models
+models.murre.flt_ht_no_filter.stdz <- list()
+models.murre.flt_ht_no_filter.stdz[[1]] <- models.murre.flt_ht_no_filter[[1]]
+for(i in 2:18){
+  models.murre.flt_ht_no_filter.stdz[[i]] <- standardize(models.murre.flt_ht_no_filter[[i]], standardize.y=FALSE)
+}
+
+models.murre.flt_ht_no_filter.aicc <- sapply(models.murre.flt_ht_no_filter.stdz, AICc)
+models.murre.flt_ht_no_filter.aicc.dif <- models.murre.flt_ht_no_filter.aicc-min(models.murre.flt_ht_no_filter.aicc)
+models.murre.flt_ht_no_filter.r2m <- sapply(models.murre.flt_ht_no_filter.stdz, r.squaredGLMM)
+t(models.murre.flt_ht_no_filter.r2m)
+
+models.murre.flt_ht_no_filter.fit.df <- cbind.data.frame(c(1:18),models.murre.flt_ht_no_filter.aicc,
+                                                        models.murre.flt_ht_no_filter.aicc.dif,
+                                                        t(models.murre.flt_ht_no_filter.r2m))
+names(models.murre.flt_ht_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 
 
 
 
 
 
-# Make model comparison tables for 3 data sub-sets for 2 species -----
-# (table 4 in MS plan)
-# Include:
-# - AIC (or AICc) + delta AIC from best model
-# - R2 - both components
 
-# Calculate p values for dropping of terms from lowest AIC model
+# * 10m_unfiltered ------
+
+
+# Fit possible models (18):
+models.murre.10m_no_filter <- list()
+
+models.murre.10m_no_filter[[14]] <- glmer(va_10m ~
+                                           trunc_seg_dist_a_b_km +
+                                           cross_wind_10m_abs*cross_wind_10m_type +
+                                           head_wind_10m_abs*head_wind_10m_type +
+                                           + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[18]] <- glmer(va_10m ~
+                                           
+                                           cross_wind_10m_abs*cross_wind_10m_type +
+                                           head_wind_10m_abs*head_wind_10m_type
+                                         + (1|ring_number),
+                                         data = flight_10m_murre)
+
+
+models.murre.10m_no_filter[[17]] <- glmer(va_10m ~
+                                           
+                                           cross_wind_10m_abs + cross_wind_10m_type +
+                                           head_wind_10m_abs*head_wind_10m_type
+                                         + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[16]] <- glmer(va_10m ~
+                                           
+                                           cross_wind_10m_type +
+                                           head_wind_10m_abs*head_wind_10m_type
+                                         + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[15]] <- glmer(va_10m ~
+                                           
+                                           head_wind_10m_abs*head_wind_10m_type
+                                         + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[13]] <- glmer(va_10m ~
+                                           trunc_seg_dist_a_b_km +
+                                           cross_wind_10m_abs+cross_wind_10m_type +
+                                           head_wind_10m_abs*head_wind_10m_type +
+                                           + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[12]] <- glmer(va_10m ~
+                                           trunc_seg_dist_a_b_km +
+                                           cross_wind_10m_type +
+                                           head_wind_10m_abs*head_wind_10m_type +
+                                           + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[11]] <- glmer(va_10m ~
+                                           trunc_seg_dist_a_b_km +
+                                           
+                                           head_wind_10m_abs*head_wind_10m_type +
+                                           + (1|ring_number),
+                                         data = flight_10m_murre)
+
+models.murre.10m_no_filter[[10]] <- glmer(va_10m ~
+                                           trunc_seg_dist_a_b_km +
+                                           cross_wind_10m_abs*cross_wind_10m_type
+                                         
+                                         + (1|ring_number),
+                                         data = flight_10m_murre)
+
+
+models.murre.10m_no_filter[[9]] <- glmer(va_10m ~
+                                          trunc_seg_dist_a_b_km +
+                                          cross_wind_10m_abs+cross_wind_10m_type +
+                                          (1|ring_number),
+                                        data = flight_10m_murre)
+
+
+models.murre.10m_no_filter[[8]] <- glmer(va_10m ~
+                                          trunc_seg_dist_a_b_km +
+                                          cross_wind_10m_type +
+                                          (1|ring_number),
+                                        data = flight_10m_murre)
+
+
+models.murre.10m_no_filter[[7]] <- glmer(va_10m ~
+                                          head_wind_10m_abs*head_wind_10m_type +
+                                          + (1|ring_number),
+                                        data = flight_10m_murre)
+
+
+models.murre.10m_no_filter[[6]] <- glmer(va_10m ~
+                                          
+                                          cross_wind_10m_abs*cross_wind_10m_type +
+                                          (1|ring_number),
+                                        data = flight_10m_murre)
+
+models.murre.10m_no_filter[[5]] <- glmer(va_10m ~
+                                          
+                                          cross_wind_10m_abs+cross_wind_10m_type 
+                                        + (1|ring_number),
+                                        data = flight_10m_murre)
+
+
+models.murre.10m_no_filter[[4]] <- glmer(va_10m ~
+                                          cross_wind_10m_type +
+                                          (1|ring_number),
+                                        data = flight_10m_murre)
+
+models.murre.10m_no_filter[[3]] <- glmer(va_10m ~
+                                          
+                                          cross_wind_10m_abs
+                                        + (1|ring_number),
+                                        data = flight_10m_murre)
+
+models.murre.10m_no_filter[[2]] <- glmer(va_10m ~
+                                          trunc_seg_dist_a_b_km +
+                                          (1|ring_number),
+                                        data = flight_10m_murre)
+
+models.murre.10m_no_filter[[1]] <- glmer(va_10m ~ 1 +
+                                          (1|ring_number),
+                                        data = flight_10m_murre)
+#
+
+# Standardize models
+models.murre.10m_no_filter.stdz <- list()
+models.murre.10m_no_filter.stdz[[1]] <- models.murre.10m_no_filter[[1]]
+for(i in 2:18){
+  models.murre.10m_no_filter.stdz[[i]] <- standardize(models.murre.10m_no_filter[[i]], standardize.y=FALSE)
+}
+
+models.murre.10m_no_filter.aicc <- sapply(models.murre.10m_no_filter.stdz, AICc)
+models.murre.10m_no_filter.aicc.dif <- models.murre.10m_no_filter.aicc-min(models.murre.10m_no_filter.aicc)
+models.murre.10m_no_filter.r2m <- sapply(models.murre.10m_no_filter.stdz, r.squaredGLMM)
+t(models.murre.10m_no_filter.r2m)
+
+models.murre.10m_no_filter.fit.df <- cbind.data.frame(c(1:18),models.murre.10m_no_filter.aicc,
+                                                     models.murre.10m_no_filter.aicc.dif,
+                                                     t(models.murre.10m_no_filter.r2m))
+names(models.murre.10m_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+
+
+# * merge murre glmm summary table -----
+
+names(models.murre.10m_no_filter.fit.df) <- paste(
+  "no_filter_10m_", names(models.murre.10m_no_filter.fit.df), sep = "")
+
+names(models.murre.flt_ht_no_filter.fit.df) <- paste(
+  "no_filter_flt_ht_", names(models.murre.flt_ht_no_filter.fit.df), sep = "")
+
+names(models.murre.fit.df) <- paste(
+  "filter_flt_ht_", names(models.murre.fit.df), sep = "")
+
+# Combine
+models.murre.fit.all <- cbind(models.murre.fit.df,
+                             models.murre.flt_ht_no_filter.fit.df[,2:5],
+                             models.murre.10m_no_filter.fit.df[,2:5])
+
+write.csv(models.murre.fit.all, file = "murre_va_model_fit_table.csv")
+#
+
+summary(models.murre[[2]])
+summary(models.murre.flt_ht_no_filter[[2]])
+summary(models.murre.10m_no_filter[[2]])
+
+
+
+
+
+
+# *********** Coef + p-values -----------
+# Calculate p values for dropping of terms from lowest AIC model -----
+murre_model_va <- models.murre[[7]]
+lbbg_model_va <- models.gull[[14]]
+
+
+# anova(lbbg_model_va_ml)
+# # ?drop1
+# ?anova.merMod
+# qqmath(murre_model_va)
+# 
+
+
+# using test from help page:
+?drop1.merMod()
+
+# install.packages("pbkrtest")
+
+library(pbkrtest)
+
+KRSumFun <- function(object, objectDrop, ...) {
+  krnames <- c("ndf","ddf","Fstat","p.value","F.scaling")
+  r <- if (missing(objectDrop)) {
+    setNames(rep(NA,length(krnames)),krnames)
+  } else {
+    krtest <- KRmodcomp(object,objectDrop)
+    unlist(krtest$stats[krnames])
+  }
+  attr(r,"method") <- c("Kenward-Roger via pbkrtest package")
+  r
+}
+
+# P values for gull model
+drop1(lbbg_model_va,test="user",sumFun=KRSumFun)
+
+# p values for murre model
+drop1(murre_model_va,test="user",sumFun=KRSumFun)
+
+# drop1(models.gull.stdz[[14]],test="user",sumFun=KRSumFun)
+
+# Cite: Halekoh, U., and Højsgaard, S. (2014). A kenward-roger approximation and parametric bootstrap methods for tests in linear mixed models–the R package pbkrtest. Journal of Statistical Software 59, 1–30.
+
+
+# "The result could reported as a Kenward-Roger corrected test with F(1, 118.5) = 16.17, p = .0001024"
+# From: https://seriousstats.wordpress.com/tag/kenward-roger-approximation/
+
+
+# Confidence intervals + coeficients
+lbbg_model_va_coef <- summary(lbbg_model_va)$coef[, 1]
+lbbg_model_va_ci <- confint(lbbg_model_va, method="Wald")
+lbbg_model_va_par_df <- cbind.data.frame(lbbg_model_va_coef,lbbg_model_va_ci[-c(1:2),])
+
+murre_model_va_coef <- summary(murre_model_va)$coef[, 1]
+murre_model_va_ci <- confint(murre_model_va, method="Wald")
+murre_model_va_par_df <- cbind.data.frame(murre_model_va_coef,murre_model_va_ci[-c(1:2),])
 
 
 # Make forest plot to illustrate final model - fig 7 in ms plan -----
 # Maybe do for all 3 data subsets depending on how much they differ
 # Work out how to combine the two species in a single figure - different colours
 # Maybe add vertical dashed lines for calculated max range and minimum power speeds
+
+
+
+
+
+
+# Adapted from: https://gist.github.com/dsparks/4332698
+
+mod_gull_frame <- data.frame(Variable = rownames(summary(lbbg_model_va)$coef),
+                          Coefficient = summary(lbbg_model_va)$coef[, 1],
+                          CI_low = confint(lbbg_model_va, method="Wald")[-c(1:2), 1],
+                          CI_high = confint(lbbg_model_va, method="Wald")[-c(1:2), 2],
+                          modelName = "Lesser black-backed gulls")
+mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef),
+                          Coefficient = summary(murre_model_va)$coef[, 1],
+                          CI_low = confint(murre_model_va, method="Wald")[-c(1:2), 1],
+                          CI_high = confint(murre_model_va, method="Wald")[-c(1:2), 2],
+                          modelName = "Common murres")
+# Combine these data.frames
+allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
+
+str(allModelFrame)
+allModelFrame$modelName <-  factor(allModelFrame$modelName,
+                                   levels(allModelFrame$modelName)[c(2,1)])
+
+zp1 <- ggplot(allModelFrame, aes(colour = modelName))
+zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2)
+zp1 <- zp1 + geom_linerange(aes(x = Variable,
+                                ymin = CI_low,
+                                ymax = CI_high),
+                            lwd = 1, position = position_dodge(width = 1/2))
+zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
+                                 ymin = CI_low,
+                                 ymax = CI_high),
+                             lwd = 1/2, position = position_dodge(width = 1/2),
+                             shape = 21, fill = "WHITE")
+zp1 <- zp1 + coord_flip() 
+zp1 + theme_new + ylim(-4,2.5)
 
 
 
