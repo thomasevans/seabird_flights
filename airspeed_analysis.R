@@ -33,47 +33,6 @@ library(ggplot2)
 library(cowplot)
 
 
-# # Airspeed and ground-speed for two species
-# # - for flights with good altitude data only + good quality locations
-# ggplot(flight_alt_ok, aes(va_flt_ht_alt_filter,
-#                           col = as.factor(species))) +
-#   geom_line(stat="density", alpha = 0.6, lwd = 2) +
-#   geom_line(stat="density", data = flight_alt_ok, aes(vg_alt_filter, col = as.factor(species)
-#   ),alpha = 0.6, lty = 2, lwd = 2) +
-#   theme_bw()
-# 
-# # Cross and head wind components for two species
-# # - for flights with good altitude data only + good quality locations
-# gg <- ggplot(flight_alt_ok, aes(cross_wind_flt_ht_alt_filter,
-#                           col = as.factor(species))) +
-#   geom_line(stat="density", alpha = 0.6, lwd = 2) +
-#   geom_line(stat="density", data = flight_alt_ok, aes(
-#     head_wind_flt_ht_alt_filter, col = as.factor(species)
-#   ),alpha = 0.6, lty = 2, lwd = 2) +
-#   theme_bw(base_size = 14, base_family = "serif")
-# ?theme_bw
-# 
-# gg2 <- gg +
-#   annotate("text",  x= layer_scales(gg)$x$range$range[1],
-#            y = layer_scales(gg)$y$range$range[2], label = "(b)", vjust=1, hjust=1)
-# #
-# 
-# layer_scales(gg)$y$range$range[2]
-# 
-# # library(cowplot)
-# # gg
-# # gg + draw_figure_label("(a)", position = "top.left")
-# 
-# hist(flight_alt$va_flt_ht[flight_alt$species == "gull"],  breaks = 20)
-# hist(flight_alt$va_flt_ht[flight_alt$species == "murre"], breaks = 20)
-# 
-# 
-# hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "gull"],
-#      breaks = 20)
-# hist(flight_alt_ok$va_flt_ht[flight_alt_ok$species == "murre"], breaks = 20)
-# 
-# 
-
 
 
 # *** Preparing a summary figure for flight behaviour recorded ------
@@ -1357,18 +1316,19 @@ murre_model_va_par_df <- cbind.data.frame(murre_model_va_coef,murre_model_va_ci[
 
 
 
+library(cowplot)
 
 # Adapted from: https://gist.github.com/dsparks/4332698
 
-mod_gull_frame <- data.frame(Variable = rownames(summary(lbbg_model_va)$coef),
-                          Coefficient = summary(lbbg_model_va)$coef[, 1],
-                          CI_low = confint(lbbg_model_va, method="Wald")[-c(1:2), 1],
-                          CI_high = confint(lbbg_model_va, method="Wald")[-c(1:2), 2],
+mod_gull_frame <- data.frame(Variable = rownames(summary(lbbg_model_va)$coef)[-1],
+                          Coefficient = summary(lbbg_model_va)$coef[-1, 1],
+                          CI_low = confint(lbbg_model_va, method="Wald")[-c(1:3), 1],
+                          CI_high = confint(lbbg_model_va, method="Wald")[-c(1:3), 2],
                           modelName = "Lesser black-backed gulls")
-mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef),
-                          Coefficient = summary(murre_model_va)$coef[, 1],
-                          CI_low = confint(murre_model_va, method="Wald")[-c(1:2), 1],
-                          CI_high = confint(murre_model_va, method="Wald")[-c(1:2), 2],
+mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef)[-1],
+                          Coefficient = summary(murre_model_va)$coef[-1, 1],
+                          CI_low = confint(murre_model_va, method="Wald")[-c(1:3), 1],
+                          CI_high = confint(murre_model_va, method="Wald")[-c(1:3), 2],
                           modelName = "Common murres")
 # Combine these data.frames
 allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
@@ -1377,21 +1337,34 @@ str(allModelFrame)
 allModelFrame$modelName <-  factor(allModelFrame$modelName,
                                    levels(allModelFrame$modelName)[c(2,1)])
 
+
+
 zp1 <- ggplot(allModelFrame, aes(colour = modelName))
 zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2)
 zp1 <- zp1 + geom_linerange(aes(x = Variable,
                                 ymin = CI_low,
                                 ymax = CI_high),
-                            lwd = 1, position = position_dodge(width = 1/2))
+                            lwd = 1, position = position_dodge(width = 1/2),
+                            show.legend = FALSE)
 zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                                  ymin = CI_low,
                                  ymax = CI_high),
                              lwd = 1/2, position = position_dodge(width = 1/2),
-                             shape = 21, fill = "WHITE")
+                             shape = 21, fill = "WHITE",
+                             show.legend = FALSE)
 zp1 <- zp1 + coord_flip() 
-zp1 + theme_new + ylim(-4,2.5)
+# zp1 <- zp1 + theme_new + ylim(-4,2.5)
+zp1 <- zp1 + theme(legend.position = c(0, 1))
+zp1 <- zp1 + scale_y_continuous(breaks = seq(-4, 4, 1),
+                                minor_breaks = seq(-4, 4, 0.5),
+                                limits = c(-4, 2.5))
+# ?scale_y_continuous
+zp1 <- zp1 + theme(axis.text = element_text(size = 12))
+zp1 <- zp1 + labs(x = "")
 
-
+ggsave(zp1, filename = "va_model_coef_fig.svg", width = 12, height = 6,
+       units = "in")
+# ?ggsave
 
 # Figures to illustrate model predictions - fig 8 in ms plan ------
 # Similar style to fig 4 or sup file 4 in Sapir et al. 2014 study
@@ -1406,11 +1379,174 @@ zp1 + theme_new + ylim(-4,2.5)
 # - See: http://stackoverflow.com/a/27571412/1172358
 
 
+wind.side <- seq(-10,10,.1)
+wind.assist <- seq(-10,10,.1)
+dist.median <- median(flight_alt_ok$trunc_seg_dist_a_b_km[flight_alt_ok$species == "gull"])
+
+gg <- expand.grid(x=wind.assist,y=wind.side)
+
+
+lbbg.new.data.df <- cbind.data.frame(
+  trunc_seg_dist_a_b_km = dist.median,
+  cross_wind_flt_ht_alt_filter_abs = abs(gg$y),
+  cross_wind_flt_ht_alt_filter_type = factor(
+            sign(gg$y), levels = c(-1, 1),
+            labels = c("to left", "to right")),
+  head_wind_flt_ht_alt_filter_abs = abs(gg$x),
+  head_wind_flt_ht_alt_filter_type = factor(
+    sign(gg$x), levels = c(-1, 1),
+    labels = c("head", "tail"))
+)
+
+
+
+pred.va <- predict(lbbg_model_va,
+                   newdata = lbbg.new.data.df,
+                   re.form=NA)
+
+
+
+gg$z <- with(gg,pred.va)      # need long format for ggplot
+summary(is.na(gg$z))
+range(gg$z, na.rm = TRUE)
+library(RColorBrewer)               #for brewer.pal()
+library(scales)
+
+
+
+v <- seq(10, 20, 0.5) 
+gg$z2 <- findInterval(gg$z, v)
+gg$z3 <- v[gg$z2]
+
+
+flight_alt_ok_gg <- data.frame(
+  x = flight_alt_ok_gull$head_wind_flt_ht_alt_filter,
+  y = flight_alt_ok_gull$cross_wind_flt_ht_alt_filter,
+  z = flight_alt_ok_gull$va_flt_ht_alt_filter,
+  z2 = findInterval(flight_alt_ok_gull$va_flt_ht_alt_filter, v)
+)
+
+
+lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+lab.3 <- expression("Vw"["c"]+~"(to right)")
+lab.4 <- expression("Vw"["c"]-~"(to left)")
+
+
+ggplot(gg,aes(x,y)) + 
+  geom_raster(aes(fill=z3))+
+  scale_fill_gradient2(low = muted("blue"), mid = "white",
+                       high = muted("red"), midpoint = median(
+                         flight_alt_ok_gg$z, na.rm = TRUE
+                       ), space = "Lab",
+                       na.value = "grey50", guide = "colourbar") +
+  scale_x_continuous(expand=c(0,0))+
+  scale_y_continuous(expand=c(0,0))+
+  coord_fixed() +
+  geom_point(data = flight_alt_ok_gg,
+             aes(fill = z), 
+             shape=21, alpha=1,na.rm=T, size=3) +
+  labs( x = expression("Wind assitance ("~ms^{-1}~")"),
+        y = expression("Cross wind ("~ms^{-1}~")"),
+        fill= expression("Va ("~ms^{-1}~")"),
+        parse=TRUE) +
+  theme_new +
+  theme(legend.title = element_text(size = 14)) +
+  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
+            x = c(1, 1 , 8, -6),
+            y = c(-10, 9, 0, 0),
+           parse=TRUE,
+           colour = "black",
+           size = 6,
+           vjust = 0) 
+
+
+ggsave("va_gull_predication.svg", width = 8, height = 8, units = "in")
 
 
 
 
 
+# For murres
+
+dist.median <- median(flight_alt_ok_murre$trunc_seg_dist_a_b_km)
+gg <- expand.grid(x=wind.assist,y=wind.side)
+
+
+
+murre.new.data.df <- cbind.data.frame(
+  trunc_seg_dist_a_b_km = dist.median,
+  cross_wind_flt_ht_alt_filter_abs = abs(gg$y),
+  cross_wind_flt_ht_alt_filter_type = factor(
+    sign(gg$y), levels = c(-1, 1),
+    labels = c("to left", "to right")),
+  head_wind_flt_ht_alt_filter_abs = abs(gg$x),
+  head_wind_flt_ht_alt_filter_type = factor(
+    sign(gg$x), levels = c(-1, 1),
+    labels = c("head", "tail"))
+)
+
+
+
+pred.va <- predict(murre_model_va,
+                   newdata = murre.new.data.df,
+                   re.form=NA)
+summary(pred.va)
+
+
+gg$z <- with(gg, pred.va)      # need long format for ggplot
+summary(is.na(gg$z))
+range(gg$z, na.rm = TRUE)
+
+v <- seq(10, 25, 0.5) 
+gg$z2 <- findInterval(gg$z, v)
+gg$z3 <- v[gg$z2]
+
+
+flight_alt_ok_gg <- data.frame(
+  x = flight_alt_ok_murre$head_wind_flt_ht_alt_filter,
+  y = flight_alt_ok_murre$cross_wind_flt_ht_alt_filter,
+  z = flight_alt_ok_murre$va_flt_ht_alt_filter,
+  z2 = findInterval(flight_alt_ok_murre$va_flt_ht_alt_filter, v)
+)
+
+
+lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+lab.3 <- expression("Vw"["c"]+~"(to right)")
+lab.4 <- expression("Vw"["c"]-~"(to left)")
+
+
+ggplot(gg,aes(x,y)) + 
+  geom_raster(aes(fill=z3))+
+  scale_fill_gradient2(low = muted("blue"), mid = "white",
+                       high = muted("red"), midpoint = median(
+                         flight_alt_ok_gg$z, na.rm = TRUE
+                       ), space = "Lab",
+                       na.value = "grey50", guide = "colourbar") +
+  scale_x_continuous(expand=c(0,0))+
+  scale_y_continuous(expand=c(0,0))+
+  coord_fixed() +
+  geom_hline(yintercept=0, lwd = 1, col ="grey50" ) +
+  geom_point(data = flight_alt_ok_gg,
+             aes(fill = z), 
+             shape=21, alpha=1,na.rm=T, size=3) +
+  labs( x = expression("Wind assitance ("~ms^{-1}~")"),
+        y = expression("Cross wind ("~ms^{-1}~")"),
+        fill= expression("Va ("~ms^{-1}~")"),
+        parse=TRUE) +
+  theme_new +
+  theme(legend.title = element_text(size = 14)) +
+  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c(0, 0 , 7, -7),
+           y = c(-10, 9, 0, 0),
+           parse=TRUE,
+           colour = "black",
+           size = 6,
+           vjust = 0) 
+
+
+ggsave("va_murre_predication.svg", width = 8, height = 8, units = "in")
 
 
 
