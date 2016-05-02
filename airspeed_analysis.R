@@ -1337,7 +1337,14 @@ str(allModelFrame)
 allModelFrame$modelName <-  factor(allModelFrame$modelName,
                                    levels(allModelFrame$modelName)[c(2,1)])
 
+levels(allModelFrame$Variable)
 
+
+# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+# lab.3 <- expression("Vw"["c"]~"Absolute speed")
+# lab.4 <- expression("Vw"["c"]-~"(to left)")
+# parse=TRUE
 
 zp1 <- ggplot(allModelFrame, aes(colour = modelName))
 zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2)
@@ -1351,18 +1358,35 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                                  ymax = CI_high),
                              lwd = 1/2, position = position_dodge(width = 1/2),
                              shape = 21, fill = "WHITE",
-                             show.legend = FALSE)
+                             show.legend = TRUE)
+zp1 <- zp1 + scale_x_discrete("",
+                              labels = c(expression("Vw"["c"]~" speed"),
+                                         expression("Vw"["c"]~" speed: type (to right)"),
+                                         expression("Vw"["c"]~" type (to right)"),
+                                         expression("Vw"["s"]~" speed"),
+                                         expression("Vw"["s"]~" speed: type (tail-wind)"),
+                                         expression("Vw"["s"]~" type (tail-wind)"),
+                                         "Distance (km)"
+                                         ))
+
+# expression("Vw"["s"]+~"(tail-wind)")
+
 zp1 <- zp1 + coord_flip() 
 # zp1 <- zp1 + theme_new + ylim(-4,2.5)
-zp1 <- zp1 + theme(legend.position = c(0, 1))
 zp1 <- zp1 + scale_y_continuous(breaks = seq(-4, 4, 1),
                                 minor_breaks = seq(-4, 4, 0.5),
                                 limits = c(-4, 2.5))
 # ?scale_y_continuous
-zp1 <- zp1 + theme(axis.text = element_text(size = 12))
-zp1 <- zp1 + labs(x = "")
-
-ggsave(zp1, filename = "va_model_coef_fig.svg", width = 12, height = 6,
+# zp1 <- zp1 + theme(axis.text = element_text(size = 12))
+zp1 <- zp1 +  theme_new
+zp1 <- zp1 + theme(legend.position = c(0.5, 0.3))
+zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Va ["~ms^{-1}~"])"))
+zp1 <- zp1 +
+  annotate("text",  x= layer_scales(zp1)$x$range$range[7],
+           y = layer_scales(zp1)$y$range$range[1], label = "(a)",
+           vjust=-1, hjust=2, size = 5)
+zp1
+ggsave(zp1, filename = "va_model_coef_fig.svg", width = 8, height = 8,
        units = "in")
 # ?ggsave
 
@@ -1433,7 +1457,7 @@ lab.3 <- expression("Vw"["c"]+~"(to right)")
 lab.4 <- expression("Vw"["c"]-~"(to left)")
 
 
-ggplot(gg,aes(x,y)) + 
+p <- ggplot(gg,aes(x,y)) + 
   geom_raster(aes(fill=z3))+
   scale_fill_gradient2(low = muted("blue"), mid = "white",
                        high = muted("red"), midpoint = median(
@@ -1457,9 +1481,11 @@ ggplot(gg,aes(x,y)) +
             y = c(-10, 9, 0, 0),
            parse=TRUE,
            colour = "black",
-           size = 6,
+           size = 5,
            vjust = 0) 
-
+ p <- p + annotate("text",  x= -9,
+           y = 9, label = "(b)",
+           vjust=-1, hjust=0, size = 5)
 
 ggsave("va_gull_predication.svg", width = 8, height = 8, units = "in")
 
@@ -1517,7 +1543,7 @@ lab.3 <- expression("Vw"["c"]+~"(to right)")
 lab.4 <- expression("Vw"["c"]-~"(to left)")
 
 
-ggplot(gg,aes(x,y)) + 
+p <- ggplot(gg,aes(x,y)) + 
   geom_raster(aes(fill=z3))+
   scale_fill_gradient2(low = muted("blue"), mid = "white",
                        high = muted("red"), midpoint = median(
@@ -1542,8 +1568,12 @@ ggplot(gg,aes(x,y)) +
            y = c(-10, 9, 0, 0),
            parse=TRUE,
            colour = "black",
-           size = 6,
+           size = 5,
            vjust = 0) 
+
+p <- p + annotate("text",  x= -9,
+                  y = 9, label = "(c)",
+                  vjust=-1, hjust=0, size = 5)
 
 
 ggsave("va_murre_predication.svg", width = 8, height = 8, units = "in")
