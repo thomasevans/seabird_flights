@@ -40,3 +40,6 @@ gps_plot_test_illustration_g37478.svg
 gull_va_model_fit_table.csv
 murre_va_model_fit_table.csv
 packages_20160428.RData
+altitude_analysis.R
+#Ignore csv files
+*.csv
