@@ -1256,6 +1256,20 @@ murre_model_va <- models.murre[[7]]
 lbbg_model_va <- models.gull[[14]]
 
 
+lbbg_model_va <- models.gull.flt_ht_no_filter[[14]]
+
+
+lbbg_model_va <- models.gull.10m_no_filter[[14]]
+
+
+murre_model_va <- models.murre.flt_ht_no_filter[[7]]
+
+
+murre_model_va <- models.murre.10m_no_filter[[7]]
+
+
+
+
 # anova(lbbg_model_va_ml)
 # # ?drop1
 # ?anova.merMod
@@ -1301,6 +1315,8 @@ drop1(murre_model_va,test="user",sumFun=KRSumFun)
 lbbg_model_va_coef <- summary(lbbg_model_va)$coef[, 1]
 lbbg_model_va_ci <- confint(lbbg_model_va, method="Wald")
 lbbg_model_va_par_df <- cbind.data.frame(lbbg_model_va_coef,lbbg_model_va_ci[-c(1:2),])
+
+# show(lbbg_model_va_par_df)
 
 murre_model_va_coef <- summary(murre_model_va)$coef[, 1]
 murre_model_va_ci <- confint(murre_model_va, method="Wald")
