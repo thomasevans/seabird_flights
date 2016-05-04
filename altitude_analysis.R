@@ -449,6 +449,16 @@ write.csv(models.gull.fit.all, file = "gull_alt_model_fit_table.csv")
 
 # * Flight height with filter -----
 
+# sort(flight_alt_ok_murre$altitude_callib_extm)
+flight_alt_ok_murre_original <- flight_alt_ok_murre
+flight_alt_ok_murre <- flight_alt_ok_murre_original[
+  !(flight_alt_ok_murre_original$flight_id_combined %in% c("m1228", "m623", "m781")),]
+
+
+# flight_alt_ok_murre <- flight_alt_ok_murre[flight_alt_ok_murre$altitude_callib_extm < 50,]
+
+# hist(flight_alt_ok_murre_original$altitude_callib_extm, breaks = 40)
+
 # Fit possible models (18):
 models.murre <- list()
 
@@ -589,6 +599,9 @@ models.murre.fit.df <- cbind.data.frame(c(1:17),models.murre.aicc,
                                        t(models.murre.r2m))
 names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 
+plot(models.murre[[14]])
+qqmath(models.murre[[14]])
+
 
 # * Flight_height_unfiltered ------
 
@@ -597,6 +610,9 @@ names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 # Fit possible models (18):
 models.murre.flt_ht_no_filter <- list()
 
+flight_alt_murre.original <- flight_alt_murre
+flight_alt_murre <- flight_alt_murre.original[
+  !(flight_alt_murre.original$flight_id_combined %in% c("m1228", "m623", "m781")),]
 
 # 
 # flight_alt_ok_murre$altitude_callib_extm_no_filter
@@ -755,7 +771,7 @@ names(models.murre.fit.df) <- paste(
 models.murre.fit.all <- cbind(models.murre.fit.df,
                              models.murre.flt_ht_no_filter.fit.df[,2:5])
 
-write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table.csv")
+write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table_3influential_removed.csv")
 #
 
 
@@ -823,6 +839,12 @@ qqmath(murre_model_va)
 install.packages("influence.ME")
 
 library(influence.ME)
-infl <- influence(murre_model_va, obs = TRUE)
-(cooks.distance(infl))>0.1
+infl <- influence(models.murre[[14]], obs = TRUE)
+(cooks.distance(infl))>0.06
 plot(infl, which = "cook")
+alt_na_rem <- !is.na(flight_alt_ok_murre$altitude_callib_extm)
+exclude.flights <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.distance(infl))>0.06]
+# "m1228" "m623"  "m781" 
+plot(models.murre[[14]])
+qqmath(models.murre[[14]])
+
