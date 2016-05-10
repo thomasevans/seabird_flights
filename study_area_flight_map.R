@@ -54,7 +54,7 @@ load("SWE_adm0.RData")
 # Set global par
 par(ps = 14, cex = 1.5, cex.lab = 2)
 
-svg("map_test3.svg",
+svg("map_flights_03.svg",
     width = 12, height = 6, family = "serif")
 
 par(mfrow = c(1,2), cex = 1.0)
@@ -101,14 +101,13 @@ for(i in 1:length(flight_ids)){
              points.gull$latitude[fp][1:(n-1)],
              points.gull$longitude[fp][-1],
              points.gull$latitude[fp][-1],
-             col = addalpha(cols.new[2], alpha = 0.07),
-             lwd = 1
+             col = addalpha(cols.new[2], alpha = 0.12),
+             lwd = 1.2
     )  
   }
   
 
 }
-
 
 
 
@@ -178,8 +177,8 @@ for(i in 1:length(flight_ids)){
              points.murre$latitude[fp][1:(n-1)],
              points.murre$longitude[fp][-1],
              points.murre$latitude[fp][-1],
-             col = addalpha(cols.new[1], alpha = 0.2),
-             lwd = 1
+             col = addalpha(cols.new[1], alpha = 0.5),
+             lwd = 1.2
     )  
   }
   
