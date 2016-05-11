@@ -79,6 +79,8 @@ p <- p + geom_rug(alpha = 0.3, show.legend = FALSE)
 # and: http://stackoverflow.com/a/10747608/1172358
 
 
+# summary(as.factor(flight_alt_ok$species[!is.na(flight_alt_ok$altitude_callib_extm)]))
+
 # Add figure legend (a)
 p <- p +
   annotate("text",  x= layer_scales(p)$x$range$range[2],
