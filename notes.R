@@ -25,3 +25,56 @@ hist(flight.details$altitude_callib_extm_05[flight.details$species == "murre"  &
                                               flight.details$device_type == "uva"])
 hist(flight.details$altitude_callib_extm_no_filter[flight.details$species == "murre"  &
                                               flight.details$device_type == "uva"])
+
+
+
+
+# Faurier transform thing -----
+
+x <- 1:4
+fft(x)
+fft(fft(x), inverse = TRUE)/length(x)
+
+
+
+# Using spectrum function to get spectral density
+
+?spectrum
+
+
+require(graphics)
+
+
+
+## Examples from Venables & Ripley
+## spec.pgram
+par(mfrow = c(2,2))
+spectrum(lh)
+
+spec.ar(ldeaths)
+spec.ar(ldeaths, method = "burg")
+
+
+# See: http://stats.stackexchange.com/questions/120663/finding-peaks-in-power-spectrum-of-a-signal-in-r
+# Seems to give a good solution for doing this
+
+
+# Or specgram in library signal ----
+install.packages("signal")
+
+library("signal")
+
+x <- specgram(chirp(seq(-2, 15, by = 0.001), 400, 10, 100, 'quadratic'))
+x$S
+
+# possible workflow:
+
+# Subtract mean value from sequence
+centred.x <- x - mean(x)
+
+# calculate speectrogram thing
+spec.x <- specgram(centred.x)
+
+# Get out the highest spectral peak in range 1-20 hz??
+S <- abs(spec.x$S[2:(fftn*20/Fs),])
+
