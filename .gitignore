@@ -43,3 +43,5 @@ packages_20160428.RData
 altitude_analysis.R
 #Ignore csv files
 *.csv
+acc.dat.df.RData
+acc.rec.df.Rdata
