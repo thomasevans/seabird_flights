@@ -135,9 +135,9 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
   # Colour - rainbow colour by time - with alpha channel (lighter for excluded??)
   points.col <- rainbow(nrow(points.sub))
   
-  points.col.alpha <- addalpha(points.col, alpha = 0.5)
+  points.col.alpha <- addalpha(points.col, alpha = 0.8)
   points.col.alpha[points.sub$included_points == FALSE] <- addalpha(
-    points.col[points.sub$included_points == FALSE], alpha = 0.2)
+    points.col[points.sub$included_points == FALSE], alpha = 0.4)
   
   
   # Size - by altitude
@@ -149,7 +149,7 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
   
   # Mark example point representing aproximately a median point/ 
   # representative location - maybe an X
-  points(points.sub$longitude[pid], points.sub$latitude[pid], pch = 4, cex = 2, col = "black",
+  points(points.sub$longitude[pid], points.sub$latitude[pid], pch = 4, cex = 3, col = "black",
          lwd = 2)
   
   
@@ -159,9 +159,9 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
   
   # Borders scale etc
   # Scale bar and axis
-  x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
-  y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/20
-  map.scale(x,y, ratio = FALSE,
+  # x <- c.xlim[1] + (c.xlim[2] - c.xlim[1])/20
+  # y <- c.ylim[1] + (c.ylim[2] - c.ylim[1])/20
+  map.scale(ratio = FALSE,
             col="black", col.lab="black",
             relwidth = 0.3)
   box(col="black",lwd=2)
@@ -209,9 +209,9 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            lwd = 2, lty = line.lty, col = line.col)
   points(points.sub$altitude_callib~ points.sub$date_time,
          pch = 21, bg = points.col, cex = 1.5)
-  abline(h = flight.details.sub$altitude_callib,
+  abline(h = flight.details.sub$altitude_callib_extm_05,
          lwd = 2, col = "dark grey", lty = 2)
-  points(points.sub$altitude_callib[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
+  points(points.sub$altitude_callib[pid]~ points.sub$date_time[pid], pch = 4, cex = 3, col = "black",
          lwd = 1.5)
   
   legend("topleft", "(b)", bty="n", cex = 1.2) 
@@ -244,14 +244,14 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
          pch = 21, bg = points.col,
          cex = 1.5
          )
-  points(points.sub$speed_2d[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
+  points(points.sub$speed_2d[pid]~ points.sub$date_time[pid], pch = 4, cex = 3, col = "black",
          lwd = 1.5)
   
-
+#   sqrt((flight.details.sub$vg_v*flight.details.sub$vg_v)+(
+#  flight.details.sub$vg_u*flight.details.sub$vg_u
+#  ))
   # Add line for median ground speed
-    abline(h = sqrt((flight.details.sub$vg_v*flight.details.sub$vg_v)+(
-    flight.details.sub$vg_u*flight.details.sub$vg_u
-  )), lwd = 2, col = "dark grey", lty = 2)
+    abline(h =  flight.details.sub$vg, lwd = 2, col = "dark grey", lty = 2)
     
     legend("topleft", "(c)", bty="n", cex = 1.2) 
     
@@ -278,7 +278,7 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
        pch = 21, bg = points.col,
        # cex = 1.5,
        type = "n",
-       xlab = "Time (minutes)",
+       xlab = "Time (hh:mm)",
        ylab = "Displacement (km)",
        cex.lab = 1.3,
        las = 1,
@@ -292,7 +292,7 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
   points(island_dist~ points.sub$date_time,
          pch = 21, bg = points.col, cex = 1.5)
   
-  points(island_dist[pid]~ points.sub$date_time[pid], pch = 4, cex = 2, col = "black",
+  points(island_dist[pid]~ points.sub$date_time[pid], pch = 4, cex = 3, col = "black",
          lwd = 1.5)
   
   # Add line for median ground speed
@@ -346,9 +346,9 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
        )
     grid()
     
-    points(wind.speed,altitude_increments,
-           lwd = 3, type = "l")
-    
+#     points(wind.speed,altitude_increments,
+#            lwd = 3, type = "l")
+#     
     # Add sea-surface
     alt_sea <- sin(seq(-pi, pi, 0.5))
     alt_sea <- rep(alt_sea,100)
@@ -357,6 +357,14 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
   
     points(0.4*alt_sea[1:length(wind.speed_sea)]~ wind.speed_sea,
            col = addalpha("light blue", 0.8), lwd = 3, type = "l")
+    
+    
+    points(wind.speed,altitude_increments,
+         lwd = 3,
+         # new = FALSE,
+         type = "l"
+    )
+    
     
     abline(h = points.sub$altitude_callib[pid], lwd = 2,
            lty = 2, col = "#1b9e77")
@@ -367,7 +375,16 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            lty = 2, col = "dark grey")
     abline(v = points.sub$ecmwf_wind_10m_speed[pid], lwd = 2,
            lty = 2, col = "dark grey")
-    legend("topleft", "(f)", bty="n", cex = 1.2) 
+    legend("topleft", "(f)", bty="n", cex = 1.2)
+    # ?text
+    text(3.5
+         ,points.sub$altitude_callib[pid]+ 3,
+         "Flight height", col = "#1b9e77",
+         pos = 4)
+    text(3.5
+         ,13,
+         "Reference height (10 m)", col = "dark grey",
+         pos = 4)
     
     dev.off()
     
