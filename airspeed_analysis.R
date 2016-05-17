@@ -1344,12 +1344,12 @@ mod_gull_frame <- data.frame(Variable = rownames(summary(lbbg_model_va)$coef)[-1
                           Coefficient = summary(lbbg_model_va)$coef[-1, 1],
                           CI_low = confint(lbbg_model_va, method="Wald")[-c(1:3), 1],
                           CI_high = confint(lbbg_model_va, method="Wald")[-c(1:3), 2],
-                          modelName = "Lesser black-backed gulls")
+                          modelName = "Lesser Black-backed Gulls")
 mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef)[-1],
                           Coefficient = summary(murre_model_va)$coef[-1, 1],
                           CI_low = confint(murre_model_va, method="Wald")[-c(1:3), 1],
                           CI_high = confint(murre_model_va, method="Wald")[-c(1:3), 2],
-                          modelName = "Common murres")
+                          modelName = "Common Murres")
 # Combine these data.frames
 allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
 
@@ -1366,8 +1366,24 @@ levels(allModelFrame$Variable)
 # lab.4 <- expression("Vw"["c"]-~"(to left)")
 # parse=TRUE
 
+
+
+theme_new_top_legend <- theme_bw(base_size = 14, base_family = "serif") +
+  theme(legend.position = "top",
+        legend.justification = c(1, 1),
+        legend.key.size =   unit(2, "lines"),
+        legend.key = element_rect(colour =NA),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 14),
+        legend.text.align = 0,
+        legend.key.width = unit(3, "lines"),
+        legend.title = element_blank()
+  )
+
 zp1 <- ggplot(allModelFrame, aes(colour = modelName))
-zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2)
+zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2,
+                        show.legend = FALSE)
 zp1 <- zp1 + geom_linerange(aes(x = Variable,
                                 ymin = CI_low,
                                 ymax = CI_high),
@@ -1377,8 +1393,8 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                                  ymin = CI_low,
                                  ymax = CI_high),
                              lwd = 1/2, position = position_dodge(width = 1/2),
-                             shape = 21, fill = "WHITE",
-                             show.legend = TRUE)
+                             shape = 21, fill = NA,
+                             show.legend = FALSE)
 zp1 <- zp1 + scale_x_discrete("",
                               labels = c(expression("Vw"["c"]~" speed"),
                                          expression("Vw"["c"]~" speed: type (to right)"),
@@ -1399,14 +1415,17 @@ zp1 <- zp1 + scale_y_continuous(breaks = seq(-4, 4, 1),
 # ?scale_y_continuous
 # zp1 <- zp1 + theme(axis.text = element_text(size = 12))
 zp1 <- zp1 +  theme_new
-zp1 <- zp1 + theme(legend.position = c(0.5, 0.3))
+zp1 <- zp1 + theme_new_top_legend
+# zp1 <- zp1 + theme(legend.position = c(0.5, 0.3))
 zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Va ["~ms^{-1}~"])"))
 zp1 <- zp1 +
   annotate("text",  x= layer_scales(zp1)$x$range$range[7],
            y = layer_scales(zp1)$y$range$range[1], label = "(a)",
-           vjust=-1, hjust=2, size = 5)
+           vjust=-1, hjust=0, size = 5)
+# zp1 <- zp1 + theme(legend.justification=c(0,0), legend.position=c(0,0))
 zp1
-ggsave(zp1, filename = "va_model_coef_fig.svg", width = 8, height = 8,
+
+ggsave(zp1, filename = "va_model_coef_fig2.svg", width = 6, height = 6,
        units = "in")
 # ?ggsave
 
@@ -1470,11 +1489,16 @@ flight_alt_ok_gg <- data.frame(
   z2 = findInterval(flight_alt_ok_gull$va_flt_ht_alt_filter, v)
 )
 
+# 
+# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+# lab.3 <- expression("Vw"["c"]+~"(to right)")
+# lab.4 <- expression("Vw"["c"]-~"(to left)")
 
-lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
-lab.2 <- expression("Vw"["s"]-~"(head-wind)")
-lab.3 <- expression("Vw"["c"]+~"(to right)")
-lab.4 <- expression("Vw"["c"]-~"(to left)")
+lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1489,25 +1513,38 @@ p <- ggplot(gg,aes(x,y)) +
   coord_fixed() +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
-             shape=21, alpha=1,na.rm=T, size=3) +
-  labs( x = expression("Wind assitance ("~ms^{-1}~")"),
-        y = expression("Cross wind ("~ms^{-1}~")"),
-        fill= expression("Va ("~ms^{-1}~")"),
-        parse=TRUE) +
+             shape=21, alpha=1,na.rm=T, size=2) +
+  labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+        y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
+        fill = expression("Va ("~ms^{-1}~")"),
+        parse = TRUE) +
+#   labs( x = expression("Wind assitance ("~ms^{-1}~")"),
+#         y = expression("Cross wind ("~ms^{-1}~")"),
+#         fill= expression("Va ("~ms^{-1}~")"),
+#         parse=TRUE) +
   theme_new +
   theme(legend.title = element_text(size = 14)) +
+  theme(legend.position = "top")+
+  theme(legend.key.size = unit(0.25, "inch")) +
+#   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
+#             x = c(1, 1 , 8, -6),
+#             y = c(-10, 9, 0, 0),
+#            parse=TRUE,
+#            colour = "black",
+#            size = 5,
+#            vjust = 0) 
   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-            x = c(1, 1 , 8, -6),
-            y = c(-10, 9, 0, 0),
+           x = c(2, 2 , 8, -7.5),
+           y = c(-10, 8.5, 0, 0),
            parse=TRUE,
-           colour = "black",
-           size = 5,
-           vjust = 0) 
- p <- p + annotate("text",  x= -9,
-           y = 9, label = "(b)",
-           vjust=-1, hjust=0, size = 5)
-
-ggsave("va_gull_predication.svg", width = 8, height = 8, units = "in")
+           colour = "grey40",
+           size = 4,
+           vjust = 0.5) 
+p <- p + annotate("text",  x= -9,
+                  y = 9, label = "(b)",
+                  vjust = 1, hjust=0, size = 5)
+p
+ggsave("va_gull_predication2.svg", width = 5, height = 6, units = "in")
 
 
 
@@ -1556,11 +1593,18 @@ flight_alt_ok_gg <- data.frame(
   z2 = findInterval(flight_alt_ok_murre$va_flt_ht_alt_filter, v)
 )
 
+# 
+# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+# lab.3 <- expression("Vw"["c"]+~"(to right)")
+# lab.4 <- expression("Vw"["c"]-~"(to left)")
 
-lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
-lab.2 <- expression("Vw"["s"]-~"(head-wind)")
-lab.3 <- expression("Vw"["c"]+~"(to right)")
-lab.4 <- expression("Vw"["c"]-~"(to left)")
+
+lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1577,26 +1621,27 @@ p <- ggplot(gg,aes(x,y)) +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
              shape=21, alpha=1,na.rm=T, size=3) +
-  labs( x = expression("Wind assitance ("~ms^{-1}~")"),
-        y = expression("Cross wind ("~ms^{-1}~")"),
-        fill= expression("Va ("~ms^{-1}~")"),
-        parse=TRUE) +
+  labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+        y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
+        fill = expression("Va ("~ms^{-1}~")"),
+        parse = TRUE) +
   theme_new +
   theme(legend.title = element_text(size = 14)) +
+  theme(legend.position = "top")+
+  theme(legend.key.size = unit(0.25, "inch")) +
   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(0, 0 , 7, -7),
-           y = c(-10, 9, 0, 0),
+           x = c(2, 2 , 8, -7.5),
+           y = c(-9, 8.5, 0, 0),
            parse=TRUE,
-           colour = "black",
-           size = 5,
-           vjust = 0) 
-
+           colour = "grey40",
+           size = 4,
+           vjust = 0.5) 
 p <- p + annotate("text",  x= -9,
                   y = 9, label = "(c)",
-                  vjust=-1, hjust=0, size = 5)
+                  vjust = 1, hjust=0, size = 5)
+p
 
-
-ggsave("va_murre_predication.svg", width = 8, height = 8, units = "in")
+ggsave("va_murre_predication2.svg", width = 5, height = 6, units = "in")
 
 
 
