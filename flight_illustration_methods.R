@@ -504,6 +504,26 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
          col = "dark grey")
     legend("topleft", "(e)", bty="n", cex = 1.2) 
     
+#     # install.packages("plotrix")
+#     library(plotrix)
+    
+    
+    text(1.4,1.8, expression(alpha), cex = 1.2)
+    # draw.arc(x=1,y=NULL,radius=.5)
+    # points.sub$vg_u[pid], points.sub$vg_v[pid]
+    # points.sub$ecmwf_wind_10m_u_flt_ht[pid],
+    # points.sub$ecmwf_wind_10m_v_flt_ht[pid]
+    xspline(x = c(0.3*points.sub$ecmwf_wind_10m_u_flt_ht[pid],
+                  0.11*points.sub$ecmwf_wind_10m_u_flt_ht[pid],
+                  0.15*points.sub$vg_u[pid]),
+            y= c(0.3*points.sub$ecmwf_wind_10m_v_flt_ht[pid],
+                 0.125*points.sub$vg_v[pid],
+                 0.15*points.sub$vg_v[pid]),
+            shape = -1,
+            lwd = 2)
+    
+    
+    
     dev.off()
     
 # Do for same example flight as all above.
