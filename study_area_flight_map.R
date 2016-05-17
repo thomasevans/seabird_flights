@@ -54,7 +54,7 @@ load("SWE_adm0.RData")
 # Set global par
 par(ps = 14, cex = 1.5, cex.lab = 2)
 
-svg("map_flights_03.svg",
+svg("map_flights_04.svg",
     width = 12, height = 6, family = "serif")
 
 par(mfrow = c(1,2), cex = 1.0)
@@ -131,6 +131,9 @@ axis(side=(2), las=1, col="black", col.axis="black")
 # ?map.scale
 
 legend("topleft", "(a)", bty="n", cex = 1.2) 
+legend("topright", "Lesser Black-backed Gulls", bty="n", cex = 1.2,
+       text.col = cols.new[2]) 
+ 
 
 
 
@@ -208,6 +211,8 @@ axis(side=(2), las=1, col="black", col.axis="black")
 # ?map.scale
 
 legend("topleft", "(b)", bty="n", cex = 1.2) 
+legend("top", "Common Murres", bty="n", cex = 1.2,
+       text.col = cols.new[1]) 
 
 
 dev.off()
