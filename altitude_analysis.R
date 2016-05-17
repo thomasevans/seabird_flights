@@ -50,6 +50,19 @@ theme_new <- theme_bw(base_size = 14, base_family = "serif") +
   )
 
 
+theme_new_rt_legend <- theme_bw(base_size = 14, base_family = "serif") +
+  theme(legend.position = "right",
+        legend.justification = c(1, 1),
+        legend.key.size =   unit(2, "lines"),
+        legend.key = element_rect(colour =NA),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 14),
+        legend.text.align = 0,
+        legend.key.width = unit(3, "lines"),
+        legend.title = element_blank()
+  )
+
 # ********** Statistical analysis -----
 library(lme4)
 library(arm)
@@ -944,10 +957,14 @@ murre_model_va_par_df <- cbind.data.frame(murre_model_va_coef,murre_model_va_ci[
 plot(murre_model_va)
 qqmath(murre_model_va)
 
+
+plot(lbbg_model_va)
+qqmath(lbbg_model_va)
+
 #
 
 # Influential points in murre data ----
-install.packages("influence.ME")
+# install.packages("influence.ME")
 
 library(influence.ME)
 infl <- influence(models.murre[[14]], obs = TRUE)
@@ -1003,7 +1020,8 @@ mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef),
                               modelName = "Common murres")
 # Combine these data.frames
 allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
-# allModelFrame <- mod_gull_frame
+allModelFrame <- mod_gull_frame
+allModelFrame <- mod_murre_frame
 
 str(allModelFrame)
 allModelFrame$modelName <-  factor(allModelFrame$modelName,
@@ -1032,7 +1050,7 @@ zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2)
 zp1 <- zp1 + geom_linerange(aes(x = Variable,
                                 ymin = CI_low,
                                 ymax = CI_high),
-                            colour = cols.new[1],
+                            colour = cols.new,
                             lwd = 1, position = position_dodge(width = 1/2),
                             show.legend = FALSE)
 zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
@@ -1040,7 +1058,7 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                                  ymax = CI_high),
                              lwd = 1/2, position = position_dodge(width = 1/2),
                              shape = 21, fill = "WHITE",
-                             colour = cols.new[1],
+                             colour = cols.new,
                              show.legend = TRUE)
 zp1 <- zp1 + scale_x_discrete("",
                               labels = c("Intercept",
@@ -1070,7 +1088,7 @@ zp1 <- zp1 +
            y = layer_scales(zp1)$y$range$range[1], label = "(a)",
            vjust=-1, hjust=0, size = 5)
 zp1
-ggsave(zp1, filename = "alt_model_coef_fig_lbbg_only.svg", width = 8, height = 8,
+ggsave(zp1, filename = "alt_model_coef_fig_combined.svg", width = 6, height = 6,
        units = "in")
 # ?ggsave
 
@@ -1139,11 +1157,11 @@ flight_alt_ok_gg <- data.frame(
   z2 = findInterval(flight_alt_ok_gull$altitude_callib_extm, v)
 )
 
-
-lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
-lab.2 <- expression("Vw"["s"]-~"(head-wind)")
-lab.3 <- expression("Vw"["c"]+~"(to right)")
-lab.4 <- expression("Vw"["c"]-~"(to left)")
+#expression("Vw"["c"]^"+")
+lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1158,25 +1176,26 @@ p <- ggplot(gg,aes(x,y)) +
   coord_fixed() +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
-             shape=21, alpha=1,na.rm=T, size=3) +
-  labs( x = expression("Wind assitance ("~ms^{-1}~")"),
-        y = expression("Cross wind ("~ms^{-1}~")"),
+             shape=21, alpha=1,na.rm=T, size=2) +
+  labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+        y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
         fill = "Altitude (m)",
         parse = TRUE) +
-  theme_new +
+  # theme_new +
+  theme_new_rt_legend +
   theme(legend.title = element_text(size = 14)) +
   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(1, 1 , 8, -6),
-           y = c(-10, 9, 0, 0),
+           x = c(2, 2 , 8, -7.5),
+           y = c(-10, 8.5, 0, 0),
            parse=TRUE,
-           colour = "black",
-           size = 5,
-           vjust = 0) 
+           colour = "grey40",
+           size = 4,
+           vjust = 0.5) 
 p <- p + annotate("text",  x= -9,
                   y = 9, label = "(b)",
-                  vjust=-1, hjust=0, size = 5)
+                  vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_gull_predication.svg", width = 8, height = 8, units = "in")
+ggsave("Alt_gull_predication2.svg", width = 6, height = 5, units = "in")
 
 
 
@@ -1218,7 +1237,7 @@ library(scales)
 
 
 # range(gg$z, na.rm = TRUE)
-v <- seq(-20, 45, 2.5) 
+v <- seq(-20, 45, 1) 
 gg$z2 <- findInterval(gg$z, v)
 gg$z3 <- v[gg$z2]
 
@@ -1233,10 +1252,17 @@ flight_alt_ok_gg <- data.frame(
 )
 # summary(is.na(flight_alt_ok_murre$altitude_callib_extm))
 
-lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
-lab.2 <- expression("Vw"["s"]-~"(head-wind)")
-lab.3 <- expression("Vw"["c"]+~"(to right)")
-lab.4 <- expression("Vw"["c"]-~"(to left)")
+# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+# lab.3 <- expression("Vw"["c"]+~"(to right)")
+# lab.4 <- expression("Vw"["c"]-~"(to left)")
+
+lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+
+
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1252,24 +1278,32 @@ p <- ggplot(gg,aes(x,y)) +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
              shape=21, alpha=1,na.rm=T, size=3) +
-  labs( x = expression("Wind assitance ("~ms^{-1}~")"),
-        y = expression("Cross wind ("~ms^{-1}~")"),
+  labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+        y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
         fill = "Altitude (m)",
         parse = TRUE) +
-  theme_new +
+  theme_new_rt_legend +
   theme(legend.title = element_text(size = 14)) +
+#   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
+#            x = c(1, 1 , 8, -6),
+#            y = c(-10, 9, 0, 0),
+#            parse=TRUE,
+#            colour = "black",
+#            size = 5,
+#            vjust = 0) 
+
   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(1, 1 , 8, -6),
-           y = c(-10, 9, 0, 0),
+           x = c(2, 2 , 8, -7.5),
+           y = c(-9, 8.5, 0, 0),
            parse=TRUE,
-           colour = "black",
-           size = 5,
-           vjust = 0) 
-# p <- p + annotate("text",  x= -9,
-#                   y = 9, label = "(b)",
-#                   vjust=-1, hjust=0, size = 5)
+           colour = "grey40",
+           size = 4,
+           vjust = 0.5) 
+p <- p + annotate("text",  x= -9,
+                  y = 9, label = "(b)",
+                  vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_murre_predication.svg", width = 8, height = 8, units = "in")
+ggsave("Alt_murre_predication2.svg", width = 6, height = 5, units = "in")
 
 
 
