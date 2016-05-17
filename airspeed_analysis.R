@@ -77,8 +77,9 @@ p <- p + geom_rug(alpha = 0.3, show.legend = FALSE)
 # Add legend for species in top right corner
 # see: https://rpubs.com/folias/A-simple-example-on-ggplot2-legend-options
 # and: http://stackoverflow.com/a/10747608/1172358
-
-
+p <-   p + geom_vline(xintercept = 0, lwd = 2, col = "grey10",
+                      lty = 2, alpha = 0.5)
+# ?geom_abline
 # summary(as.factor(flight_alt_ok$species[!is.na(flight_alt_ok$altitude_callib_extm)]))
 
 # Add figure legend (a)
@@ -87,6 +88,7 @@ p <- p +
            y = layer_scales(p)$y$range$range[1], label = "(a)",
            vjust=0, hjust=0, size = 5)
 plot_altitude <- p
+
 ggsave("plot_altitude2.svg", plot = plot_altitude, width = 4, height = 8, units = "in")
 
 # install.packages("svglite")
