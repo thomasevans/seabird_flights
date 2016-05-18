@@ -26,6 +26,101 @@ flight_alt_ok <- flight.details[flight.details$altitude_filter_n >= 1,]
 # Using altitude data - but all - calculated wind at flight height
 flight_alt <- flight.details
 
+
+
+# Sample sizes and summary statistics ----
+gulls <- flight.details$species == "gull"
+murres <- flight.details$species == "murre"
+
+gulls2 <- flight_alt_ok$species == "gull"
+murres2 <- flight_alt_ok$species == "murre"
+
+
+# N
+summary(flight.details$sp_name)
+summary(flight_alt_ok$sp_name)
+
+# Vg
+mean(flight.details$vg[gulls])
+mean(flight_alt_ok$vg[gulls2])
+sd(flight.details$vg[gulls])
+sd(flight_alt_ok$vg[gulls2])
+
+mean(flight.details$vg[murres])
+mean(flight_alt_ok$vg[murres2])
+sd(flight.details$vg[murres])
+sd(flight_alt_ok$vg[murres2])
+
+
+# Va
+mean(flight.details$va_flt_ht[gulls], na.rm = TRUE)
+mean(flight_alt_ok$va_flt_ht_alt_filter[gulls2], na.rm = TRUE)
+sd(flight.details$va_flt_ht[gulls], na.rm = TRUE)
+sd(flight_alt_ok$va_flt_ht_alt_filter[gulls2], na.rm = TRUE)
+
+mean(flight.details$va_flt_ht[murres], na.rm = TRUE)
+mean(flight_alt_ok$va_flt_ht_alt_filter[murres2], na.rm = TRUE)
+sd(flight.details$va_flt_ht[murres], na.rm = TRUE)
+sd(flight_alt_ok$va_flt_ht_alt_filter[murres2], na.rm = TRUE)
+
+
+# Vw
+mean(flight.details$ecmwf_wind_10m_speed[gulls], na.rm = TRUE)
+mean(flight_alt_ok$ecmwf_wind_10m_speed_flt_ht_alt_filter[gulls2], na.rm = TRUE)
+sd(flight.details$ecmwf_wind_10m_speed[gulls], na.rm = TRUE)
+sd(flight_alt_ok$ecmwf_wind_10m_speed_flt_ht_alt_filter[gulls2], na.rm = TRUE)
+
+mean(flight.details$ecmwf_wind_10m_speed[murres], na.rm = TRUE)
+mean(flight_alt_ok$ecmwf_wind_10m_speed_flt_ht_alt_filter[murres2], na.rm = TRUE)
+sd(flight.details$ecmwf_wind_10m_speed[murres], na.rm = TRUE)
+sd(flight_alt_ok$ecmwf_wind_10m_speed_flt_ht_alt_filter[murres2], na.rm = TRUE)
+
+# Alt
+mean(flight.details$altitude_callib_extm[gulls], na.rm = TRUE)
+mean(flight_alt_ok$altitude_callib_extm[gulls2], na.rm = TRUE)
+sd(flight.details$altitude_callib_extm[gulls], na.rm = TRUE)
+sd(flight_alt_ok$altitude_callib_extm[gulls2], na.rm = TRUE)
+
+mean(flight.details$altitude_callib_extm[murres], na.rm = TRUE)
+mean(flight_alt_ok$altitude_callib_extm[murres2], na.rm = TRUE)
+sd(flight.details$altitude_callib_extm[murres], na.rm = TRUE)
+sd(flight_alt_ok$altitude_callib_extm[murres2], na.rm = TRUE)
+
+
+median(flight_alt_ok$altitude_callib_extm[gulls2], na.rm = TRUE)
+quantile(flight_alt_ok$altitude_callib_extm[gulls2], c(0.05,0.95), na.rm = TRUE)
+
+median(flight_alt_ok$altitude_callib_extm[murres2], na.rm = TRUE)
+quantile(flight_alt_ok$altitude_callib_extm[murres2], c(0.05,0.95), na.rm = TRUE)
+
+
+# Distance
+mean(flight_alt_ok$trunc_seg_dist_a_b[gulls2], na.rm = TRUE)
+sd(flight_alt_ok$trunc_seg_dist_a_b[gulls2], na.rm = TRUE)
+median(flight_alt_ok$trunc_seg_dist_a_b[gulls2], na.rm = TRUE)
+quantile(flight_alt_ok$trunc_seg_dist_a_b[gulls2], c(0.05,0.95), na.rm = TRUE)
+
+mean(flight_alt_ok$trunc_seg_dist_a_b[murres2], na.rm = TRUE)
+sd(flight_alt_ok$trunc_seg_dist_a_b[murres2], na.rm = TRUE)
+median(flight_alt_ok$trunc_seg_dist_a_b[murres2], na.rm = TRUE)
+quantile(flight_alt_ok$trunc_seg_dist_a_b[murres2], c(0.05,0.95), na.rm = TRUE)
+
+# Duration (minutes)
+mean(flight_alt_ok$trunc_seg_duration[gulls2], na.rm = TRUE)/60
+sd(flight_alt_ok$trunc_seg_duration[gulls2], na.rm = TRUE)/60
+median(flight_alt_ok$trunc_seg_duration[gulls2], na.rm = TRUE)/60
+quantile(flight_alt_ok$trunc_seg_duration[gulls2], c(0.05,0.95), na.rm = TRUE)/60
+
+mean(flight_alt_ok$trunc_seg_duration[murres2], na.rm = TRUE)/60
+sd(flight_alt_ok$trunc_seg_duration[murres2], na.rm = TRUE)/60
+median(flight_alt_ok$trunc_seg_duration[murres2], na.rm = TRUE)/60
+quantile(flight_alt_ok$trunc_seg_duration[murres2], c(0.05,0.95), na.rm = TRUE)/60
+
+
+length(unique(flight.details$ring_number[murres]))
+length(unique(flight.details$ring_number[gulls]))
+
+
 # Frequency distributions for Va for two species (fig. 6 in MS plan) ------
 # Make in ggplot - adapt previous made one for WSC
 # Maybe add dashed lines for Vg, or some such??
