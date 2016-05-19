@@ -45,3 +45,4 @@ altitude_analysis.R
 *.csv
 acc.dat.df.RData
 acc.rec.df.Rdata
+points.acc.calc.RData
