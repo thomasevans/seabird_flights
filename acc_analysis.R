@@ -66,8 +66,8 @@ for(i in 1:nrow(points.acc)){
     max.spec <- max(unlist(x[['spec']]))
     freq.max <- unlist(x[['spec']]) == max.spec
     # str(x['freq'])
-    freq <- unlist(x['freq'])[freq.max][1]
-    spec.freq <- freq*20
+    freq <- unlist(x['freq'])[freq.max][1]  # First maxima (if there are multiple maxima of same value[rare])
+    spec.freq <- freq*20  # multiply by sampling interval (Hz)
     z[i] <- spec.freq
     
   }
@@ -83,6 +83,9 @@ for(i in 1:nrow(points.acc)){
   save(points.acc, file = "points.acc.calc.RData")
   
   
+  
+  # Resume here
+  load("acc_workspace_20160520.Rdata")
   
   # Have a look at the data -----
   
@@ -101,11 +104,67 @@ anova(aov(z[f]~points.acc$head_wind_flt_ht[f]))
 plot(z[f]~as.factor(points.acc$device_info_serial[f]))
 
 
+
 # Next ---
 
+library(plyr)
 # Get median values for each flight
 
-# Get summary statistics for individuals
+# points.acc$
+  # ?ddply
+  
+mean.range <- function(x, min.x, max.x){
+  x2 <- x[x>min.x & x <max.x]
+  mean(x2, na.rm = TRUE)
+}
+
+sd.range <- function(x, min.x, max.x){
+  x2 <- x[x>min.x & x <max.x]
+  sd(x2, na.rm = TRUE)
+}
+
+median.range <- function(x, min.x, max.x){
+  x2 <- x[x>min.x & x <max.x]
+  mean(x2, na.rm = TRUE)
+}
+
+n.range <- function(x, min.x, max.x){
+  x2 <- x[x>min.x & x <max.x]
+  sum(!is.na(x2))
+}
+
+flight.summary <- ddply(points.acc, .(device_info_serial, flight_id_combined.x),
+                        summarise,
+      mean = mean(wing_beat_freq, na.rm = TRUE),
+      sd = sd(wing_beat_freq, na.rm = TRUE),
+      median = median(wing_beat_freq, na.rm = TRUE),
+      mean.f = mean.range(wing_beat_freq, 2, 5),
+      sd.f = sd.range(wing_beat_freq, 2, 5),
+      median.f = median.range(wing_beat_freq, 2, 5),
+      n = sum(!is.na(wing_beat_freq)),
+      n.f = n.range(wing_beat_freq, 2, 5)
+      )
+
+
+
+hist(flight.summary$median, breaks = 100)
+
+hist(flight.summary$median.f, breaks = 20)
+
+
+# Combine above with ring_number
+ring_numbers <- unique(data.frame(flight.details$device_info_serial, flight.details$ring_number))
+names(ring_numbers) <- c("device_info_serial", "ring_number")
+
+flight.summary.ring_number <- merge(flight.summary, ring_numbers, by = "device_info_serial")
+
+plot(flight.summary.ring_number$median.f~ as.factor(as.character(flight.summary.ring_number$ring_number)))
+
+plot(flight.summary.ring_number$median~ as.factor(as.character(flight.summary.ring_number$ring_number)))
+
+# warnings()
+
+# Get summary statistics for individuals (with and without restricted range)
 # - median
 # - mean (sd)
 # - 95% CI??
@@ -113,8 +172,82 @@ plot(z[f]~as.factor(points.acc$device_info_serial[f]))
 # Get number of useful Acc locations per flight too (for some idea of reliability)
 # N flights with acc data per individual too
 
+bird.summary <- ddply(flight.summary.ring_number, .(ring_number),
+                        summarise,
+                        mean = mean(median, na.rm = TRUE),
+                        sd = sd(median, na.rm = TRUE),
+                        median = median(median, na.rm = TRUE),
+                        mean.f = mean.range(median.f, 2, 5),
+                        sd.f = sd.range(median.f, 2, 5),
+                        median.f = median.range(median.f, 2, 5),
+                        # n = sum(!is.na("median")),
+                        # n.f = sum(!is.na("median.f")),
+                        n = length(ring_number)
+)
 
-# Combine above with morphometric data (wing-area etc)
+bird.acc.dep_per <- ddply(flight.summary.ring_number, .(ring_number,
+                                                        device_info_serial),
+                      summarise,
+                      acc.mean = mean(median, na.rm = TRUE),
+                      acc.sd = sd(median, na.rm = TRUE),
+                      acc.median = median(median, na.rm = TRUE),
+                      acc.mean.f = mean.range(median.f, 2, 5),
+                      acc.sd.f = sd.range(median.f, 2, 5),
+                      acc.median.f = median.range(median.f, 2, 5),
+                      # n = sum(!is.na("median")),
+                      # n.f = sum(!is.na("median.f")),
+                      acc.n = length(ring_number)
+)
+
+# summary(is.na(flight.summary.ring_number$median))
+
+flight.details$date_time_include_end
+deployments.all <- ddply(flight.details, .(ring_number, device_info_serial, species),
+                         summarise,
+                         n = length(ring_number),
+                         date.first = min(date_time_include_start),
+                         date.final = max(date_time_include_end),
+                         date.per = ceiling(difftime(date.final, date.first,
+                                             units = "days")),
+                         nf = sum(altitude_filter_n >= 1),
+                         va_10m_mean = mean(va_10m, na.rm = TRUE),
+                         va_10m_sd = sd(va_10m, na.rm = TRUE),
+                         va_10m_median = median(va_10m, na.rm = TRUE),
+                         # Va at flight height with altitude filter
+                         va_fltht_mean = mean(va_flt_ht_alt_filter, na.rm = TRUE),
+                         va_fltht_sd = sd(va_flt_ht_alt_filter, na.rm = TRUE),
+                         va_fltht_median = median(va_flt_ht_alt_filter, na.rm = TRUE),
+                         vg_mean = mean(vg, na.rm = TRUE),
+                         vg_sd = sd(vg, na.rm = TRUE),
+                         vg_median = median(vg, na.rm = TRUE),
+                         alt_mean = mean(altitude_callib_extm_no_filter, na.rm = TRUE),
+                         alt_sd = sd(altitude_callib_extm_no_filter, na.rm = TRUE),
+                         alt_median = median(altitude_callib_extm_no_filter, na.rm = TRUE),
+                         alt_filt_mean = mean(altitude_callib_extm, na.rm = TRUE),
+                         alt_filt_sd = sd(altitude_callib_extm, na.rm = TRUE),
+                         alt_filt_median = median(altitude_callib_extm, na.rm = TRUE)
+# flight.details$altitude_callib_extm_no_filter
+)
+
+deployments.all$n - deployments.all$nf
+
+deployments.all.acc <- merge(deployments.all, bird.acc.dep_per,
+                             by = c("ring_number", "device_info_serial"),
+                             all = TRUE
+)
+
+
+write.table(deployments.all.acc,
+            file = "deployments_acc.csv",
+            sep = ",",
+            row.names = FALSE,
+            col.names = TRUE)
+
+
+
+# ?difftime
+
+# Combine above with morphometric data (wing-area etc) -----
 
 
 # Then need to do somthing for the guillemots
