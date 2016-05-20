@@ -46,3 +46,5 @@ altitude_analysis.R
 acc.dat.df.RData
 acc.rec.df.Rdata
 points.acc.calc.RData
+# Ignore Rdata files
+*.RData
