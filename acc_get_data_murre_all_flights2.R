@@ -238,6 +238,8 @@ for(i in 1:nrow(acc.measures)){
     sum(!is.na(x2))
   }
 
+  
+  
   bird.summary <- ddply(acc.measures, .(ring_number, device_info_serial),
                           summarise,
                           mean = mean(wing_beat_freq, na.rm = TRUE),
@@ -251,11 +253,13 @@ for(i in 1:nrow(acc.measures)){
                           date.start = min(date_time),
                         date.end = max(date_time),
                         days = difftime(date.end,date.start, units = "days"),
-                        day.int = ceiling(days)
+                        day.int = ceiling(days),
+                        samples.med = median(n_acc_samples, na.rm = TRUE),
+                        samples.mean = mean(n_acc_samples, na.rm = TRUE)
   )
   
   write.csv(bird.summary, file = "murre_acc_dat.csv", row.names = FALSE)
 # ?write.csv  
   
-  ?difftime
+  # ?difftime
   
