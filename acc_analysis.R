@@ -34,12 +34,14 @@ hist(points.acc$vg)
 
 points.acc_vg3 <- points.acc$vg >3
 
-# i <- 150
+i <- 150
 z <- NULL
 # hist(z, breaks = 100)
 for(i in 1:nrow(points.acc)){
   
   for(i in 8097:nrow(points.acc)){
+    
+  
     
   device_info_i <- points.acc$device_info_serial[i]
   date_time_i <- points.acc$date_time[i]
@@ -59,7 +61,28 @@ for(i in 1:nrow(points.acc)){
     # plot(z_acc_cen, type = "l")
     
     z_acc_cen_norm <- z_acc_cen/max(abs(z_acc_cen))
-    # plot(z_acc_cen_norm, type = "l")
+    plot(z_acc_cen_norm, type = "l")
+    
+    
+    svg("gull_acc_example_raw.svg",
+        width = 5, height = 4, family = "serif")
+    # ?pdf
+    par(ps = 14, cex = 1.5, cex.lab = 2)
+    par(mfrow = c(1,1),cex=1)
+    t <- as.difftime((acc_dat.i$index-1)/20, units = "secs")
+    
+    par(mar=c(5,7,1,2))
+    plot(z_acc_cen_norm ~ t , type = "b",
+         ylab = paste("Acceleration (scaled)\nZ-component"),
+         xlab = "Time (s)",
+         las = 1,
+         cex.lab = 1.3,
+         lty = 2,
+         ylim = c(-1,1))
+    grid()
+    legend("topleft", "(a)", bty="n", cex = 1.2) 
+    dev.off()
+    
     # ?spec.ar
     x <- spec.ar(z_acc_cen, log="no", plot = FALSE)
     
@@ -69,6 +92,30 @@ for(i in 1:nrow(points.acc)){
     freq <- unlist(x['freq'])[freq.max][1]  # First maxima (if there are multiple maxima of same value[rare])
     spec.freq <- freq*20  # multiply by sampling interval (Hz)
     z[i] <- spec.freq
+    
+    
+    # Plot AR thing
+    value <- unlist(x[['spec']])[,1]
+    # str(value)
+    freq.v <- unlist(x['freq'])*20
+    
+    svg("gull_acc_example.svg",
+        width = 5, height = 3, family = "serif")
+    # ?pdf
+    par(ps = 14, cex = 1.5, cex.lab = 2)
+    par(mfrow = c(1,1),cex=1)
+    
+    par(mar=c(5,5,1,2))   
+    
+    plot(value/1000000~freq.v, type = "l",
+         ylab = expression("AR spectrum"~(x10^6)),
+         xlab = "Frequency (Hz)",
+         las = 1,
+         cex.lab = 1.3)
+    abline(v = spec.freq, lty = 2)
+    legend("topleft", "(c)", bty="n", cex = 1.2) 
+    dev.off()
+    
     
   }
   
@@ -90,6 +137,59 @@ for(i in 1:nrow(points.acc)){
   # Have a look at the data -----
   
   # i
+  
+  
+  
+  
+  svg("gull_acc_hist_all.svg",
+      width = 5, height = 4, family = "serif")
+  # ?pdf
+  par(ps = 14, cex = 1.5, cex.lab = 2)
+  par(mfrow = c(1,1),cex=1)
+  
+  par(mar=c(5,6,1,2))   
+  
+  hist(z, breaks = 100,
+       ylab = "Number of\nacceleration samples",
+       main = "",
+       xlab = "AR peak frequency",
+       las = 1,
+       cex.lab = 1.3)
+  
+  #   plot(value~freq.v, type = "l",
+  #        ylab = "AR spectrum",
+  #        xlab = "Frequency (Hz)",
+  #        las = 1,
+  #        cex.lab = 1.3)
+  # abline(v = spec.freq, lty = 2)
+  legend("topleft", "(e)", bty="n", cex = 1.2) 
+  dev.off()
+  
+  
+  svg("gull_acc_hist_flight.svg",
+      width = 5, height = 4, family = "serif")
+  # ?pdf
+  par(ps = 14, cex = 1.5, cex.lab = 2)
+  par(mfrow = c(1,1),cex=1)
+  
+  par(mar=c(5,6,1,2))   
+  
+  hist(z[z > 2 & z < 5], breaks = 150,
+       ylab = "Number of\nacceleration samples",
+       main = "",
+       xlab = "AR peak frequency",
+       las = 1,
+       cex.lab = 1.3)
+  
+  #   plot(value~freq.v, type = "l",
+  #        ylab = "AR spectrum",
+  #        xlab = "Frequency (Hz)",
+  #        las = 1,
+  #        cex.lab = 1.3)
+  # abline(v = spec.freq, lty = 2)
+  legend("topleft", "(g)", bty="n", cex = 1.2) 
+  dev.off()
+  
   
   hist(z, breaks = 200,
        xlab ="wing-beat frequency")
