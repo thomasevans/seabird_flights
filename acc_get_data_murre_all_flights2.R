@@ -92,7 +92,7 @@ for(i in 1:nrow(acc.measures)){
   # ptm <- proc.time()
   # for(i in 1:200){
     
-  # i <- idx[p1][1000]
+  i <- idx[p2][600]
   
   
     device_info_i <- acc.measures$device_info_serial[i]
@@ -108,8 +108,40 @@ for(i in 1:nrow(acc.measures)){
       # plot(z_acc_cen, type = "l")
       
       z_acc_cen_norm <- z_acc_cen/max(abs(z_acc_cen), na.rm = TRUE)
-      # plot(z_acc_cen_norm, type = "l")
-      # ?spec.ar
+     
+      
+      t <- as.difftime((acc_dat.i$index-1)/20, units = "secs")
+      # str(t)
+      
+      # str(acc_dat.i)
+      
+      
+      
+      svg("murre_acc_example_raw.svg",
+          width = 5, height = 4, family = "serif")
+      # ?pdf
+      par(ps = 14, cex = 1.5, cex.lab = 2)
+      par(mfrow = c(1,1),cex=1)
+      
+      par(mar=c(5,7,1,2))
+       plot(z_acc_cen_norm ~ t , type = "b",
+           ylab = paste("Acceleration (scaled)\nZ-component"),
+           xlab = "Time (s)",
+           las = 1,
+           cex.lab = 1.3,
+           lty = 2,
+           ylim = c(-1,1))
+       grid()
+       legend("topleft", "(b)", bty="n", cex = 1.2) 
+       dev.off()
+       
+       
+       # ?spec.ar
+       # spec.ar(z_acc_cen_norm, log="no", plot = TRUE)
+      
+       # ?as.difftime
+       # ?spec.ar
+      # ?plot
       
       y <- length(z_acc_cen_norm)
       
@@ -127,7 +159,7 @@ for(i in 1:nrow(acc.measures)){
           
         }
         
-        x <- spec.ar(z_acc_cen_norm, log="no", plot = FALSE)
+        x <- spec.ar(z_acc_cen_norm, log="no", plot = TRUE)
         # ?spec.ar
         max.spec <- max(unlist(x[['spec']]))
         freq.max <- unlist(x[['spec']]) == max.spec
@@ -136,6 +168,31 @@ for(i in 1:nrow(acc.measures)){
         spec.freq <- freq*20  # multiply by sampling interval (Hz)
         z[i] <- spec.freq
         n[i] <- length(z_acc_cen_norm)
+        
+        # Plot AR thing
+        value <- unlist(x[['spec']])[,1]
+        # str(value)
+        freq.v <- unlist(x['freq'])*20
+        
+        
+        
+        
+        svg("murre_acc_example.svg",
+            width = 5, height = 3, family = "serif")
+        # ?pdf
+        par(ps = 14, cex = 1.5, cex.lab = 2)
+        par(mfrow = c(1,1),cex=1)
+        
+        par(mar=c(5,5,1,2))   
+        
+        plot(value~freq.v, type = "l",
+             ylab = "AR spectrum",
+             xlab = "Frequency (Hz)",
+             las = 1,
+             cex.lab = 1.3)
+        abline(v = spec.freq, lty = 2)
+        legend("topleft", "(d)", bty="n", cex = 1.2) 
+        dev.off()
         
       }
    
@@ -153,8 +210,64 @@ for(i in 1:nrow(acc.measures)){
   acc.measures$n_acc_samples <- n
 
   
+  
+  
+  
   par(mfrow= c(1,1))
-  hist(z, breaks = 100)
+  
+  
+  
+  svg("murre_acc_hist_all.svg",
+      width = 5, height = 4, family = "serif")
+  # ?pdf
+  par(ps = 14, cex = 1.5, cex.lab = 2)
+  par(mfrow = c(1,1),cex=1)
+  
+  par(mar=c(5,6,1,2))   
+  
+  hist(z, breaks = 100,
+       ylab = "Number of\nacceleration samples",
+       main = "",
+       xlab = "AR peak frequency",
+       las = 1,
+       cex.lab = 1.3,
+       ylim = c(0,6000))
+  
+#   plot(value~freq.v, type = "l",
+#        ylab = "AR spectrum",
+#        xlab = "Frequency (Hz)",
+#        las = 1,
+#        cex.lab = 1.3)
+  # abline(v = spec.freq, lty = 2)
+  legend("topleft", "(f)", bty="n", cex = 1.2) 
+  dev.off()
+  
+  
+  svg("murre_acc_hist_flight.svg",
+      width = 5, height = 4, family = "serif")
+  # ?pdf
+  par(ps = 14, cex = 1.5, cex.lab = 2)
+  par(mfrow = c(1,1),cex=1)
+  
+  par(mar=c(5,6,1,2))   
+  
+  hist(z[acc.measures$wing_beat_freq > 4 & acc.measures$wing_beat_freq < 10], breaks = 50,
+       ylab = "Number of\nacceleration samples",
+       main = "",
+       xlab = "AR peak frequency",
+       las = 1,
+       cex.lab = 1.3)
+  
+  #   plot(value~freq.v, type = "l",
+  #        ylab = "AR spectrum",
+  #        xlab = "Frequency (Hz)",
+  #        las = 1,
+  #        cex.lab = 1.3)
+  # abline(v = spec.freq, lty = 2)
+  legend("topleft", "(h)", bty="n", cex = 1.2) 
+  dev.off()
+  
+  
   
   summary(is.na(z))
   summary(is.na(n))
@@ -166,8 +279,9 @@ for(i in 1:nrow(acc.measures)){
   
   idx <- c(1:nrow(acc.measures))
   p1 <- acc.measures$wing_beat_freq > 1.5 & acc.measures$wing_beat_freq < 2
+  p2 <- acc.measures$wing_beat_freq > 4 & acc.measures$wing_beat_freq < 10
   
-  i <- idx[p1][100]
+  i <- idx[!p1][100]
   
   
   # acc.measures
