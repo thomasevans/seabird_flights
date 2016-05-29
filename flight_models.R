@@ -207,19 +207,85 @@ birds.means$vmp <- birds_mp_df$speed
 # Wind calculations --------
 
 
+# i <- 1
+wind.speed <- seq(-12.0,12.0, 1)
+wind.dir <- seq(0,180,2)
 
-# Adapt this:
-tailwind <- seq(-10.0,10.0)
-flightperf_wind_gull <- adply(
-  tailwind,
-  1,
-  function(tailwind)findMaximumRangePower(
-    function(speed)computeChemicalPower(
-      computeFlappingPower(bird,speed),
-      bird
-    ),
-    lower=5,
-    upper=30,
-    windSpeed=tailwind
-  )
-)
+winds <- expand.grid(wind.speed, wind.dir)
+
+# Gulls
+  fun_powerchem <- function(speed)computeChemicalPower(computeFlappingPower(birds_means_list[1,],speed),birds_means_list[1,])
+  maximumRangeSpeed.chem <- findMaximumRangePower(fun_powerchem,
+                                                  3, 30, windSpeed = winds[,1],
+                                                  windDir = winds[,2])
+  gull.mean.wind <- cbind.data.frame(maximumRangeSpeed.chem, winds)
+
+
+  
+  fun_powerchem <- function(speed)computeChemicalPower(computeFlappingPower(birds_means_list[4,],speed),birds_means_list[4,])
+  maximumRangeSpeed.chem <- findMaximumRangePower(fun_powerchem,
+                                                  3, 30, windSpeed = winds[,1],
+                                                  windDir = winds[,2])
+  murre.mean.wind <- cbind.data.frame(maximumRangeSpeed.chem, winds)
+  
+  
+  plot(murre.mean.wind$Var1, murre.mean.wind$Var2, col = murre.mean.wind$speed)
+
+  
+  plot(gull.mean.wind$Var1, gull.mean.wind$Var2, col = gull.mean.wind$speed)
+  
+# str(birds_mr)
+
+# birds_mr_wind_df <- do.call(rbind , birds_mr_wind)
+gull.mean.wind <- gull.mean.wind[gull.mean.wind$Var1 >= 0,]
+murre.mean.wind <- murre.mean.wind[murre.mean.wind$Var1 >= 0,]
+
+names(murre.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
+names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
+
+
+plot(murre.mean.wind$wind_speed~ murre.mean.wind$wind_dir, col = murre.mean.wind$speed)
+
+
+plot(gull.mean.wind$wind_speed~ gull.mean.wind$wind_dir, col = gull.mean.wind$speed)
+
+
+
+library(CircStats)
+
+  # Calculate wind components (relative to heading)
+  
+  # Gulls
+gull.mean.wind$va_vw_angle <- deg(asin((gull.mean.wind$wind_speed*(sin(rad(gull.mean.wind$wind_dir))))/gull.mean.wind$speed)) + gull.mean.wind$wind_dir
+  
+  gull.mean.wind$Vw.c <-  gull.mean.wind$wind_speed*sin(rad(gull.mean.wind$va_vw_angle))
+  gull.mean.wind$Vw.s <-  gull.mean.wind$wind_speed*cos(rad(gull.mean.wind$va_vw_angle))
+  
+  
+  plot(gull.mean.wind$Vw.c~gull.mean.wind$Vw.s, col = gull.mean.wind$speed,
+       xlim = c(-10,10), ylim = c(0,10))
+  
+  
+  # Murres
+  murre.mean.wind$va_vw_angle <- deg(asin((murre.mean.wind$wind_speed*(sin(rad(murre.mean.wind$wind_dir))))/murre.mean.wind$speed)) + murre.mean.wind$wind_dir
+  
+  murre.mean.wind$Vw.c <-  murre.mean.wind$wind_speed*sin(rad(murre.mean.wind$va_vw_angle))
+  murre.mean.wind$Vw.s <-  murre.mean.wind$wind_speed*cos(rad(murre.mean.wind$va_vw_angle))
+  
+  f <- murre.mean.wind$Vw.s == 2
+  
+  summary(f)
+  
+  plot(murre.mean.wind$speed~ murre.mean.wind$Vw.c )
+  
+  
+  (murre.mean.wind$wind_speed*murre.mean.wind$wind_speed) - ((murre.mean.wind$Vw.c*murre.mean.wind$Vw.c) + (murre.mean.wind$Vw.s*murre.mean.wind$Vw.s))
+  
+  
+  plot(murre.mean.wind$Vw.c~murre.mean.wind$Vw.s, col = murre.mean.wind$speed,
+       xlim = c(-10,10), ylim = c(0,10))
+  # abline(v= se)
+  grid()
+  
+  # plot(gull.mean.wind$va_vw_angle,gull.mean.wind$speed )
+  
