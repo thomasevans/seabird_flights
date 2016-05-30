@@ -1740,4 +1740,75 @@ ggsave("va_murre_predication2.svg", width = 5, height = 6, units = "in")
 
 
 
+# Predictions for no wind ----
 
+# Gulls
+
+lbbg.new.data.df <- cbind.data.frame(
+  trunc_seg_dist_a_b_km = dist.median,
+  cross_wind_flt_ht_alt_filter_abs = 0,
+  cross_wind_flt_ht_alt_filter_type = factor(
+    c(-1,1,-1,1), levels = c(-1, 1),
+    labels = c("to left", "to right")),
+  head_wind_flt_ht_alt_filter_abs = 0,
+  head_wind_flt_ht_alt_filter_type = factor(
+    c(1,-1,-1,1), levels = c(-1, 1),
+    labels = c("head", "tail")),
+  ring_number = rep(unique(flight_alt_ok$ring_number[flight_alt_ok$species == "gull"]),4)
+)
+
+pred.va <- predict(lbbg_model_va,
+                   newdata = lbbg.new.data.df,
+                   re.form=NA)
+mean(pred.va)
+
+pred.va <- predict(lbbg_model_va,
+                   newdata = lbbg.new.data.df,
+                   re.form=NULL)
+
+library(plyr)
+df <- cbind.data.frame(pred.va,lbbg.new.data.df$ring_number)
+names(df) <- c("va", "ring_number")
+x <- ddply(df, .(ring_number),
+      summarise,
+      mean = mean(va)
+)
+str(x)
+x[,2]
+
+
+
+murre.new.data.df <- cbind.data.frame(
+  trunc_seg_dist_a_b_km = dist.median,
+  cross_wind_flt_ht_alt_filter_abs = 0,
+  cross_wind_flt_ht_alt_filter_type = factor(
+    c(-1,1,-1,1), levels = c(-1, 1),
+    labels = c("to left", "to right")),
+  head_wind_flt_ht_alt_filter_abs = 0,
+  head_wind_flt_ht_alt_filter_type = factor(
+    c(1,-1,-1,1), levels = c(-1, 1),
+    labels = c("head", "tail")),
+  ring_number = rep(unique(flight_alt_ok$ring_number[flight_alt_ok$species == "murre"]),4)
+)
+
+
+
+pred.va <- predict(murre_model_va,
+                   newdata = murre.new.data.df,
+                   re.form=NA)
+
+mean(pred.va)
+
+pred.va <- predict(murre_model_va,
+                   newdata = murre.new.data.df,
+                   re.form=NULL)
+
+# library(plyr)
+df <- cbind.data.frame(pred.va,murre.new.data.df$ring_number)
+names(df) <- c("va", "ring_number")
+x <- ddply(df, .(ring_number),
+           summarise,
+           mean = mean(va)
+)
+str(x)
+x[,2]
