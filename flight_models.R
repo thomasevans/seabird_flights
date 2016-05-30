@@ -331,3 +331,290 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   
   write.csv(birds_details, row.names = FALSE, file = "birds_predictions_flight.csv")
   
+  
+  
+# **** Various plot ------  
+  library("ggplot2")
+  library("scales")
+  library(RColorBrewer)               #for brewer.pal()
+  library(cowplot)
+  library(akima)
+  
+  theme_new <- theme_bw(base_size = 14, base_family = "serif") +
+    theme(legend.position = c(1, 1),
+          legend.justification = c(1, 1),
+          legend.key.size =   unit(2, "lines"),
+          legend.key = element_rect(colour =NA),
+          legend.text = element_text(size = 12),
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 14),
+          legend.text.align = 0,
+          legend.key.width = unit(3, "lines"),
+          legend.title = element_blank()
+    )
+  # Airspeed prediction plots -----
+  
+  # Murres - according to track ----
+
+  str(murre.mean.wind)
+  
+  v <- seq(5, 30, 0.5) 
+  murre.mean.wind$z2 <- findInterval(murre.mean.wind$speed, v)
+  murre.mean.wind$z3 <- v[murre.mean.wind$z2]
+  
+  
+  murre_gg <- data.frame(
+    x = murre.mean.wind$Vw.s_track,
+    y = murre.mean.wind$Vw.c_track,
+    z = murre.mean.wind$speed,
+    z2 = murre.mean.wind$z3
+  )
+  
+  
+  # install.packages("akima")
+  # Using tip from SO answer: http://stackoverflow.com/a/19339663/1172358
+  fld <- with(murre_gg, interp(x = x, y = y, z = z, duplicate = "strip",
+                               nx = 100, ny = 100))
+  # ?interp
+  
+  
+  
+  df <- melt(fld$z, na.rm = TRUE)
+  names(df) <- c("x", "y", "Va")
+  df$x <- fld$x[df$x]
+  df$y <- fld$y[df$y]
+
+  
+  lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+  lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+
+ p <-  ggplot(data = df, aes(x = x, y = y, z = Va)) +
+    geom_tile(aes(fill = Va)) +
+    stat_contour(colour = "grey20", lty = 2) +
+    scale_x_continuous(expand=c(0,0), limits = c(-10,10))+
+    scale_y_continuous(expand=c(0,0), limits = c(0,10))+
+    coord_fixed() +
+    # scale_fill_continuous(name = "Va",
+                          # low = "white", high = "blue") 
+    scale_fill_gradient2(low = muted("blue"), mid = "white",
+                       high = muted("red"), midpoint = 20, space = "Lab",
+                       na.value = "grey50", guide = "colourbar") +
+    labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+          y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
+          fill = expression("Va ("~ms^{-1}~")"),
+          parse = TRUE) +
+   theme_new +
+   theme(legend.title = element_text(size = 14)) +
+   theme(legend.position = "top")+
+   theme(legend.key.size = unit(0.25, "inch")) +
+    annotate("text", label = c(paste(lab.1),paste(lab.2)),
+             x = c( 8, -7.5),
+             y = c( 1.5, 1.5),
+             parse=TRUE,
+             colour = "grey40",
+             size = 4,
+             vjust = 0.5) 
+  p <- p + annotate("text",  x= -9,
+                    y = 9, label = "(b)",
+                    vjust = 1, hjust=0, size = 5)
+  p
+  ggsave("va_murre_model_prediction_track.svg", width = 5, height = 4, units = "in")
+  
+  
+    # Gull - according to track -------
+  str(gull.mean.wind)
+  
+  v <- seq(5, 30, 0.5) 
+  gull.mean.wind$z2 <- findInterval(gull.mean.wind$speed, v)
+  gull.mean.wind$z3 <- v[gull.mean.wind$z2]
+  
+  
+  gull_gg <- data.frame(
+    x = gull.mean.wind$Vw.s_track,
+    y = gull.mean.wind$Vw.c_track,
+    z = gull.mean.wind$speed,
+    z2 = gull.mean.wind$z3
+  )
+  
+  
+  # install.packages("akima")
+  # Using tip from SO answer: http://stackoverflow.com/a/19339663/1172358
+  fld <- with(gull_gg, interp(x = x, y = y, z = z, duplicate = "strip",
+                              nx = 100, ny = 100))
+  # ?interp
+  
+  
+  
+  df <- melt(fld$z, na.rm = TRUE)
+  names(df) <- c("x", "y", "Va")
+  df$x <- fld$x[df$x]
+  df$y <- fld$y[df$y]
+  
+  lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+  lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+  
+  p <-  ggplot(data = df, aes(x = x, y = y, z = Va)) +
+    geom_tile(aes(fill = Va)) +
+    stat_contour(colour = "grey20", lty = 2) +
+    scale_x_continuous(expand=c(0,0), limits = c(-10,10))+
+    scale_y_continuous(expand=c(0,0), limits = c(0,7.5))+
+    coord_fixed() +
+    # scale_fill_continuous(name = "Va",
+    # low = "white", high = "blue") 
+    scale_fill_gradient2(low = muted("blue"), mid = "white",
+                         high = muted("red"), midpoint = 12.7, space = "Lab",
+                         na.value = "grey50", guide = "colourbar") +
+    labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+          y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
+          fill = expression("Va ("~ms^{-1}~")"),
+          parse = TRUE) +
+    theme_new +
+    theme(legend.title = element_text(size = 14)) +
+    theme(legend.position = "top")+
+    theme(legend.key.size = unit(0.25, "inch")) +
+    annotate("text", label = c(paste(lab.1),paste(lab.2)),
+             x = c( 8, -7.5),
+             y = c( 1.5, 1.5),
+             parse=TRUE,
+             colour = "grey40",
+             size = 4,
+             vjust = 0.5) 
+  p <- p + annotate("text",  x= -9,
+                    y = 7, label = "(a)",
+                    vjust = 1, hjust=0, size = 5)
+  p
+  ggsave("va_gull_model_prediction_track.svg", width = 5, height = 4, units = "in")
+  
+  
+  # Murre - relative to Va vector -----
+  
+  
+  str(murre.mean.wind)
+  
+#   v <- seq(5, 30, 0.5) 
+#   murre.mean.wind$z2 <- findInterval(murre.mean.wind$speed, v)
+#   murre.mean.wind$z3 <- v[murre.mean.wind$z2]
+  
+  
+  murre_gg <- data.frame(
+    x = murre.mean.wind$Vw.s,
+    y = murre.mean.wind$Vw.c,
+    z = murre.mean.wind$speed,
+    z2 = murre.mean.wind$z3
+  )
+  
+  
+  # install.packages("akima")
+  # Using tip from SO answer: http://stackoverflow.com/a/19339663/1172358
+  fld <- with(murre_gg, interp(x = x, y = y, z = z, duplicate = "strip",
+                               nx = 100, ny = 100))
+  # ?interp
+  
+  
+  
+  df <- melt(fld$z, na.rm = TRUE)
+  names(df) <- c("x", "y", "Va")
+  df$x <- fld$x[df$x]
+  df$y <- fld$y[df$y]
+  
+  
+  lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+  lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+  
+  p <-  ggplot(data = df, aes(x = x, y = y, z = Va)) +
+    geom_tile(aes(fill = Va)) +
+    stat_contour(colour = "grey20", lty = 2) +
+    scale_x_continuous(expand=c(0,0), limits = c(-10,10))+
+    scale_y_continuous(expand=c(0,0), limits = c(0,10))+
+    coord_fixed() +
+    # scale_fill_continuous(name = "Va",
+    # low = "white", high = "blue") 
+    scale_fill_gradient2(low = muted("blue"), mid = "white",
+                         high = muted("red"), midpoint = 20, space = "Lab",
+                         na.value = "grey50", guide = "colourbar") +
+    labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+          y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
+          fill = expression("Va ("~ms^{-1}~")"),
+          parse = TRUE) +
+    theme_new +
+    theme(legend.title = element_text(size = 14)) +
+    theme(legend.position = "top")+
+    theme(legend.key.size = unit(0.25, "inch")) +
+    annotate("text", label = c(paste(lab.1),paste(lab.2)),
+             x = c( 8, -7.5),
+             y = c( 1.5, 1.5),
+             parse=TRUE,
+             colour = "grey40",
+             size = 4,
+             vjust = 0.5) 
+  p <- p + annotate("text",  x= -9,
+                    y = 9, label = "(d)",
+                    vjust = 1, hjust=0, size = 5)
+  p
+  ggsave("va_murre_model_prediction_heading.svg", width = 5, height = 4, units = "in")
+  
+  
+  # Gull - according to heading -------
+  str(gull.mean.wind)
+  
+#   v <- seq(5, 30, 0.5) 
+#   gull.mean.wind$z2 <- findInterval(gull.mean.wind$speed, v)
+#   gull.mean.wind$z3 <- v[gull.mean.wind$z2]
+#   
+  
+  gull_gg <- data.frame(
+    x = gull.mean.wind$Vw.s,
+    y = gull.mean.wind$Vw.c,
+    z = gull.mean.wind$speed,
+    z2 = gull.mean.wind$z3
+  )
+  
+  
+  # install.packages("akima")
+  # Using tip from SO answer: http://stackoverflow.com/a/19339663/1172358
+  fld <- with(gull_gg, interp(x = x, y = y, z = z, duplicate = "strip",
+                              nx = 100, ny = 100))
+  # ?interp
+  
+  
+  
+  df <- melt(fld$z, na.rm = TRUE)
+  names(df) <- c("x", "y", "Va")
+  df$x <- fld$x[df$x]
+  df$y <- fld$y[df$y]
+  
+  lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
+  lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
+  
+  p <-  ggplot(data = df, aes(x = x, y = y, z = Va)) +
+    geom_tile(aes(fill = Va)) +
+    stat_contour(colour = "grey20", lty = 2) +
+    scale_x_continuous(expand=c(0,0), limits = c(-10,10))+
+    scale_y_continuous(expand=c(0,0), limits = c(0,8))+
+    coord_fixed() +
+    # scale_fill_continuous(name = "Va",
+    # low = "white", high = "blue") 
+    scale_fill_gradient2(low = muted("blue"), mid = "white",
+                         high = muted("red"), midpoint = 12.7, space = "Lab",
+                         na.value = "grey50", guide = "colourbar") +
+    labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+          y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
+          fill = expression("Va ("~ms^{-1}~")"),
+          parse = TRUE) +
+    theme_new +
+    theme(legend.title = element_text(size = 14)) +
+    theme(legend.position = "top")+
+    theme(legend.key.size = unit(0.25, "inch")) +
+    annotate("text", label = c(paste(lab.1),paste(lab.2)),
+             x = c( 8, -7.5),
+             y = c( 1.5, 1.5),
+             parse=TRUE,
+             colour = "grey40",
+             size = 4,
+             vjust = 0.5) 
+  p <- p + annotate("text",  x= -9,
+                    y = 7.5, label = "(c)",
+                    vjust = 1, hjust=0, size = 5)
+  p
+  ggsave("va_gull_model_prediction_heading.svg", width = 5, height = 4, units = "in")
+  
