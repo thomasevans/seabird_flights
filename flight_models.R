@@ -618,3 +618,115 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   p
   ggsave("va_gull_model_prediction_heading.svg", width = 5, height = 4, units = "in")
   
+  
+  
+  # Power curve plot -----
+  powercurve.murre <- flightperf.murre$powercurve
+  powercurve.gull <- flightperf.gull$powercurve
+  
+  
+  par(mar=c(3.1,3.1,0.4,3.1),mgp=c(1.9,.7,0),cex=0.75)
+  with(powercurve.murre , plot( speed, power.aero, type='b', 
+                                xlab=NA, ylab=NA, xlim=c(0,28), ylim = c(0,35)))
+  with(powercurve.gull , points( speed, power.aero, type='b', 
+                                 col = "red"))
+  mtext(side = 1, line = 2,'Airspeed (m/s)')
+  mtext(side = 2, line = 2,'Aerodynamic power (W)')
+  
+  
+
+  svg("flight_power_curves.svg",
+      width = 5, height = 5, family = "serif")
+  
+  par(mfrow = c(1,1))
+  par(mar=c(4, 4, 1, 1) + 0.1)   
+  
+  plot(powercurve.murre$power.aero ~
+         powercurve.murre$speed, type = "n",
+       # cex.lab = 1.5,
+       las = 1,
+       xlab = expression("Va"~~~~"Airspeed ("~ms^{-1}~")"),
+       ylab = "Aerodynamic power (W)",
+       cex.lab = 1.3,
+       xlim = c(0, 28),
+       ylim = c(0, 35),
+       yaxs = "i",
+       xaxs = "i")
+  grid()    
+  
+  gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+  }
+  
+  cols.new <- gg_color_hue(2)
+  cols.new <- rev(cols.new)
+  
+  points(powercurve.murre$power.aero~powercurve.murre$speed,
+         type = "l", lwd = 2, col = cols.new[2])
+  
+  points(powercurve.gull$power.aero~powercurve.gull$speed,
+         type = "l", lwd = 2, col = cols.new[1])
+  
+  
+  points(birds_mr[[1]]$speed,computeFlappingPower(birds_means_list[1,],
+                                                  birds_mr[[1]]$speed)[2][1,],
+         bg = cols.new[1], pch = 21)
+  segments(0,0,birds_mr[[1]]$speed,computeFlappingPower(birds_means_list[1,],
+                                                        birds_mr[[1]]$speed)[2][1,],
+           lty = 2, cols.new[1])
+  segments(birds_mr[[1]]$speed,computeFlappingPower(birds_means_list[1,],
+                                                        birds_mr[[1]]$speed)[2][1,],
+           birds_mr[[1]]$speed,0,
+           lty = 2, cols.new[1])
+  
+  points(birds_mr[[4]]$speed,computeFlappingPower(birds_means_list[4,],
+                                                  birds_mr[[4]]$speed)[2][1,],
+         bg = cols.new[2], pch = 21)
+  segments(0,0,birds_mr[[4]]$speed,computeFlappingPower(birds_means_list[4,],
+                                                        birds_mr[[4]]$speed)[2][1,],
+           lty = 2, cols.new[2])
+  segments(birds_mr[[4]]$speed,computeFlappingPower(birds_means_list[4,],
+                                                    birds_mr[[4]]$speed)[2][1,],
+           birds_mr[[4]]$speed,0,
+           lty = 2, cols.new[2])
+  
+  points(birds_mp[[1]]$speed,computeFlappingPower(birds_means_list[1,],
+                                                  birds_mp[[1]]$speed)[2][1,],
+         bg = cols.new[1], pch = 21)
+  segments(birds_mp[[1]]$speed,computeFlappingPower(birds_means_list[1,],
+                                  birds_mp[[1]]$speed)[2][1,],birds_mp[[1]]$speed,0,
+           lty = 3, cols.new[1])
+  segments(birds_mp[[1]]$speed,computeFlappingPower(birds_means_list[1,],
+                                                    birds_mp[[1]]$speed)[2][1,],
+           0,computeFlappingPower(birds_means_list[1,],
+                                                    birds_mp[[1]]$speed)[2][1,],
+           lty = 3, cols.new[1])
+  
+  points(birds_mp[[4]]$speed,computeFlappingPower(birds_means_list[4,],
+                                                  birds_mp[[4]]$speed)[2][1,],
+         bg = cols.new[2], pch = 21)
+  segments(birds_mp[[4]]$speed,computeFlappingPower(birds_means_list[4,],
+                                                    birds_mp[[4]]$speed)[2][1,],birds_mp[[4]]$speed,0,
+           lty = 3, cols.new[2])
+  segments(birds_mp[[4]]$speed,computeFlappingPower(birds_means_list[4,],
+                                                    birds_mp[[4]]$speed)[2][1,],
+           0,computeFlappingPower(birds_means_list[4,],
+                                  birds_mp[[4]]$speed)[2][1,],
+           lty = 3, cols.new[2])
+  
+  
+  text(14.3, 6,
+       "Vmr", col = cols.new[1])
+  text(10.8, 4.5,
+       "Vmp", col = cols.new[1])
+  text(21.3, 20,
+       "Vmr", col = cols.new[2])
+  text(16.8, 17,
+       "Vmp", col = cols.new[2])
+  
+  box()
+  dev.off()
+  
+  
+  # Displaying predicted, and actual speeds ----
