@@ -730,3 +730,110 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   
   
   # Displaying predicted, and actual speeds ----
+  
+  # Code for transparent colours 
+  # Code from https://github.com/mylesmharrison/colorRampPaletteAlpha/blob/master/colorRampPaletteAlpha.R
+  # Hight-lighted by blog post: http://www.everydayanalytics.ca/2014/03/colorRampPalette-alpha-in-R.html
+  addalpha <- function(colors, alpha=1.0) {
+    r <- col2rgb(colors, alpha=T)
+    # Apply alpha
+    r[4,] <- alpha*255
+    r <- r/255.0
+    return(rgb(r[1,], r[2,], r[3,], r[4,]))
+  }
+  
+  
+  svg("flight_speeds_predicted_recorded.svg",
+      width = 5, height = 5, family = "serif")
+  
+  par(mfrow = c(1,1))
+  par(mar=c(4, 7.4, 1, 1) + 0.1)   
+  
+  plot(powercurve.murre$power.aero ~
+         powercurve.murre$speed, type = "n",
+       # cex.lab = 1.5,
+       las = 1,
+       xlab = expression("Speed ("~ms^{-1}~")"),
+       ylab = "",
+       cex.lab = 1.3,
+       xlim = c(5, 28),
+       ylim = c(0, 9),
+       yaxt = "n",
+       yaxs = "i",
+       xaxs = "i")
+  grid(ny = 9)    
+  # ?grid
+  gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+  }
+  
+  cols.new <- gg_color_hue(2)
+  cols.new <- rev(cols.new)
+  cols.new.05 <- addalpha(cols.new, 0.6)
+  cols.new.08 <- addalpha(cols.new, 0.6)
+  
+
+  
+  points(birds_details$Vmr[1:19], rep(7, 19),
+         col = cols.new.08[1],
+         cex = 1.5)
+  points(birds_mr[[1]]$speed, 7,
+         bg = cols.new.05[1], pch = 21,
+         cex = 2)
+  
+  points(birds_details$Vmr[20:46], rep(3, 46-19),
+         col = cols.new.08[2],
+         cex = 1.5)
+  points(birds_mr[[4]]$speed, 3,
+         bg = cols.new.05[2], pch = 21,
+         cex = 2)
+  
+  points(birds_details$Vmp[1:19], rep(6, 19),
+         col = cols.new.08[1],
+         cex = 1.5)
+  points(birds_mp[[1]]$speed, 6,
+         bg = cols.new.05[1], pch = 21,
+         cex = 2)
+  
+  points(birds_details$Vmp[20:46], rep(2, 46-19),
+         col = cols.new.08[2],
+         cex = 1.5)
+  points(birds_mp[[4]]$speed, 2,
+         bg = cols.new.05[2], pch = 21,
+         cex = 2)
+  
+  # ?mtext
+  mtext("Lesser Black-\nbacked Gulls", side = 2,
+        las = 1, at = 8, line = 5, adj = 0.2)
+  mtext("Vmr", side = 2,
+        las = 1, at = 7, line = 4, adj = 0.2)
+  mtext("Vmp", side = 2,
+        las = 1, at = 6, line = 4, adj = 0.2)
+  mtext("Va", side = 2,
+        las = 1, at = 5, line = 4, adj = 0.2)
+  
+  
+  mtext("Common \nMurres", side = 2,
+        las = 1, at = 4, line = 5, adj = 0.2)
+  mtext("Vmr", side = 2,
+        las = 1, at = 3, line = 4, adj = 0.2)
+  mtext("Vmp", side = 2,
+        las = 1, at = 2, line = 4, adj = 0.2)
+  mtext("Va", side = 2,
+        las = 1, at = 1, line = 4, adj = 0.2)
+  
+  
+  # va - gulls
+  # mean: 11.19277
+  
+  # Individuals: 11.87982 11.73128 11.06866 10.70988 10.85327 11.19412 11.69940 11.26912 11.11638 10.99355 11.45010 11.10744 11.15412 11.45894 11.03225 10.36595
+  
+  # Va - murres
+  # mean:14.83481
+  
+  # Individuals: 15.90540 15.65118 17.22575 13.11338 13.95448 15.02935 14.78943 15.82419 16.64745 15.05879 12.70207 12.60923 13.46966 15.52329 16.59419 14.74537 15.46680 14.00277 13.19658 14.88626 15.13534
+  
+  
+  dev.off()
+  
