@@ -48,3 +48,4 @@ acc.rec.df.Rdata
 points.acc.calc.RData
 # Ignore Rdata files
 *.RData
+.RDataTmp
