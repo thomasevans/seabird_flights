@@ -687,6 +687,11 @@ summary(models.gull.10m_no_filter[[2]])
 
 # ***** Statistical analysis - murres -------
 # * Flight height with filter -----
+flight_alt_ok_murre_original <- flight_alt_ok_murre
+
+flight_alt_ok_murre <- flight_alt_ok_murre_original[
+  !(flight_alt_ok_murre_original$flight_id_combined %in% c("m527", "m554", "m623",
+                                                           "m634", "m676", "m637")),]
 
 # Fit possible models (17):
 models.murre <- list()
@@ -829,7 +834,7 @@ models.murre.fit.df <- cbind.data.frame(c(1:17),models.murre.aicc,
                                        t(models.murre.r2m))
 names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 
-
+# write.csv(models.murre.fit.df, file = "models.murre.fit.df.filtered.track.csv")
 
 
 
@@ -1142,9 +1147,30 @@ summary(models.murre.10m_no_filter[[2]])
 
 # *********** Coef + p-values -----------
 # Calculate p values for dropping of terms from lowest AIC model -----
-murre_model_va <- models.murre[[7]]
+murre_model_va <- models.murre[[14]]
 lbbg_model_va <- models.gull[[14]]
 
+
+
+library(influence.ME)
+infl <- influence(models.murre[[14]], obs = TRUE)
+(cooks.distance(infl))>0.06
+plot(infl, which = "cook")
+# alt_na_rem <- !is.na(flight_alt_ok_murre$altitude_callib_extm)
+alt_na_rem <- !is.na(flight_alt_ok_murre$altitude_callib_extm)
+exclude.flights <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.distance(infl))>0.06]
+# "m527" "m554" "m623" "m634" "m676"
+
+infl2 <- influence(models.murre.f.14, obs = TRUE)
+(cooks.distance(infl2))>0.06
+plot(infl2, which = "cook")
+# alt_na_rem <- !is.na(flight_alt_ok_murre$altitude_callib_extm)
+x <- (cooks.distance(infl2))>0.06
+exclude.flights2 <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.distance(infl2))>0.1]
+# "m637"
+
+# 6 flights excluded:
+# "m527" "m554" "m623" "m634" "m676" "m637"
 
 lbbg_model_va <- models.gull.flt_ht_no_filter[[14]]
 
@@ -1152,10 +1178,10 @@ lbbg_model_va <- models.gull.flt_ht_no_filter[[14]]
 lbbg_model_va <- models.gull.10m_no_filter[[14]]
 
 
-murre_model_va <- models.murre.flt_ht_no_filter[[7]]
+murre_model_va <- models.murre.flt_ht_no_filter[[14]]
 
 
-murre_model_va <- models.murre.10m_no_filter[[7]]
+murre_model_va <- models.murre.10m_no_filter[[14]]
 
 
 
@@ -1192,6 +1218,7 @@ drop1(lbbg_model_va,test="user",sumFun=KRSumFun)
 # p values for murre model
 drop1(murre_model_va,test="user",sumFun=KRSumFun)
 
+# drop1(models.murre.f.14, test = "user", sumFun = KRSumFun)
 # drop1(models.gull.stdz[[14]],test="user",sumFun=KRSumFun)
 
 # Cite: Halekoh, U., and Højsgaard, S. (2014). A kenward-roger approximation and parametric bootstrap methods for tests in linear mixed models–the R package pbkrtest. Journal of Statistical Software 59, 1–30.
@@ -1297,7 +1324,7 @@ zp1 <- zp1 + coord_flip()
 # zp1 <- zp1 + theme_new + ylim(-4,2.5)
 zp1 <- zp1 + scale_y_continuous(breaks = seq(-4, 4, 1),
                                 minor_breaks = seq(-4, 4, 0.5),
-                                limits = c(-4, 2.5))
+                                limits = c(-4, 3))
 # ?scale_y_continuous
 # zp1 <- zp1 + theme(axis.text = element_text(size = 12))
 zp1 <- zp1 +  theme_new
@@ -1311,7 +1338,7 @@ zp1 <- zp1 +
 # zp1 <- zp1 + theme(legend.justification=c(0,0), legend.position=c(0,0))
 zp1
 
-ggsave(zp1, filename = "va_model_coef_fig2.svg", width = 6, height = 6,
+ggsave(zp1, filename = "va_model_coef_fig_TRACK.svg", width = 6, height = 6,
        units = "in")
 # ?ggsave
 
@@ -1390,9 +1417,7 @@ lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
 p <- ggplot(gg,aes(x,y)) + 
   geom_raster(aes(fill=z3))+
   scale_fill_gradient2(low = muted("blue"), mid = "white",
-                       high = muted("red"), midpoint = median(
-                         flight_alt_ok_gg$z, na.rm = TRUE
-                       ), space = "Lab",
+                       high = muted("red"), midpoint = 10.95978, space = "Lab",
                        na.value = "grey50", guide = "colourbar") +
   scale_x_continuous(expand=c(0,0))+
   scale_y_continuous(expand=c(0,0))+
@@ -1430,7 +1455,7 @@ p <- p + annotate("text",  x= -9,
                   y = 9, label = "(b)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("va_gull_predication2.svg", width = 5, height = 6, units = "in")
+ggsave("va_gull_predication_track.svg", width = 5, height = 6, units = "in")
 
 
 
@@ -1467,10 +1492,11 @@ gg$z <- with(gg, pred.va)      # need long format for ggplot
 summary(is.na(gg$z))
 range(gg$z, na.rm = TRUE)
 
-v <- seq(10, 25, 0.5) 
+v <- seq(9, 25, 0.5) 
 gg$z2 <- findInterval(gg$z, v)
 gg$z3 <- v[gg$z2]
 
+# summary(gg$z)
 
 flight_alt_ok_gg <- data.frame(
   x = flight_alt_ok_murre$head_wind_flt_ht_alt_filter,
@@ -1479,11 +1505,6 @@ flight_alt_ok_gg <- data.frame(
   z2 = findInterval(flight_alt_ok_murre$va_flt_ht_alt_filter, v)
 )
 
-# 
-# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
-# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
-# lab.3 <- expression("Vw"["c"]+~"(to right)")
-# lab.4 <- expression("Vw"["c"]-~"(to left)")
 
 
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
@@ -1496,9 +1517,7 @@ lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
 p <- ggplot(gg,aes(x,y)) + 
   geom_raster(aes(fill=z3))+
   scale_fill_gradient2(low = muted("blue"), mid = "white",
-                       high = muted("red"), midpoint = median(
-                         flight_alt_ok_gg$z, na.rm = TRUE
-                       ), space = "Lab",
+                       high = muted("red"), midpoint = 13.6778, space = "Lab",
                        na.value = "grey50", guide = "colourbar") +
   scale_x_continuous(expand=c(0,0))+
   scale_y_continuous(expand=c(0,0))+
@@ -1527,7 +1546,7 @@ p <- p + annotate("text",  x= -9,
                   vjust = 1, hjust=0, size = 5)
 p
 
-ggsave("va_murre_predication2.svg", width = 5, height = 6, units = "in")
+ggsave("va_murre_predication_track.svg", width = 5, height = 6, units = "in")
 
 
 
@@ -1552,6 +1571,7 @@ pred.va <- predict(lbbg_model_va,
                    newdata = lbbg.new.data.df,
                    re.form=NA)
 mean(pred.va)
+#10.8972
 
 pred.va <- predict(lbbg_model_va,
                    newdata = lbbg.new.data.df,
@@ -1566,7 +1586,7 @@ x <- ddply(df, .(ring_number),
 )
 str(x)
 x[,2]
-
+# 11.68236 11.17443 11.04795 10.42490 10.84785 10.63654 11.36720 10.99591 10.73558 10.58941 11.17174 11.09349 11.17512 10.89864 10.44534 10.06882
 
 
 murre.new.data.df <- cbind.data.frame(
@@ -1589,7 +1609,7 @@ pred.va <- predict(murre_model_va,
                    re.form=NA)
 
 mean(pred.va)
-
+# 13.6778
 pred.va <- predict(murre_model_va,
                    newdata = murre.new.data.df,
                    re.form=NULL)
@@ -1603,3 +1623,5 @@ x <- ddply(df, .(ring_number),
 )
 str(x)
 x[,2]
+# [1] 14.51659 13.90763 15.47492 11.60889 13.19780 14.04954 13.21611 14.65621 15.63218 14.35419 11.94333 11.85689 12.06912 14.54855 15.50250 14.03046 14.53534 12.79665 11.78864
+# [20] 13.90724 13.64110
