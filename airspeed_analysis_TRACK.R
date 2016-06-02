@@ -171,6 +171,32 @@ flight_alt_ok_murre <- flight_alt_ok[flight_alt_ok$species == "murre",]
 # Fit possible models (17):
 models.gull <- list()
 
+
+
+models.gull[[18]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs
+                             + (1|ring_number),
+                           data = flight_alt_ok_gull)
+
+models.gull[[19]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_gull)
+
+models.gull[[20]] <- glmer(va_flt_ht_alt_filter ~
+                             
+                             cross_wind_flt_ht_alt_filter_abs +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_gull)
+
+
+
+
+
 models.gull[[14]] <- glmer(va_flt_ht_alt_filter ~
                        trunc_seg_dist_a_b_km +
                        cross_wind_flt_ht_alt_filter_abs*cross_wind_flt_ht_alt_filter_type +
@@ -286,7 +312,7 @@ models.gull[[1]] <- glmer(va_flt_ht_alt_filter ~ 1 +
 # Standardize models
 models.gull.stdz <- list()
 models.gull.stdz[[1]] <- models.gull[[1]]
-for(i in 2:17){
+for(i in 2:20){
   models.gull.stdz[[i]] <- standardize(models.gull[[i]], standardize.y=FALSE)
 }
 
@@ -295,12 +321,17 @@ models.gull.aicc.dif <- models.gull.aicc-min(models.gull.aicc)
 models.gull.r2m <- sapply(models.gull.stdz, r.squaredGLMM)
 t(models.gull.r2m)
 
-models.gull.fit.df <- cbind.data.frame(c(1:17),models.gull.aicc,
+mods_inc2 <- c(1, 2, 3, 7, 11, 18, 19, 20)
+models.gull.aicc.dif2 <- models.gull.aicc-min(models.gull.aicc[mods_inc2])
+
+
+models.gull.fit.df <- cbind.data.frame(c(1:20),models.gull.aicc,
                                        models.gull.aicc.dif,
+                                       models.gull.aicc.dif2,
                                        t(models.gull.r2m))
-names(models.gull.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+names(models.gull.fit.df) <- c("mod", "AICc", "dAICc", "dAICc_sub", "R2m", "R2c")
 
-
+write.csv(models.gull.fit.df, file = "gull_mod_track.csv")
 
 
 
@@ -696,6 +727,31 @@ flight_alt_ok_murre <- flight_alt_ok_murre_original[
 # Fit possible models (17):
 models.murre <- list()
 
+
+
+
+
+models.murre[[18]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs
+                           + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[19]] <- glmer(va_flt_ht_alt_filter ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_flt_ht_alt_filter_abs +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[20]] <- glmer(va_flt_ht_alt_filter ~
+                             
+                             cross_wind_flt_ht_alt_filter_abs +
+                             head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+
 models.murre[[14]] <- glmer(va_flt_ht_alt_filter ~
                              trunc_seg_dist_a_b_km +
                              cross_wind_flt_ht_alt_filter_abs*cross_wind_flt_ht_alt_filter_type +
@@ -820,7 +876,7 @@ models.murre[[1]] <- glmer(va_flt_ht_alt_filter ~ 1 +
 # Standardize models
 models.murre.stdz <- list()
 models.murre.stdz[[1]] <- models.murre[[1]]
-for(i in 2:17){
+for(i in 2:20){
   models.murre.stdz[[i]] <- standardize(models.murre[[i]], standardize.y=FALSE)
 }
 
@@ -829,10 +885,14 @@ models.murre.aicc.dif <- models.murre.aicc-min(models.murre.aicc)
 models.murre.r2m <- sapply(models.murre.stdz, r.squaredGLMM)
 t(models.murre.r2m)
 
-models.murre.fit.df <- cbind.data.frame(c(1:17),models.murre.aicc,
+mods_inc2 <- c(1, 2, 3, 7, 11, 18, 19, 20)
+models.murre.aicc.dif2 <- models.murre.aicc-min(models.murre.aicc[mods_inc2])
+
+models.murre.fit.df <- cbind.data.frame(c(1:20),models.murre.aicc,
                                        models.murre.aicc.dif,
+                                       models.murre.aicc.dif2,
                                        t(models.murre.r2m))
-names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "dAICc_sub", "R2m", "R2c")
 
 # write.csv(models.murre.fit.df, file = "models.murre.fit.df.filtered.track.csv")
 
@@ -1147,8 +1207,8 @@ summary(models.murre.10m_no_filter[[2]])
 
 # *********** Coef + p-values -----------
 # Calculate p values for dropping of terms from lowest AIC model -----
-murre_model_va <- models.murre[[14]]
-lbbg_model_va <- models.gull[[14]]
+murre_model_va <- models.murre[[20]]
+lbbg_model_va <- models.gull[[19]]
 
 
 
@@ -1310,8 +1370,8 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                              show.legend = FALSE)
 zp1 <- zp1 + scale_x_discrete("",
                               labels = c(expression("Vw"["c"]~" speed"),
-                                         expression("Vw"["c"]~" speed: type (to right)"),
-                                         expression("Vw"["c"]~" type (to right)"),
+                                         # expression("Vw"["c"]~" speed: type (to right)"),
+                                         # expression("Vw"["c"]~" type (to right)"),
                                          expression("Vw"["s"]~" speed"),
                                          expression("Vw"["s"]~" speed: type (tail-wind)"),
                                          expression("Vw"["s"]~" type (tail-wind)"),
@@ -1324,7 +1384,7 @@ zp1 <- zp1 + coord_flip()
 # zp1 <- zp1 + theme_new + ylim(-4,2.5)
 zp1 <- zp1 + scale_y_continuous(breaks = seq(-4, 4, 1),
                                 minor_breaks = seq(-4, 4, 0.5),
-                                limits = c(-4, 3))
+                                limits = c(-4, 2))
 # ?scale_y_continuous
 # zp1 <- zp1 + theme(axis.text = element_text(size = 12))
 zp1 <- zp1 +  theme_new
@@ -1332,13 +1392,13 @@ zp1 <- zp1 + theme_new_top_legend
 # zp1 <- zp1 + theme(legend.position = c(0.5, 0.3))
 zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Va ["~ms^{-1}~"])"))
 zp1 <- zp1 +
-  annotate("text",  x= layer_scales(zp1)$x$range$range[7],
+  annotate("text",  x= layer_scales(zp1)$x$range$range[5],
            y = layer_scales(zp1)$y$range$range[1], label = "(a)",
            vjust=-1, hjust=0, size = 5)
 # zp1 <- zp1 + theme(legend.justification=c(0,0), legend.position=c(0,0))
 zp1
 
-ggsave(zp1, filename = "va_model_coef_fig_TRACK.svg", width = 6, height = 6,
+ggsave(zp1, filename = "va_model_coef_fig_TRACK2.svg", width = 6, height = 8,
        units = "in")
 # ?ggsave
 
@@ -1355,7 +1415,7 @@ ggsave(zp1, filename = "va_model_coef_fig_TRACK.svg", width = 6, height = 6,
 # - See: http://stackoverflow.com/a/27571412/1172358
 
 
-wind.side <- seq(-10,10,.1)
+wind.side <- seq(0,10,.1)
 wind.assist <- seq(-10,10,.1)
 dist.median <- median(flight_alt_ok$trunc_seg_dist_a_b_km[flight_alt_ok$species == "gull"])
 
@@ -1397,7 +1457,7 @@ gg$z3 <- v[gg$z2]
 
 flight_alt_ok_gg <- data.frame(
   x = flight_alt_ok_gull$head_wind_flt_ht_alt_filter,
-  y = flight_alt_ok_gull$cross_wind_flt_ht_alt_filter,
+  y = abs(flight_alt_ok_gull$cross_wind_flt_ht_alt_filter),
   z = flight_alt_ok_gull$va_flt_ht_alt_filter,
   z2 = findInterval(flight_alt_ok_gull$va_flt_ht_alt_filter, v)
 )
@@ -1410,8 +1470,8 @@ flight_alt_ok_gg <- data.frame(
 
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
-lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+# lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","Cross-wind"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1424,7 +1484,7 @@ p <- ggplot(gg,aes(x,y)) +
   coord_fixed() +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
-             shape=21, alpha=1,na.rm=T, size=2) +
+             shape=21, alpha=1,na.rm=T, size=1.5) +
   labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
         y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
         fill = expression("Va ("~ms^{-1}~")"),
@@ -1444,9 +1504,9 @@ p <- ggplot(gg,aes(x,y)) +
 #            colour = "black",
 #            size = 5,
 #            vjust = 0) 
-  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(2, 2 , 8, -7.5),
-           y = c(-10, 8.5, 0, 0),
+  annotate("text", label = c(paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c( 2 , 9, -7.5),
+           y = c( 8.5, 1, 1),
            parse=TRUE,
            colour = "grey40",
            size = 4,
@@ -1455,7 +1515,7 @@ p <- p + annotate("text",  x= -9,
                   y = 9, label = "(b)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("va_gull_predication_track.svg", width = 5, height = 6, units = "in")
+ggsave("va_gull_predication_track2.svg", width = 6, height = 4, units = "in")
 
 
 
@@ -1492,7 +1552,7 @@ gg$z <- with(gg, pred.va)      # need long format for ggplot
 summary(is.na(gg$z))
 range(gg$z, na.rm = TRUE)
 
-v <- seq(9, 25, 0.5) 
+v <- seq(10, 26, 0.5) 
 gg$z2 <- findInterval(gg$z, v)
 gg$z3 <- v[gg$z2]
 
@@ -1500,7 +1560,7 @@ gg$z3 <- v[gg$z2]
 
 flight_alt_ok_gg <- data.frame(
   x = flight_alt_ok_murre$head_wind_flt_ht_alt_filter,
-  y = flight_alt_ok_murre$cross_wind_flt_ht_alt_filter,
+  y = abs(flight_alt_ok_murre$cross_wind_flt_ht_alt_filter),
   z = flight_alt_ok_murre$va_flt_ht_alt_filter,
   z2 = findInterval(flight_alt_ok_murre$va_flt_ht_alt_filter, v)
 )
@@ -1509,8 +1569,8 @@ flight_alt_ok_gg <- data.frame(
 
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
-lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+# lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","Cross-wind"))
 
 
 
@@ -1534,9 +1594,9 @@ p <- ggplot(gg,aes(x,y)) +
   theme(legend.title = element_text(size = 14)) +
   theme(legend.position = "top")+
   theme(legend.key.size = unit(0.25, "inch")) +
-  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(2, 2 , 8, -7.5),
-           y = c(-9, 8.5, 0, 0),
+  annotate("text", label = c(paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c( 2 , 8, -7.5),
+           y = c( 8.5, 1, 1),
            parse=TRUE,
            colour = "grey40",
            size = 4,
@@ -1546,7 +1606,7 @@ p <- p + annotate("text",  x= -9,
                   vjust = 1, hjust=0, size = 5)
 p
 
-ggsave("va_murre_predication_track.svg", width = 5, height = 6, units = "in")
+ggsave("va_murre_predication_track2.svg", width = 6, height = 4, units = "in")
 
 
 
