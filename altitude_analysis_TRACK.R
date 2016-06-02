@@ -59,7 +59,7 @@ theme_new_rt_legend <- theme_bw(base_size = 14, base_family = "serif") +
         axis.text = element_text(size = 14),
         axis.title = element_text(size = 14),
         legend.text.align = 0,
-        legend.key.width = unit(3, "lines"),
+        legend.key.width = unit(2, "lines"),
         legend.title = element_blank()
   )
 
@@ -81,7 +81,7 @@ flight_alt_ok$trunc_seg_dist_a_b_km <- flight_alt_ok$trunc_seg_dist_a_b / 1000
 hist(flight_alt_ok$trunc_seg_dist_a_b_km)
 
 # Type of wind assistance
-flight_alt_ok$head_wind_10m_alt_filter_type <- sign(flight_alt_ok$head_wind_10m_alt_filter)
+flight_alt_ok$head_wind_10m_alt_filter_type <- sign(flight_alt_ok$track_head_wind_10m_alt_filter)
 summary(as.factor(flight_alt_ok$head_wind_10m_alt_filter_type))
 flight_alt_ok$head_wind_10m_alt_filter_type <- factor(
   flight_alt_ok$head_wind_10m_alt_filter_type, levels = c(-1, 1),
@@ -90,12 +90,13 @@ flight_alt_ok$head_wind_10m_alt_filter_type <- factor(
 summary(flight_alt_ok$head_wind_10m_alt_filter_type)
 
 # Wind assistance absolute value
-flight_alt_ok$head_wind_10m_alt_filter_abs<- abs(flight_alt_ok$head_wind_10m_alt_filter)
+flight_alt_ok$head_wind_10m_alt_filter_abs<- abs(flight_alt_ok$track_head_wind_10m_alt_filter)
 hist(flight_alt_ok$head_wind_10m_alt_filter_abs)
 
 
+
 # Type of wind side
-flight_alt_ok$cross_wind_10m_alt_filter_type <- sign(flight_alt_ok$cross_wind_10m_alt_filter)
+flight_alt_ok$cross_wind_10m_alt_filter_type <- sign(flight_alt_ok$track_cross_wind_10m_alt_filter)
 summary(as.factor(flight_alt_ok$cross_wind_10m_alt_filter_type))
 flight_alt_ok$cross_wind_10m_alt_filter_type <- factor(
   flight_alt_ok$cross_wind_10m_alt_filter_type, levels = c(-1, 1),
@@ -104,7 +105,7 @@ flight_alt_ok$cross_wind_10m_alt_filter_type <- factor(
 summary(flight_alt_ok$cross_wind_10m_alt_filter_type)
 
 # Wind assistance absolute value
-flight_alt_ok$cross_wind_10m_alt_filter_abs<- abs(flight_alt_ok$cross_wind_10m_alt_filter)
+flight_alt_ok$cross_wind_10m_alt_filter_abs<- abs(flight_alt_ok$track_cross_wind_10m_alt_filter)
 hist(flight_alt_ok$cross_wind_10m_alt_filter_abs)
 
 # Species subsets
@@ -117,6 +118,25 @@ models.gull <- list()
 
 # flight_alt_ok_gull$ecmwf_wind_10m_speed_alt_filter
 
+
+models.gull[[20]] <- glmer(altitude_callib_extm ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_10m_alt_filter_abs+
+                             + (1|ring_number),
+                           data = flight_alt_ok_gull)
+
+models.gull[[21]] <- glmer(altitude_callib_extm ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_10m_alt_filter_abs+
+                             head_wind_10m_alt_filter_abs*head_wind_10m_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_gull)
+
+models.gull[[22]] <- glmer(altitude_callib_extm ~
+                             cross_wind_10m_alt_filter_abs+
+                             head_wind_10m_alt_filter_abs*head_wind_10m_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_gull)
 
 models.gull[[18]] <- glmer(altitude_callib_extm ~
                              trunc_seg_dist_a_b_km +
@@ -251,19 +271,23 @@ models.gull[[1]] <- glmer(altitude_callib_extm ~ 1 +
 # Standardize models
 models.gull.stdz <- list()
 models.gull.stdz[[1]] <- models.gull[[1]]
-for(i in 2:19){
+for(i in 2:22){
   models.gull.stdz[[i]] <- standardize(models.gull[[i]], standardize.y=FALSE)
 }
 
 models.gull.aicc <- sapply(models.gull.stdz, AICc)
 models.gull.aicc.dif <- models.gull.aicc-min(models.gull.aicc)
+mods_inc2 <- c(1, 2, 3, 7, 11, 18, 19, 20, 21, 22)
+models.gull.aicc.dif2 <- models.gull.aicc-min(models.gull.aicc[mods_inc2])
+
 models.gull.r2m <- sapply(models.gull.stdz, r.squaredGLMM)
 t(models.gull.r2m)
 
-models.gull.fit.df <- cbind.data.frame(c(1:19),models.gull.aicc,
+models.gull.fit.df <- cbind.data.frame(c(1:22),models.gull.aicc,
                                        models.gull.aicc.dif,
+                                       models.gull.aicc.dif2,
                                        t(models.gull.r2m))
-names(models.gull.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+names(models.gull.fit.df) <- c("mod", "AICc", "dAICc", "dAICc_sub", "R2m", "R2c")
 
 
 # * Flight_height_unfiltered ------
@@ -272,7 +296,7 @@ flight_alt$trunc_seg_dist_a_b_km <- flight_alt$trunc_seg_dist_a_b / 1000
 hist(flight_alt$trunc_seg_dist_a_b_km)
 
 # Type of wind assistance
-flight_alt$head_wind_10m_type <- sign(flight_alt$head_wind_10m)
+flight_alt$head_wind_10m_type <- sign(flight_alt$track_head_wind_10m)
 summary(as.factor(flight_alt$head_wind_10m_type))
 flight_alt$head_wind_10m_type <- factor(
   flight_alt$head_wind_10m_type, levels = c(-1, 1),
@@ -281,12 +305,12 @@ flight_alt$head_wind_10m_type <- factor(
 summary(flight_alt$head_wind_10m_type)
 
 # Wind assistance absolute value
-flight_alt$head_wind_10m_abs<- abs(flight_alt$head_wind_10m)
+flight_alt$head_wind_10m_abs<- abs(flight_alt$track_head_wind_10m)
 hist(flight_alt$head_wind_10m_abs)
 
 
 # Type of wind side
-flight_alt$cross_wind_10m_type <- sign(flight_alt$cross_wind_10m)
+flight_alt$cross_wind_10m_type <- sign(flight_alt$track_cross_wind_10m)
 summary(as.factor(flight_alt$cross_wind_10m_type))
 flight_alt$cross_wind_10m_type <- factor(
   flight_alt$cross_wind_10m_type, levels = c(-1, 1),
@@ -295,7 +319,7 @@ flight_alt$cross_wind_10m_type <- factor(
 summary(flight_alt$cross_wind_10m_type)
 
 # Wind assistance absolute value
-flight_alt$cross_wind_10m_abs<- abs(flight_alt$cross_wind_10m)
+flight_alt$cross_wind_10m_abs<- abs(flight_alt$track_cross_wind_10m)
 hist(flight_alt$cross_wind_10m_abs)
 
 # Species subsets
@@ -310,6 +334,35 @@ models.gull.flt_ht_no_filter <- list()
 # 
 # flight_alt_ok_gull$altitude_callib_extm_no_filter
 # flight_alt_ok$cross_wind_flt_
+
+
+
+models.gull.flt_ht_no_filter[[20]] <- glmer(altitude_callib_extm_no_filter ~
+                             trunc_seg_dist_a_b_km +
+                               cross_wind_10m_abs+
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[21]] <- glmer(altitude_callib_extm_no_filter ~
+                             trunc_seg_dist_a_b_km +
+                               cross_wind_10m_abs+
+                               head_wind_10m_abs*head_wind_10m_type +
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+
+models.gull.flt_ht_no_filter[[22]] <- glmer(altitude_callib_extm_no_filter ~
+                                              cross_wind_10m_abs+
+                                              head_wind_10m_abs*head_wind_10m_type+
+                             + (1|ring_number),
+                           data = flight_alt_gull)
+# 
+# models.gull.flt_ht_no_filter[[14]] <- glmer(altitude_callib_extm_no_filter ~
+#                                               trunc_seg_dist_a_b_km +
+#                                               cross_wind_10m_abs*cross_wind_10m_type +
+#                                               head_wind_10m_abs*head_wind_10m_type +
+#                                               + (1|ring_number),
+#                                             data = flight_alt_gull)
+
 
 
 models.gull.flt_ht_no_filter[[18]] <- glmer(altitude_callib_extm_no_filter ~
@@ -447,7 +500,7 @@ models.gull.flt_ht_no_filter[[1]] <- glmer(altitude_callib_extm_no_filter ~ 1 +
 # Standardize models
 models.gull.flt_ht_no_filter.stdz <- list()
 models.gull.flt_ht_no_filter.stdz[[1]] <- models.gull.flt_ht_no_filter[[1]]
-for(i in 2:19){
+for(i in 2:22){
   models.gull.flt_ht_no_filter.stdz[[i]] <- standardize(models.gull.flt_ht_no_filter[[i]],
                                                         standardize.y=FALSE)
 }
@@ -455,16 +508,19 @@ for(i in 2:19){
 models.gull.flt_ht_no_filter.aicc <- sapply(models.gull.flt_ht_no_filter.stdz, AICc)
 mmodels.gull.flt_ht_no_filter.aicc.dif <- models.gull.flt_ht_no_filter.aicc-
   min(models.gull.flt_ht_no_filter.aicc)
+mods_inc2 <- c(1, 2, 3, 7, 11, 18, 19, 20, 21, 22)
+mmodels.gull.flt_ht_no_filter.aicc.dif2 <- models.gull.flt_ht_no_filter.aicc-min(models.gull.flt_ht_no_filter.aicc[mods_inc2])
 
 models.gull.flt_ht_no_filter.r2m <- sapply(models.gull.flt_ht_no_filter.stdz,
                           r.squaredGLMM)
 t(models.gull.flt_ht_no_filter.r2m)
 
-models.gull.flt_ht_no_filter.fit.df <- cbind.data.frame(c(1:19),
+models.gull.flt_ht_no_filter.fit.df <- cbind.data.frame(c(1:22),
                                                         models.gull.flt_ht_no_filter.aicc,
                                                         mmodels.gull.flt_ht_no_filter.aicc.dif,
+                                                        mmodels.gull.flt_ht_no_filter.aicc.dif2,
                                        t(models.gull.flt_ht_no_filter.r2m))
-names(models.gull.flt_ht_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+names(models.gull.flt_ht_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "dAICc_sub", "R2m", "R2c")
 
 
 # * merge gull glmm summary table -----
@@ -477,9 +533,9 @@ names(models.gull.fit.df) <- paste(
 
 # Combine
 models.gull.fit.all <- cbind(models.gull.fit.df,
-                             models.gull.flt_ht_no_filter.fit.df[,2:5])
+                             models.gull.flt_ht_no_filter.fit.df[,2:6])
 
-write.csv(models.gull.fit.all, file = "gull_alt_model_fit_table.csv")
+write.csv(models.gull.fit.all, file = "gull_alt_model_fit_table_TRACK.csv")
 #
 
 
@@ -494,9 +550,8 @@ write.csv(models.gull.fit.all, file = "gull_alt_model_fit_table.csv")
 flight_alt_ok_murre_original <- flight_alt_ok_murre
 flight_alt_ok_murre <- flight_alt_ok_murre_original[
   !(flight_alt_ok_murre_original$flight_id_combined %in% c("m1228", "m623",
-                                                           "m495", "m515",
-                                                           "m527", "m676",
-                                                           "m774")),]
+                                                           "m515", "m676",
+                                                           "m495", "m774")),]
 
 # Transformations of altitude:
 # hist(flight_alt_ok_murre$altitude_callib_extm)
@@ -510,6 +565,28 @@ flight_alt_ok_murre <- flight_alt_ok_murre_original[
 
 # Fit possible models (18):
 models.murre <- list()
+
+
+
+models.murre[[20]] <- glmer(altitude_callib_extm ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_10m_alt_filter_abs+
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[21]] <- glmer(altitude_callib_extm ~
+                             trunc_seg_dist_a_b_km +
+                             cross_wind_10m_alt_filter_abs+
+                             head_wind_10m_alt_filter_abs*head_wind_10m_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
+models.murre[[22]] <- glmer(altitude_callib_extm ~
+                             cross_wind_10m_alt_filter_abs+
+                             head_wind_10m_alt_filter_abs*head_wind_10m_alt_filter_type +
+                             + (1|ring_number),
+                           data = flight_alt_ok_murre)
+
 
 
 models.murre[[18]] <- glmer(altitude_callib_extm ~
@@ -662,7 +739,7 @@ models.murre[[1]] <- glmer(altitude_callib_extm ~ 1 +
 # Standardize models
 models.murre.stdz <- list()
 models.murre.stdz[[1]] <- models.murre[[1]]
-for(i in 2:19){
+for(i in 2:22){
   models.murre.stdz[[i]] <- standardize(models.murre[[i]], standardize.y=FALSE)
 }
 # models.murre.stdz[[14]] <- standardize(models.murre[[14]], standardize.y=FALSE)
@@ -671,14 +748,18 @@ models.murre.aicc <- sapply(models.murre.stdz, AICc)
 models.murre.aicc.dif <- models.murre.aicc-min(models.murre.aicc)
 models.murre.r2m <- sapply(models.murre.stdz, r.squaredGLMM)
 t(models.murre.r2m)
+mods_inc2 <- c(1, 2, 3, 7, 11, 18, 19, 20, 21, 22)
+models.murre.aicc.dif2 <- models.murre.aicc-min(models.murre.aicc[mods_inc2])
 
-models.murre.fit.df <- cbind.data.frame(c(1:19),models.murre.aicc,
+models.murre.fit.df <- cbind.data.frame(c(1:22),models.murre.aicc,
                                        models.murre.aicc.dif,
+                                       models.murre.aicc.dif2,
                                        t(models.murre.r2m))
-names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
 
-plot(models.murre[[14]])
-qqmath(models.murre[[14]])
+names(models.murre.fit.df) <- c("mod", "AICc", "dAICc", "dAICc_sub", "R2m", "R2c")
+
+plot(models.murre[[21]])
+qqmath(models.murre[[21]])
 
 
 # models.murre.new.stdz <- standardize(models.murre.new, standardize.y=FALSE)
@@ -694,14 +775,12 @@ qqmath(models.murre[[14]])
 
 
 # Fit possible models (18):
-models.murre.flt_ht_no_filter <- list()
 
 flight_alt_murre.original <- flight_alt_murre
 flight_alt_murre <- flight_alt_murre.original[
   !(flight_alt_murre.original$flight_id_combined %in% c("m1228", "m623",
-                                                        "m495", "m515",
-                                                        "m527", "m676",
-                                                        "m774")),]
+                                                        "m515", "m676",
+                                                        "m495", "m774")),]
 # 
 # flight_alt_ok_murre_original <- flight_alt_ok_murre
 # flight_alt_ok_murre <- flight_alt_ok_murre_original[
@@ -710,6 +789,31 @@ flight_alt_murre <- flight_alt_murre.original[
 # 
 # flight_alt_ok_murre$altitude_callib_extm_no_filter
 # flight_alt_ok$cross_wind_flt_
+
+# head(flight_alt_murre$altitude_callib_extm_no_filter)
+
+models.murre.flt_ht_no_filter <- list()
+
+
+
+models.murre.flt_ht_no_filter[[20]] <- glmer(altitude_callib_extm_no_filter ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_10m_abs+
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[21]] <- glmer(altitude_callib_extm_no_filter ~
+                                              trunc_seg_dist_a_b_km +
+                                              cross_wind_10m_abs+
+                                              head_wind_10m_abs*head_wind_10m_type +
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
+
+models.murre.flt_ht_no_filter[[22]] <- glmer(altitude_callib_extm_no_filter ~
+                                              cross_wind_10m_abs+
+                                              head_wind_10m_abs*head_wind_10m_type+
+                                              + (1|ring_number),
+                                            data = flight_alt_murre)
 
 
 
@@ -849,7 +953,7 @@ models.murre.flt_ht_no_filter[[1]] <- glmer(altitude_callib_extm_no_filter ~ 1 +
 # Standardize models
 models.murre.flt_ht_no_filter.stdz <- list()
 models.murre.flt_ht_no_filter.stdz[[1]] <- models.murre.flt_ht_no_filter[[1]]
-for(i in 2:19){
+for(i in 2:22){
   models.murre.flt_ht_no_filter.stdz[[i]] <- standardize(models.murre.flt_ht_no_filter[[i]],
                                                         standardize.y=FALSE)
 }
@@ -862,11 +966,15 @@ models.murre.flt_ht_no_filter.r2m <- sapply(models.murre.flt_ht_no_filter.stdz,
                                            r.squaredGLMM)
 t(models.murre.flt_ht_no_filter.r2m)
 
-models.murre.flt_ht_no_filter.fit.df <- cbind.data.frame(c(1:19),
+mods_inc2 <- c(1, 2, 3, 7, 11, 18, 19, 20, 21, 22)
+mmodels.murre.flt_ht_no_filter.aicc.dif2 <- models.gull.flt_ht_no_filter.aicc-min(models.gull.flt_ht_no_filter.aicc[mods_inc2])
+
+models.murre.flt_ht_no_filter.fit.df <- cbind.data.frame(c(1:22),
                                                         models.murre.flt_ht_no_filter.aicc,
                                                         mmodels.murre.flt_ht_no_filter.aicc.dif,
+                                                        mmodels.murre.flt_ht_no_filter.aicc.dif2,
                                                         t(models.murre.flt_ht_no_filter.r2m))
-names(models.murre.flt_ht_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+names(models.murre.flt_ht_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "dAICc_sub", "R2m", "R2c")
 
 
 # * merge murre glmm summary table -----
@@ -879,11 +987,11 @@ names(models.murre.fit.df) <- paste(
 
 # Combine
 models.murre.fit.all <- cbind(models.murre.fit.df,
-                             models.murre.flt_ht_no_filter.fit.df[,2:5])
+                             models.murre.flt_ht_no_filter.fit.df[,2:6])
 
-# write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table.csv")
+# write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table_TRACK.csv")
 
-write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table_influential_points_removed.csv")
+write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table_influential_points_removed_TRACK.csv")
 #
 
 
@@ -892,16 +1000,16 @@ write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table_influential_po
 
 # *********** Coef + p-values -----------
 # Calculate p values for dropping of terms from lowest AIC model -----
-murre_model_va <- models.murre[[13]]
-lbbg_model_va <- models.gull[[13]]
+murre_model_va <- models.murre[[21]]
+lbbg_model_va <- models.gull[[21]]
 
 # murre_model_va <- models.murre.new
 
 
-lbbg_model_va <- models.gull.flt_ht_no_filter[[13]]
+lbbg_model_va <- models.gull.flt_ht_no_filter[[21]]
 
 
-murre_model_va <- models.murre.flt_ht_no_filter[[13]]
+murre_model_va <- models.murre.flt_ht_no_filter[[21]]
 
 
 anova(models.gull[[14]], models.gull[[13]])
@@ -967,7 +1075,7 @@ qqmath(lbbg_model_va)
 # install.packages("influence.ME")
 
 library(influence.ME)
-infl <- influence(models.murre[[14]], obs = TRUE)
+infl <- influence(models.murre[[21]], obs = TRUE)
 (cooks.distance(infl))>0.06
 plot(infl, which = "cook")
 alt_na_rem <- !is.na(flight_alt_ok_murre$altitude_callib_extm)
@@ -976,10 +1084,10 @@ exclude.flights <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.dis
 
 x <- (cooks.distance(infl))>0.06
 exclude.flights2 <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.distance(infl))>0.06]
-# "m495" "m515" "m527" "m676"
+# "m515" "m676"
 
 
-exclude.flights3 <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.distance(infl))>0.20]
+exclude.flights3 <- flight_alt_ok_murre$flight_id_combined[alt_na_rem][(cooks.distance(infl))>0.12]
 # "m774"
 
 plot(models.murre[[14]])
@@ -1003,8 +1111,8 @@ qqmath(lbbg_model_va)
 # Make forest plot to illustrate final model -----
 library(cowplot)
 
-murre_model_va <- models.murre[[13]]
-lbbg_model_va <- models.gull[[13]]
+murre_model_va <- models.murre[[21]]
+lbbg_model_va <- models.gull[[21]]
 
 # Adapted from: https://gist.github.com/dsparks/4332698
 
@@ -1020,8 +1128,8 @@ mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef),
                               modelName = "Common murres")
 # Combine these data.frames
 allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
-allModelFrame <- mod_gull_frame
-allModelFrame <- mod_murre_frame
+# allModelFrame <- mod_gull_frame
+# allModelFrame <- mod_murre_frame
 
 str(allModelFrame)
 allModelFrame$modelName <-  factor(allModelFrame$modelName,
@@ -1050,7 +1158,7 @@ zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2)
 zp1 <- zp1 + geom_linerange(aes(x = Variable,
                                 ymin = CI_low,
                                 ymax = CI_high),
-                            colour = cols.new,
+                            # colour = cols.new,
                             lwd = 1, position = position_dodge(width = 1/2),
                             show.legend = FALSE)
 zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
@@ -1058,13 +1166,13 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                                  ymax = CI_high),
                              lwd = 1/2, position = position_dodge(width = 1/2),
                              shape = 21, fill = "WHITE",
-                             colour = cols.new,
+                             # colour = cols.new,
                              show.legend = TRUE)
 zp1 <- zp1 + scale_x_discrete("",
                               labels = c("Intercept",
                                 expression("Vw"["c"]~" speed"),
                                          # expression("Vw"["c"]~" speed: type (to right)"),
-                                         expression("Vw"["c"]~" type (to right)"),
+                                         # expression("Vw"["c"]~" type (to right)"),
                                          expression("Vw"["s"]~" speed"),
                                          expression("Vw"["s"]~" speed: type (tail-wind)"),
                                          expression("Vw"["s"]~" type (tail-wind)"),
@@ -1084,11 +1192,11 @@ zp1 <- zp1 +  theme_new
 zp1 <- zp1 + theme(legend.position = c(1, 1))
 zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Altitude ["~m~"])"))
 zp1 <- zp1 +
-  annotate("text",  x= layer_scales(zp1)$x$range$range[7],
+  annotate("text",  x= layer_scales(zp1)$x$range$range[6],
            y = layer_scales(zp1)$y$range$range[1], label = "(a)",
            vjust=-1, hjust=0, size = 5)
 zp1
-ggsave(zp1, filename = "alt_model_coef_fig_combined.svg", width = 6, height = 6,
+ggsave(zp1, filename = "alt_model_coef_fig_combined_track.svg", width = 6, height = 8,
        units = "in")
 # ?ggsave
 
@@ -1110,7 +1218,7 @@ ggsave(zp1, filename = "alt_model_coef_fig_combined.svg", width = 6, height = 6,
 # - See: http://stackoverflow.com/a/27571412/1172358
 
 
-wind.side <- seq(-10,10,.1)
+wind.side <- seq(0,10,.1)
 wind.assist <- seq(-10,10,.1)
 dist.median <- median(flight_alt_ok_gull$trunc_seg_dist_a_b_km)
 
@@ -1145,14 +1253,14 @@ library(scales)
 
 
 
-v <- seq(-15, 150, 5) 
+v <- seq(-30, 60, 5) 
 gg$z2 <- findInterval(gg$z, v)
 gg$z3 <- v[gg$z2]
 
 
 flight_alt_ok_gg <- data.frame(
   x = flight_alt_ok_gull$head_wind_10m_alt_filter,
-  y = flight_alt_ok_gull$cross_wind_10m_alt_filter,
+  y = abs(flight_alt_ok_gull$cross_wind_10m_alt_filter),
   z = flight_alt_ok_gull$altitude_callib_extm,
   z2 = findInterval(flight_alt_ok_gull$altitude_callib_extm, v)
 )
@@ -1160,8 +1268,8 @@ flight_alt_ok_gg <- data.frame(
 #expression("Vw"["c"]^"+")
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
-lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+# lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","Cross-wind"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1176,17 +1284,17 @@ p <- ggplot(gg,aes(x,y)) +
   coord_fixed() +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
-             shape=21, alpha=1,na.rm=T, size=2) +
+             shape=21, alpha=1,na.rm=T, size=1.5) +
   labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
         y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
-        fill = "Altitude (m)",
+        fill = "Altitude\n(m)",
         parse = TRUE) +
   # theme_new +
   theme_new_rt_legend +
   theme(legend.title = element_text(size = 14)) +
-  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(2, 2 , 8, -7.5),
-           y = c(-10, 8.5, 0, 0),
+  annotate("text", label = c(paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c( 2 , 8, -7.5),
+           y = c(8.5, 1, 1),
            parse=TRUE,
            colour = "grey40",
            size = 4,
@@ -1195,14 +1303,15 @@ p <- p + annotate("text",  x= -9,
                   y = 9, label = "(b)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_gull_predication2.svg", width = 6, height = 5, units = "in")
+ggsave("Alt_gull_predication2_track.svg", width = 6, height = 4, units = "in")
 
 
 
 
 # For murres ----
 
-wind.side <- seq(-10,10,.1)
+
+wind.side <- seq(0,10,.1)
 wind.assist <- seq(-10,10,.1)
 dist.median <- median(flight_alt_ok_murre$trunc_seg_dist_a_b_km)
 
@@ -1236,33 +1345,24 @@ library(RColorBrewer)               #for brewer.pal()
 library(scales)
 
 
-# range(gg$z, na.rm = TRUE)
-v <- seq(-20, 45, 1) 
+
+v <- seq(-5, 8, 0.5) 
 gg$z2 <- findInterval(gg$z, v)
 gg$z3 <- v[gg$z2]
 
-range(flight_alt_ok_murre$altitude_callib_extm[f])
 
-f <- !is.na(flight_alt_ok_murre$altitude_callib_extm)
 flight_alt_ok_gg <- data.frame(
-  x = flight_alt_ok_murre$head_wind_10m_alt_filter[f],
-  y = flight_alt_ok_murre$cross_wind_10m_alt_filter[f],
-  z = flight_alt_ok_murre$altitude_callib_extm[f],
-  z2 = findInterval(flight_alt_ok_murre$altitude_callib_extm[f], v)
+  x = flight_alt_ok_murre$head_wind_10m_alt_filter,
+  y = abs(flight_alt_ok_murre$cross_wind_10m_alt_filter),
+  z = flight_alt_ok_murre$altitude_callib_extm,
+  z2 = findInterval(flight_alt_ok_murre$altitude_callib_extm, v)
 )
-# summary(is.na(flight_alt_ok_murre$altitude_callib_extm))
 
-# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
-# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
-# lab.3 <- expression("Vw"["c"]+~"(to right)")
-# lab.4 <- expression("Vw"["c"]-~"(to left)")
-
+#expression("Vw"["c"]^"+")
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
-lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
-
-
+# lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression(atop("Vw"["c"]^"+"~"","Cross-wind"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -1277,39 +1377,25 @@ p <- ggplot(gg,aes(x,y)) +
   coord_fixed() +
   geom_point(data = flight_alt_ok_gg,
              aes(fill = z), 
-             shape=21, alpha=1,na.rm=T, size=3) +
+             shape=21, alpha=1,na.rm=T, size=2.5) +
   labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
         y = expression("Vw"["c"]~~~~"Cross wind ("~ms^{-1}~")"),
-        fill = "Altitude (m)",
+        fill = "Altitude\n(m)",
         parse = TRUE) +
+  # theme_new +
   theme_new_rt_legend +
   theme(legend.title = element_text(size = 14)) +
-#   annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-#            x = c(1, 1 , 8, -6),
-#            y = c(-10, 9, 0, 0),
-#            parse=TRUE,
-#            colour = "black",
-#            size = 5,
-#            vjust = 0) 
-
-  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(2, 2 , 8, -7.5),
-           y = c(-9, 8.5, 0, 0),
+  annotate("text", label = c(paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c( 2 , 8, -7.5),
+           y = c(8.5, 1, 1),
            parse=TRUE,
            colour = "grey40",
            size = 4,
            vjust = 0.5) 
 p <- p + annotate("text",  x= -9,
-                  y = 9, label = "(b)",
+                  y = 9, label = "(c)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_murre_predication2.svg", width = 6, height = 5, units = "in")
-
-
-
-
-
-
-
+ggsave("Alt_murre_predication2_track.svg", width = 6, height = 4, units = "in")
 
 
