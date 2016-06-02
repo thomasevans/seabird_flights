@@ -410,7 +410,7 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
     
     # pdf(paste("vector_decompose_illustration_", flight_id, ".pdf", sep = ""), width = 5, height = 5)
     
-    svg(paste("vector_decompose_illustration_", flight_id, ".svg", sep = ""),
+    svg(paste("vector_decompose_illustration_", flight_id, "_new.svg", sep = ""),
         width = 5, height = 5, family = "serif")
     
     par(mfrow = c(1,1))
@@ -422,8 +422,8 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
          las = 1,
          xlab = "",
          ylab = "",
-         xlim = c(-15,10),
-         ylim = c(-5,20))
+         xlim = c(-12,10),
+         ylim = c(-5,16))
     grid()    
     
     abline(lwd = 2, col = "dark grey", h = 0)    
@@ -436,9 +436,18 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            lwd = 2,
            length = 0.15,
            col = "#7570b3")
-    text(points.sub$vg_u[pid] + sign(points.sub$vg_u[pid])* 1,
-         points.sub$vg_v[pid] + sign(points.sub$vg_v[pid])* 1,
+    arrows(0, 0, 0.5*points.sub$vg_u[pid], 0.5*points.sub$vg_v[pid],
+           lwd = 2,
+           length = 0.15,
+           col = "#7570b3")
+    text(points.sub$vg_u[pid] + sign(points.sub$vg_u[pid])* .7,
+         points.sub$vg_v[pid] + sign(points.sub$vg_v[pid])* .7,
          "Vg", col = "#7570b3")
+    
+    text(0.5*points.sub$vg_u[pid] - 1 ,
+         0.5*points.sub$vg_v[pid] ,
+         "T",
+         col = "#7570b3")
     
     # Vw
     arrows(0, 0, points.sub$ecmwf_wind_10m_u_flt_ht[pid],
@@ -446,8 +455,9 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            lwd = 2,
            length = 0.15,
            col = "#1b9e77")
-    text(points.sub$ecmwf_wind_10m_u_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_u_flt_ht[pid])*1,
-         points.sub$ecmwf_wind_10m_v_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_v_flt_ht[pid])*1, "Vw",
+    text(points.sub$ecmwf_wind_10m_u_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_u_flt_ht[pid])*0.8,
+         points.sub$ecmwf_wind_10m_v_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_v_flt_ht[pid])*0.6 - 0.9,
+         "Vw",
          col = "#1b9e77")
     
     
@@ -458,9 +468,20 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            length = 0.15,
            col = "#d95f02",
            lty = 2)
-    text( points.sub$va_u_flt_ht[pid] + sign(points.sub$va_u_flt_ht[pid])*1,
-          points.sub$va_v_flt_ht[pid] + sign(points.sub$va_v_flt_ht[pid])*1, "Va",
+    arrows(0, 0, 0.5*points.sub$va_u_flt_ht[pid],
+           0.5*points.sub$va_v_flt_ht[pid],
+           lwd = 2,
+           length = 0.15,
+           col = "#d95f02",
+           lty = 2)
+    text( points.sub$va_u_flt_ht[pid] + sign(points.sub$va_u_flt_ht[pid])*0.6,
+          points.sub$va_v_flt_ht[pid] + sign(points.sub$va_v_flt_ht[pid])*0.6,
+          "Va",
          col = "#d95f02")
+    text( 0.5*points.sub$va_u_flt_ht[pid] - 1 ,
+          0.5*points.sub$va_v_flt_ht[pid] ,
+          "H",
+          col = "#d95f02")
     
     arrows(points.sub$ecmwf_wind_10m_u_flt_ht[pid],
            points.sub$ecmwf_wind_10m_v_flt_ht[pid],
@@ -480,12 +501,11 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            col = "#1b9e77",
            lty = 2)
     
-    text(((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1),
+    text(((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*0.7),
          ((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid]
-          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1), expression("Vw"["c"]^"H"),
+          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*0.7), expression("Vw"["c"]^"H"),
          col = "#1b9e77")
     
-    # Relative to track
     arrows(0,0,
            (sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid],
            (cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid],
@@ -494,10 +514,12 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
            col = "#1b9e77",
            lty = 2)
     
-    text(((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*1),
+    text(((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*.7),
          ((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid]
-          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*1), expression("Vw"["s"]^"H"),
+          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*.7), expression("Vw"["s"]^"H"),
          col = "#1b9e77")
+    
+    # Relative to track
     
     # points.sub$track_head_wind_flt_ht
     
@@ -519,36 +541,52 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
     vg.dir <- sapply(vg.dir, fun2)
       
     arrows(0,0,
-           (sin(rad(vg.dir)))*points.sub$track_head_wind_flt_ht[pid],
-           (cos(rad(vg.dir)))*points.sub$track_head_wind_flt_ht[pid],
+           (sin(rad((vg.dir + 90) %% 360)))*points.sub$track_cross_wind_flt_ht[pid],
+           (cos(rad((vg.dir + 90) %% 360)))*points.sub$track_cross_wind_flt_ht[pid],
            lwd = 2,
            length = 0.15,
-           col = "red",
-           lty = 3)
+           col = "grey40")
     
-    text(((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*1),
-         ((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid]
-          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid])))*points.sub$head_wind_flt_ht[pid])*1), expression("Vw"["s"]^"H"),
-         col = "#1b9e77")
     
+    text(points.sub$ecmwf_wind_10m_u_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_u_flt_ht[pid])*0.6,
+         points.sub$ecmwf_wind_10m_v_flt_ht[pid] + sign(points.sub$ecmwf_wind_10m_v_flt_ht[pid])*0.6 + 0.2,
+         expression("Vw"["c"]^"T"),
+         col = "grey40")
+    
+#     text((sin(rad((vg.dir + 90) %% 360)))*points.sub$track_cross_wind_flt_ht[pid] - 1.5,
+#          (cos(rad((vg.dir + 90) %% 360)))*points.sub$track_cross_wind_flt_ht[pid] + 0.1,
+#          expression("Vw"["c"]^"T"),
+#          col = "grey40")
     
     arrows(0,0,
-           (sin(rad(vg.dir + 90)))*points.sub$track_head_wind_flt_ht[pid],
-           (cos(rad(vg.dir + 90)))*points.sub$track_head_wind_flt_ht[pid],
-           
+           (sin(rad((vg.dir ) %% 360)))*points.sub$track_head_wind_flt_ht[pid],
+           (cos(rad((vg.dir ) %% 360)))*points.sub$track_head_wind_flt_ht[pid],
            lwd = 2,
            length = 0.15,
-           col = "#1b9e77",
-           lty = 2)
+           col = "grey40")
     
-    text(((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1),
-         ((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid]
-          +sign((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1), expression("Vw"["c"]^"H"),
-         col = "#1b9e77")
+    text((sin(rad((vg.dir ) %% 360)))*points.sub$track_head_wind_flt_ht[pid] - 1,
+         (cos(rad((vg.dir ) %% 360)))*points.sub$track_head_wind_flt_ht[pid] - 0.8,
+         expression("Vw"["s"]^"T"),
+         col = "grey40")
+#     
+#     arrows(0,0,
+#            (sin(rad(vg.dir + 90)))*points.sub$track_head_wind_flt_ht[pid],
+#            (cos(rad(vg.dir + 90)))*points.sub$track_head_wind_flt_ht[pid],
+#            
+#            lwd = 2,
+#            length = 0.15,
+#            col = "#1b9e77",
+#            lty = 2)
+#     
+#     text(((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid] + sign((sin(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1),
+#          ((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid]
+#           +sign((cos(rad(points.sub$va_flt_ht_bearing[pid]+90)))*points.sub$cross_wind_flt_ht[pid])*1), expression("Vw"["c"]^"H"),
+#          col = "#1b9e77")
     
     
     # "Vw"["s"]^"H +"
-    text(c(-14,2,2,9),c(1,20,-5,1),
+    text(c(-11,2,2,9),c(1,15,-5,1),
          c("West", "North", "South", "East"),
          col = "dark grey")
     legend("topleft", "(e)", bty="n", cex = 1.2) 
@@ -557,7 +595,7 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
 #     library(plotrix)
     
     
-    text(1.4,1.8, expression(alpha), cex = 1.2)
+    text(1.1,2, expression(alpha), cex = 1.2)
     # draw.arc(x=1,y=NULL,radius=.5)
     # points.sub$vg_u[pid], points.sub$vg_v[pid]
     # points.sub$ecmwf_wind_10m_u_flt_ht[pid],
@@ -571,7 +609,7 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
             shape = -1,
             lwd = 2)
     
-    text(-0.8,2, expression(beta), cex = 1.2)
+    text(-0.9,2.3, expression(beta), cex = 1.2)
 
     xspline(x = c(0.20*points.sub$ecmwf_wind_10m_u_flt_ht[pid],
                   0,
@@ -583,6 +621,8 @@ par(ps = 14, cex = 1.5, cex.lab = 2)
             lty = 2,
             lwd = 2)
     
+    mtext(expression(""~ms^{-1}~""), side = 2,
+          las = 1, at = -7,  cex = 1.2, line = 2, adj = 0.2)
     
     dev.off()
     
