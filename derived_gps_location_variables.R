@@ -374,6 +374,18 @@ points.info$track_head_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind
 hist(points.info$track_cross_wind_10m)
 hist(points.info$track_head_wind_10m)
 
+# points.info$ecmwf_wind_10m_speed_1m
+# new
+points.info$track_cross_wind_1m <- points.info$ecmwf_wind_10m_speed_1m*sin(rad(wind_angle_dif_track))
+
+points.info$track_head_wind_1m <- points.info$ecmwf_wind_10m_speed_1m*cos(rad(wind_angle_dif_track))
+
+hist(points.info$track_cross_wind_1m)
+hist(points.info$track_head_wind_1m)
+
+# hist(points.info$track_cross_wind_10m - points.info$track_cross_wind_1m)
+
+
 # wind_angle_dif_track_flt_ht <- points.info$ecmwf_wind_10m_dir - points.info$va_flt_ht_bearing 
 
 
