@@ -9,7 +9,16 @@ load("flights.detailed.incl.RData")
 # GPS locations + calculated variables
 load("points.detailed.incl.RData")
 
+load("points.detailed.RData")
 
+points.df_new <- merge(points.df, points.detailed[,c("flight_id_combined",
+                                                     "date_time",
+                                                     "track_head_wind_1m",
+                                                     "track_cross_wind_1m")],
+                       by = c("flight_id_combined", "date_time"))
+# ?merge
+# points.detailed$track_cross_wind_1m
+points.df <- points.df_new
 
 # Functions and packages ----
 source("deg.dist.R")
@@ -65,6 +74,8 @@ df_names <- c("flight_id_combined",
               "head_wind_flt_ht",
               "track_cross_wind_10m",
               "track_head_wind_10m",
+              "track_cross_wind_1m",
+              "track_head_wind_1m",
               "track_cross_wind_flt_ht",
               "track_head_wind_flt_ht",
               "wind_effect_10m",
@@ -95,6 +106,8 @@ df_names <- c("flight_id_combined",
               "head_wind_flt_ht_alt_filter",
               "track_cross_wind_10m_alt_filter",
               "track_head_wind_10m_alt_filter",
+              "track_cross_wind_1m_alt_filter",
+              "track_head_wind_1m_alt_filter",
               "track_cross_wind_flt_ht_alt_filter",
               "track_head_wind_flt_ht_alt_filter",
               "wind_effect_10m_alt_filter",
@@ -273,7 +286,15 @@ for(i in 1:n_flights){
       median(na.rm = TRUE, points.flight$track_cross_wind_10m[fp])  
     
     flight_summary_df$track_head_wind_10m[i] <-
-      median(na.rm = TRUE, points.flight$track_head_wind_10m[fp])                                                          
+      median(na.rm = TRUE, points.flight$track_head_wind_10m[fp])  
+    
+    
+    flight_summary_df$track_cross_wind_1m[i] <-
+      median(na.rm = TRUE, points.flight$track_cross_wind_1m[fp])  
+    # points.flight$track
+    flight_summary_df$track_head_wind_1m[i] <-
+      median(na.rm = TRUE, points.flight$track_head_wind_1m[fp])  
+    
     flight_summary_df$track_cross_wind_flt_ht[i] <-
       median(na.rm = TRUE, points.flight$track_cross_wind_flt_ht[fp])  
     
@@ -370,7 +391,17 @@ for(i in 1:n_flights){
       median(na.rm = TRUE, points.flight$track_cross_wind_10m[alt_incl & fp])  
     
     flight_summary_df$track_head_wind_10m_alt_filter[i] <-
-      median(na.rm = TRUE, points.flight$track_head_wind_10m[alt_incl & fp])                                                          
+      median(na.rm = TRUE, points.flight$track_head_wind_10m[alt_incl & fp])      
+    
+    flight_summary_df$track_cross_wind_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$track_cross_wind_1m[alt_incl & fp])  
+    # points.flight$track
+    flight_summary_df$track_head_wind_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$track_head_wind_1m[alt_incl & fp])  
+    
+    
+    
+    
     flight_summary_df$track_cross_wind_flt_ht_alt_filter[i] <-
       median(na.rm = TRUE, points.flight$track_cross_wind_flt_ht[alt_incl & fp])  
     
