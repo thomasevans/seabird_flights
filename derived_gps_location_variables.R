@@ -132,6 +132,16 @@ points.info$ecmwf_wind_10m_v_1m <- wind.shear(points.info$ecmwf_wind_10m_v,
                                                   1,
                                                   points.info$ecmwf_surf_roughness)
 
+# 2m
+points.info$ecmwf_wind_10m_v_2m <- wind.shear(points.info$ecmwf_wind_10m_v,
+                                              2,
+                                              points.info$ecmwf_surf_roughness)
+
+# 5m
+points.info$ecmwf_wind_10m_v_5m <- wind.shear(points.info$ecmwf_wind_10m_v,
+                                              5,
+                                              points.info$ecmwf_surf_roughness)
+
 # 50m
 points.info$ecmwf_wind_10m_v_50m <- wind.shear(points.info$ecmwf_wind_10m_v,
                                               50,
@@ -160,6 +170,18 @@ points.info$ecmwf_wind_10m_u_flt_ht <- wind.shear(points.info$ecmwf_wind_10m_u,
 points.info$ecmwf_wind_10m_u_1m <- wind.shear(points.info$ecmwf_wind_10m_u,
                                               1,
                                               points.info$ecmwf_surf_roughness)
+
+# 2m
+points.info$ecmwf_wind_10m_u_2m <- wind.shear(points.info$ecmwf_wind_10m_u,
+                                              2,
+                                              points.info$ecmwf_surf_roughness)
+
+# 1m
+points.info$ecmwf_wind_10m_u_5m <- wind.shear(points.info$ecmwf_wind_10m_u,
+                                              5,
+                                              points.info$ecmwf_surf_roughness)
+
+
 
 # 50m
 points.info$ecmwf_wind_10m_u_50m <- wind.shear(points.info$ecmwf_wind_10m_u,
@@ -236,6 +258,18 @@ points.info$ecmwf_wind_10m_speed_1m <- t(mapply(wind.dir.speed,
                                                     points.info$ecmwf_wind_10m_u_1m,
                                                     points.info$ecmwf_wind_10m_v_1m))[,1]
 
+
+# Wind 2
+points.info$ecmwf_wind_10m_speed_2m <- t(mapply(wind.dir.speed,
+                                                points.info$ecmwf_wind_10m_u_2m,
+                                                points.info$ecmwf_wind_10m_v_2m))[,1]
+
+# Wind 5
+points.info$ecmwf_wind_10m_speed_5m <- t(mapply(wind.dir.speed,
+                                                points.info$ecmwf_wind_10m_u_5m,
+                                                points.info$ecmwf_wind_10m_v_5m))[,1]
+
+
 # wind 50
 points.info$ecmwf_wind_10m_speed_50m <- t(mapply(wind.dir.speed,
                                                 points.info$ecmwf_wind_10m_u_50m,
@@ -292,6 +326,18 @@ points.info$va_v_1m <- points.info$vg_v - points.info$ecmwf_wind_10m_v_1m
 points.info$va_u_1m <- points.info$vg_u - points.info$ecmwf_wind_10m_u_1m
 
 
+points.info$va_v_5m <- points.info$vg_v - points.info$ecmwf_wind_10m_v_5m
+# hist(points.info$va_v_10m, xlim = c(-50,50), breaks = 400)
+
+points.info$va_u_5m <- points.info$vg_u - points.info$ecmwf_wind_10m_u_5m
+
+
+points.info$va_v_2m <- points.info$vg_v - points.info$ecmwf_wind_10m_v_2m
+# hist(points.info$va_v_10m, xlim = c(-50,50), breaks = 400)
+
+points.info$va_u_2m <- points.info$vg_u - points.info$ecmwf_wind_10m_u_2m
+
+
 points.info$va_v_flt_ht <- points.info$vg_v - points.info$ecmwf_wind_10m_v_flt_ht
 hist(points.info$va_v_flt_ht, xlim = c(-50,50), breaks = 50)
 
@@ -311,6 +357,13 @@ points.info$va_1m <- calc_hypotenuse(points.info$va_u_1m,
                                       points.info$va_v_1m)
 hist(points.info$va_1m, xlim = c(0,50), breaks = 1000)
 
+
+points.info$va_2m <- calc_hypotenuse(points.info$va_u_2m,
+                                     points.info$va_v_2m)
+
+points.info$va_5m <- calc_hypotenuse(points.info$va_u_5m,
+                                     points.info$va_v_5m)
+
 # Va bear
 points.info$va_flt_ht_bearing <- t(mapply(wind.dir.speed,
          points.info$va_u_flt_ht,
@@ -323,6 +376,14 @@ points.info$va_flt_10m_bearing <- t(mapply(wind.dir.speed,
 points.info$va_flt_1m_bearing <- t(mapply(wind.dir.speed,
                                            points.info$va_u_1m,
                                            points.info$va_v_1m))[,2]
+
+points.info$va_flt_2m_bearing <- t(mapply(wind.dir.speed,
+                                          points.info$va_u_2m,
+                                          points.info$va_v_2m))[,2]
+
+points.info$va_flt_5m_bearing <- t(mapply(wind.dir.speed,
+                                          points.info$va_u_5m,
+                                          points.info$va_v_5m))[,2]
 # hist(points.info$va_flt_1m_bearing)
 
 
@@ -356,6 +417,14 @@ points.info$alpha_10m <- solve_alpha(points.info$speed_2d,
 points.info$alpha_1m <- solve_alpha(points.info$speed_2d,
                                      points.info$va_1m,
                                      points.info$ecmwf_wind_10m_speed_1m)
+
+points.info$alpha_2m <- solve_alpha(points.info$speed_2d,
+                                    points.info$va_2m,
+                                    points.info$ecmwf_wind_10m_speed_2m)
+
+points.info$alpha_5m <- solve_alpha(points.info$speed_2d,
+                                    points.info$va_5m,
+                                    points.info$ecmwf_wind_10m_speed_5m)
 
 hist(points.info$alpha_1m)
 hist((points.info$alpha_flt_ht))
@@ -402,6 +471,18 @@ hist(points.info$track_head_wind_10m)
 points.info$track_cross_wind_1m <- points.info$ecmwf_wind_10m_speed_1m*sin(rad(wind_angle_dif_track))
 
 points.info$track_head_wind_1m <- points.info$ecmwf_wind_10m_speed_1m*cos(rad(wind_angle_dif_track))
+
+
+points.info$track_cross_wind_2m <- points.info$ecmwf_wind_10m_speed_2m*sin(rad(wind_angle_dif_track))
+
+points.info$track_head_wind_2m <- points.info$ecmwf_wind_10m_speed_2m*cos(rad(wind_angle_dif_track))
+
+
+points.info$track_cross_wind_5m <- points.info$ecmwf_wind_10m_speed_5m*sin(rad(wind_angle_dif_track))
+
+points.info$track_head_wind_5m <- points.info$ecmwf_wind_10m_speed_5m*cos(rad(wind_angle_dif_track))
+
+
 
 hist(points.info$track_cross_wind_1m)
 hist(points.info$track_head_wind_1m)
@@ -484,3 +565,5 @@ save(points.detailed, file = "points.detailed.RData")
 # Output to csv
 write.table(points.detailed, file = "points_detailed.csv", col.names = TRUE,
             row.names = FALSE, sep = ",")
+
+# points.detailed$va_flt_5m_bearing
