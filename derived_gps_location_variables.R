@@ -554,7 +554,7 @@ summary(points.info$altitude_filter_included)
 # Output as new table ----
 # Save points data without the flight columns (can add those again later if needed by merge)
 # names(points.info)
-points.detailed <- points.info[,c(1:22,46:96)]
+points.detailed <- points.info[,c(1:22,46:ncol(points.info))]
 
 # summary(is.na(points.detailed$alpha_10m))
 # summary(is.na(points.detailed$alpha_flt_ht))
