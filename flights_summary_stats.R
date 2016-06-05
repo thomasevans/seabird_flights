@@ -10,11 +10,20 @@ load("flights.detailed.incl.RData")
 load("points.detailed.incl.RData")
 
 load("points.detailed.RData")
+# 
+# points.detailed$va_1m
+# points.detailed$va_v_1m
+# points.detailed$va_u_1m
+# points.detailed$va_flt_1m_bearing
 
 points.df_new <- merge(points.df, points.detailed[,c("flight_id_combined",
                                                      "date_time",
                                                      "track_head_wind_1m",
-                                                     "track_cross_wind_1m")],
+                                                     "track_cross_wind_1m",
+                                                     "va_1m",
+                                                     "va_v_1m",
+                                                     "va_u_1m",
+                                                     "va_flt_1m_bearing")],
                        by = c("flight_id_combined", "date_time"))
 # ?merge
 # points.detailed$track_cross_wind_1m
@@ -486,3 +495,5 @@ write.table(flight.details, file = "flight_details.csv", col.names = TRUE,
             row.names = FALSE, sep = ",")
 
 
+
+# flight.details$track_head_wind_1m
