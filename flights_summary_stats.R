@@ -64,6 +64,9 @@ df_names <- c("flight_id_combined",
               "va_u_flt_ht",
               "va_flt_ht",
               "va_10m",
+              "va_v_1m",
+              "va_u_1m",
+              "va_1m",
               "va_flt_ht_bearing",
               "va_flt_10m_bearing",
               "alpha_flt_ht",
@@ -92,6 +95,9 @@ df_names <- c("flight_id_combined",
               "vg_alt_filter",
               "va_v_10m_alt_filter",
               "va_u_10m_alt_filter",
+              "va_v_1m_alt_filter",
+              "va_u_1m_alt_filter",
+              "va_1m_alt_filter",
               "va_v_flt_ht_alt_filter",
               "va_u_flt_ht_alt_filter",
               "va_flt_ht_alt_filter",
@@ -249,6 +255,12 @@ for(i in 1:n_flights){
     flight_summary_df$va_u_10m[i] <-
       median(na.rm = TRUE, points.flight$va_u_10m[fp])  
     
+    flight_summary_df$va_v_1m[i] <-
+      median(na.rm = TRUE, points.flight$va_v_1m[fp])  
+    
+    flight_summary_df$va_u_1m[i] <-
+      median(na.rm = TRUE, points.flight$va_u_1m[fp])  
+    
     flight_summary_df$va_v_flt_ht[i] <-
       median(na.rm = TRUE, points.flight$va_v_flt_ht[fp])  
     
@@ -260,6 +272,9 @@ for(i in 1:n_flights){
     
     flight_summary_df$va_10m[i] <-
       median(na.rm = TRUE, points.flight$va_10m[fp])  
+    
+    flight_summary_df$va_1m[i] <-
+      median(na.rm = TRUE, points.flight$va_1m[fp])  
                                                                                
     flight_summary_df$va_flt_ht_bearing[i] <-
       median(na.rm = TRUE, points.flight$va_flt_ht_bearing[fp])  
@@ -354,6 +369,13 @@ for(i in 1:n_flights){
     flight_summary_df$va_u_10m_alt_filter[i] <-
       median(na.rm = TRUE, points.flight$va_u_10m[alt_incl & fp])  
     
+    
+    flight_summary_df$va_v_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_v_1m[alt_incl & fp])  
+    
+    flight_summary_df$va_u_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_u_1m[alt_incl & fp])  
+    
     flight_summary_df$va_v_flt_ht_alt_filter[i] <-
       median(na.rm = TRUE, points.flight$va_v_flt_ht[alt_incl & fp])  
     
@@ -365,6 +387,9 @@ for(i in 1:n_flights){
     
     flight_summary_df$va_10m_alt_filter[i] <-
       median(na.rm = TRUE, points.flight$va_10m[alt_incl & fp])  
+    
+    flight_summary_df$va_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$va_1m[alt_incl & fp]) 
     
     flight_summary_df$va_flt_ht_bearing_alt_filter[i] <-
       median(na.rm = TRUE, points.flight$va_flt_ht_bearing[alt_incl & fp])  
