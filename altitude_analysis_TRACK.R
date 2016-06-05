@@ -1130,6 +1130,7 @@ mod_murre_frame <- data.frame(Variable = rownames(summary(murre_model_va)$coef),
 allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
 # allModelFrame <- mod_gull_frame
 # allModelFrame <- mod_murre_frame
+allModelFrame <- allModelFrame[-c(1,7),]
 
 str(allModelFrame)
 allModelFrame$modelName <-  factor(allModelFrame$modelName,
@@ -1169,19 +1170,20 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                              # colour = cols.new,
                              show.legend = TRUE)
 zp1 <- zp1 + scale_x_discrete("",
-                              labels = c("Intercept",
-                                expression("Vw"["c"]~" speed"),
+                              labels = c(expression("Vw"["c"]~" speed"),
                                          # expression("Vw"["c"]~" speed: type (to right)"),
                                          # expression("Vw"["c"]~" type (to right)"),
                                          expression("Vw"["s"]~" speed"),
-                                         expression("Vw"["s"]~" speed: type (tail-wind)"),
-                                         expression("Vw"["s"]~" type (tail-wind)"),
+                                         expression(atop("Vw"["s"]~" speed:",
+                                          "type (tail-wind)")),
+                                         expression(atop("Vw"["s"]~" ",
+                                          "type (tail-wind)")),
                                          "Distance (km)"
                               ))
 
 # expression("Vw"["s"]+~"(tail-wind)")
 
-zp1 <- zp1 + coord_flip() 
+# zp1 <- zp1 + coord_flip() 
 # zp1 <- zp1 + theme_new + ylim(-4,2.5)
 # zp1 <- zp1 + scale_y_continuous(breaks = seq(-4, 4, 1),
 #                                 minor_breaks = seq(-4, 4, 0.5),
@@ -1192,12 +1194,16 @@ zp1 <- zp1 +  theme_new
 zp1 <- zp1 + theme(legend.position = c(1, 1))
 zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Altitude ["~m~"])"))
 zp1 <- zp1 +
-  annotate("text",  x= layer_scales(zp1)$x$range$range[6],
-           y = layer_scales(zp1)$y$range$range[1], label = "(a)",
-           vjust=-1, hjust=0, size = 5)
+  annotate("text",  x= layer_scales(zp1)$x$range$range[1],
+           y = layer_scales(zp1)$y$range$range[2], label = "(a)",
+           vjust=1, hjust=2, size = 5)
 zp1
 ggsave(zp1, filename = "alt_model_coef_fig_combined_track.svg", width = 6, height = 8,
        units = "in")
+
+ggsave(zp1, filename = "alt_model_coef_fig_combined_track_horizontal.svg", width = 12, height = 4,
+       units = "in")
+
 # ?ggsave
 
 
@@ -1303,7 +1309,7 @@ p <- p + annotate("text",  x= -9,
                   y = 9, label = "(b)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_gull_predication2_track.svg", width = 6, height = 4, units = "in")
+ggsave("Alt_gull_predication2_track2.svg", width = 6, height = 4, units = "in")
 
 
 
@@ -1396,6 +1402,6 @@ p <- p + annotate("text",  x= -9,
                   y = 9, label = "(c)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_murre_predication2_track.svg", width = 6, height = 4, units = "in")
+ggsave("Alt_murre_predication2_track2.svg", width = 6, height = 4, units = "in")
 
 
