@@ -285,6 +285,13 @@ hist(points.info$va_v_10m, xlim = c(-50,50), breaks = 400)
 
 points.info$va_u_10m <- points.info$vg_u - points.info$ecmwf_wind_10m_u
 
+
+points.info$va_v_1m <- points.info$vg_v - points.info$ecmwf_wind_10m_v_1m
+# hist(points.info$va_v_10m, xlim = c(-50,50), breaks = 400)
+
+points.info$va_u_1m <- points.info$vg_u - points.info$ecmwf_wind_10m_u_1m
+
+
 points.info$va_v_flt_ht <- points.info$vg_v - points.info$ecmwf_wind_10m_v_flt_ht
 hist(points.info$va_v_flt_ht, xlim = c(-50,50), breaks = 50)
 
@@ -299,6 +306,11 @@ points.info$va_10m <- calc_hypotenuse(points.info$va_u_10m,
 hist(points.info$va_10m, xlim = c(0,50), breaks = 1000)
 hist(points.info$va_flt_ht, xlim = c(0,50), breaks = 100)
 
+
+points.info$va_1m <- calc_hypotenuse(points.info$va_u_1m,
+                                      points.info$va_v_1m)
+hist(points.info$va_1m, xlim = c(0,50), breaks = 1000)
+
 # Va bear
 points.info$va_flt_ht_bearing <- t(mapply(wind.dir.speed,
          points.info$va_u_flt_ht,
@@ -307,6 +319,12 @@ points.info$va_flt_ht_bearing <- t(mapply(wind.dir.speed,
 points.info$va_flt_10m_bearing <- t(mapply(wind.dir.speed,
                                           points.info$va_u_10m,
                                           points.info$va_v_10m))[,2]
+
+points.info$va_flt_1m_bearing <- t(mapply(wind.dir.speed,
+                                           points.info$va_u_1m,
+                                           points.info$va_v_1m))[,2]
+# hist(points.info$va_flt_1m_bearing)
+
 
 # Alpha calculation ------
 
@@ -335,6 +353,11 @@ points.info$alpha_10m <- solve_alpha(points.info$speed_2d,
                                         points.info$va_10m,
                                         points.info$ecmwf_wind_10m_speed)
 
+points.info$alpha_1m <- solve_alpha(points.info$speed_2d,
+                                     points.info$va_1m,
+                                     points.info$ecmwf_wind_10m_speed_1m)
+
+hist(points.info$alpha_1m)
 hist((points.info$alpha_flt_ht))
 hist((points.info$alpha_10m))
 
@@ -450,7 +473,7 @@ summary(points.info$altitude_filter_included)
 # Output as new table ----
 # Save points data without the flight columns (can add those again later if needed by merge)
 # names(points.info)
-points.detailed <- points.info[,c(1:22,46:89)]
+points.detailed <- points.info[,c(1:22,46:96)]
 
 # summary(is.na(points.detailed$alpha_10m))
 # summary(is.na(points.detailed$alpha_flt_ht))
