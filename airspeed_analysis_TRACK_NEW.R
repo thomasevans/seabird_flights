@@ -1084,6 +1084,7 @@ models.murre.10m_no_filter[[3]] <- glmer(va_10m ~
                                         + (1|ring_number),
                                         data = flight_10m_murre)
 
+
 models.murre.10m_no_filter[[2]] <- glmer(va_10m ~
                                           trunc_seg_dist_a_b_km +
                                           (1|ring_number),
@@ -1097,7 +1098,7 @@ models.murre.10m_no_filter[[1]] <- glmer(va_10m ~ 1 +
 # Standardize models
 models.murre.10m_no_filter.stdz <- list()
 models.murre.10m_no_filter.stdz[[1]] <- models.murre.10m_no_filter[[1]]
-for(i in 2:17){
+for(i in 2:8){
   models.murre.10m_no_filter.stdz[[i]] <- standardize(models.murre.10m_no_filter[[i]], standardize.y=FALSE)
 }
 
@@ -1106,10 +1107,128 @@ models.murre.10m_no_filter.aicc.dif <- models.murre.10m_no_filter.aicc-min(model
 models.murre.10m_no_filter.r2m <- sapply(models.murre.10m_no_filter.stdz, r.squaredGLMM)
 t(models.murre.10m_no_filter.r2m)
 
-models.murre.10m_no_filter.fit.df <- cbind.data.frame(c(1:17),models.murre.10m_no_filter.aicc,
+models.murre.10m_no_filter.fit.df <- cbind.data.frame(c(1:8),models.murre.10m_no_filter.aicc,
                                                      models.murre.10m_no_filter.aicc.dif,
                                                      t(models.murre.10m_no_filter.r2m))
 names(models.murre.10m_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+
+
+# * 1 m unfiltered ------
+
+# Data preparation
+# Make km version of distance
+flight_1m <- flight_10m
+flight_1m$trunc_seg_dist_a_b_km <- flight_1m$trunc_seg_dist_a_b / 1000
+hist(flight_1m$trunc_seg_dist_a_b_km)
+
+# Type of wind assistance
+# flight_1m$track_head_wind_1m
+
+# flight_1m$track_head_wind_1m <- flight_1m$ecmwf_wind_1m_speed_1m
+
+
+flight_1m$head_wind_1m_type <- sign(flight_1m$track_head_wind_1m)
+summary(as.factor(flight_1m$head_wind_1m_type))
+flight_1m$head_wind_1m_type <- factor(
+  flight_1m$head_wind_1m_type, levels = c(-1, 1),
+  labels = c("head", "tail")
+)
+summary(flight_1m$head_wind_1m_type)
+
+# Wind assistance absolute value
+flight_1m$head_wind_1m_abs<- abs(flight_1m$track_head_wind_1m)
+hist(flight_1m$head_wind_1m_abs)
+
+# Type of wind side
+flight_1m$cross_wind_1m_type <- sign(flight_1m$track_cross_wind_1m)
+summary(as.factor(flight_1m$cross_wind_1m_type))
+flight_1m$cross_wind_1m_type <- factor(
+  flight_1m$cross_wind_1m_type, levels = c(-1, 1),
+  labels = c("to left", "to right")
+)
+summary(flight_1m$cross_wind_1m_type)
+
+# Wind assistance absolute value
+flight_1m$cross_wind_1m_abs<- abs(flight_1m$track_cross_wind_1m)
+hist(flight_1m$cross_wind_1m_abs)
+
+# Species subsets
+flight_1m_gull <- flight_1m[flight_1m$species == "gull",]
+flight_1m_murre <- flight_1m[flight_1m$species == "murre",]
+
+
+
+
+
+# Fit possible models (8):
+models.murre.1m_no_filter <- list()
+
+models.murre.1m_no_filter[[8]] <- glmer(va_1m ~
+                                           cross_wind_1m_abs +
+                                           head_wind_1m_abs*head_wind_1m_type +
+                                           + (1|ring_number),
+                                         data = flight_1m_murre)
+
+models.murre.1m_no_filter[[7]] <- glmer(va_1m ~
+                                           trunc_seg_dist_a_b_km +
+                                           cross_wind_1m_abs +
+                                           head_wind_1m_abs*head_wind_1m_type +
+                                           + (1|ring_number),
+                                         data = flight_1m_murre)
+
+models.murre.1m_no_filter[[6]] <- glmer(va_1m ~
+                                           trunc_seg_dist_a_b_km +
+                                           cross_wind_1m_abs+
+                                           + (1|ring_number),
+                                         data = flight_1m_murre)
+
+models.murre.1m_no_filter[[5]] <- glmer(va_1m ~
+                                           trunc_seg_dist_a_b_km +
+                                           
+                                           head_wind_1m_abs*head_wind_1m_type +
+                                           + (1|ring_number),
+                                         data = flight_1m_murre)
+
+models.murre.1m_no_filter[[4]] <- glmer(va_1m ~
+                                           head_wind_1m_abs*head_wind_1m_type +
+                                           + (1|ring_number),
+                                         data = flight_1m_murre)
+
+
+models.murre.1m_no_filter[[3]] <- glmer(va_1m ~
+                                           
+                                           cross_wind_1m_abs
+                                         + (1|ring_number),
+                                         data = flight_1m_murre)
+
+
+models.murre.1m_no_filter[[2]] <- glmer(va_1m ~
+                                           trunc_seg_dist_a_b_km +
+                                           (1|ring_number),
+                                         data = flight_1m_murre)
+
+models.murre.1m_no_filter[[1]] <- glmer(va_1m ~ 1 +
+                                           (1|ring_number),
+                                         data = flight_1m_murre)
+#
+
+# Standardize models
+models.murre.1m_no_filter.stdz <- list()
+models.murre.1m_no_filter.stdz[[1]] <- models.murre.1m_no_filter[[1]]
+for(i in 2:8){
+  models.murre.1m_no_filter.stdz[[i]] <- standardize(models.murre.1m_no_filter[[i]], standardize.y=FALSE)
+}
+
+models.murre.1m_no_filter.aicc <- sapply(models.murre.1m_no_filter.stdz, AICc)
+models.murre.1m_no_filter.aicc.dif <- models.murre.1m_no_filter.aicc-min(models.murre.1m_no_filter.aicc)
+models.murre.1m_no_filter.r2m <- sapply(models.murre.1m_no_filter.stdz, r.squaredGLMM)
+t(models.murre.1m_no_filter.r2m)
+
+models.murre.1m_no_filter.fit.df <- cbind.data.frame(c(1:8),models.murre.1m_no_filter.aicc,
+                                                      models.murre.1m_no_filter.aicc.dif,
+                                                      t(models.murre.1m_no_filter.r2m))
+names(models.murre.1m_no_filter.fit.df) <- c("mod", "AICc", "dAICc", "R2m", "R2c")
+
 
 
 # * merge murre glmm summary table -----
