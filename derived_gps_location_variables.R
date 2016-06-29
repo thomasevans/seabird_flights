@@ -4,7 +4,7 @@
 # Load in flight and point data ----
 load("flights.RData")
 load("points_all.RData")
-
+# mean(points.all$ecmwf_surf_roughness)
 
 # Connect point data and flight data ----
 # ?merge
