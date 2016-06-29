@@ -541,3 +541,263 @@ anova(mod)
 summary(mod)
 cor.test(df.flights.cross$h, df.flights.cross$vw_10)
 
+
+
+
+
+
+# Final Vg models for gulls and murres -----
+flights.gulls <- flight.details[flight.details$species == "gull",]
+flights.murres <- flight.details[flight.details$species == "murre",]
+
+library(lme4)
+library(arm)
+library(lattice)
+library(MuMIn)
+library(ggplot2)
+library(cowplot)
+
+# Two best fit models for two species (linear and quadratic fit models)
+
+
+mod.gull.5 <- glmer(vg ~ track_head_wind_10m + I(track_head_wind_10m^2) +
+                        track_cross_wind_10m
+                      + (1|ring_number),
+                      data = flights.gulls)
+
+mod.gull.6 <- glmer(vg ~ track_head_wind_10m +
+                        track_cross_wind_10m
+                      + (1|ring_number),
+                      data = flights.gulls)
+
+
+
+mod.murre.3 <- glmer(vg ~ track_head_wind_10m + I(track_head_wind_10m^2)
+                      + (1|ring_number),
+                      data = flights.murres)
+
+mod.murre.2 <- glmer(vg ~ track_head_wind_10m
+                      + (1|ring_number),
+                      data = flights.murres)
+
+
+
+# Make coef plot thing (mod 3 for murres, mod 5 for gulls) -----
+
+mod_gull_frame <- data.frame(Variable = rownames(summary(mod.gull.5)$coef)[-1],
+                             Coefficient = summary(mod.gull.5)$coef[-1, 1],
+                             CI_low = confint(mod.gull.5, method="Wald")[-c(1:3), 1],
+                             CI_high = confint(mod.gull.5, method="Wald")[-c(1:3), 2],
+                             modelName = "Lesser Black-backed Gulls")
+mod_murre_frame <- data.frame(Variable = rownames(summary(mod.murre.3)$coef)[-1],
+                              Coefficient = summary(mod.murre.3)$coef[-1, 1],
+                              CI_low = confint(mod.murre.3, method="Wald")[-c(1:3), 1],
+                              CI_high = confint(mod.murre.3, method="Wald")[-c(1:3), 2],
+                              modelName = "Common Murres")
+# Combine these data.frames
+allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
+
+str(allModelFrame)
+allModelFrame$modelName <-  factor(allModelFrame$modelName,
+                                   levels(allModelFrame$modelName)[c(2,1)])
+
+levels(allModelFrame$Variable)
+
+allModelFrame$Variable <-  factor(allModelFrame$Variable,
+                                   levels(allModelFrame$Variable)[c(2,1,3)])
+
+
+# lab.1 <- expression("Vw"["s"]+~"(tail-wind)")
+# lab.2 <- expression("Vw"["s"]-~"(head-wind)")
+# lab.3 <- expression("Vw"["c"]~"Absolute speed")
+# lab.4 <- expression("Vw"["c"]-~"(to left)")
+# parse=TRUE
+
+
+
+theme_new_top_legend <- theme_bw(base_size = 14, base_family = "serif") +
+  theme(legend.position = c(1, 0.4),
+        legend.justification = c(1, 1),
+        legend.key.size =   unit(2, "lines"),
+        legend.key = element_rect(colour =NA),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 14),
+        legend.text.align = 0,
+        legend.key.width = unit(3, "lines"),
+        legend.title = element_blank()
+  )
+
+zp1 <- ggplot(allModelFrame, aes(colour = modelName))
+zp1 <- zp1 + geom_hline(yintercept = 0, colour = gray(1/2), lty = 2,
+                        show.legend = TRUE)
+zp1 <- zp1 + geom_linerange(aes(x = Variable,
+                                ymin = CI_low,
+                                ymax = CI_high),
+                            lwd = 1, position = position_dodge(width = 1/2),
+                            show.legend = TRUE)
+zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
+                                 ymin = CI_low,
+                                 ymax = CI_high),
+                             lwd = 1/2, position = position_dodge(width = 1/2),
+                             shape = 21, fill = NA,
+                             show.legend = TRUE)
+zp1 <- zp1 + scale_x_discrete("",
+                              labels = c(expression("Vw"["c"]),
+                                         expression("Vw"["s"]^2~""),
+                                         expression("Vw"["s"])
+                              ))
+
+# expression("Vw"["s"]+~"(tail-wind)")
+
+zp1 <- zp1 + coord_flip() 
+# zp1 <- zp1 + theme_new + ylim(-4,2.5)
+zp1 <- zp1 + scale_y_continuous(breaks = seq(0, 1, .1),
+                                minor_breaks = seq(-0.1, 1, 0.05),
+                                limits = c(-0.06, 0.8))
+# ?scale_y_continuous
+# zp1 <- zp1 + theme(axis.text = element_text(size = 12))
+# zp1 <- zp1 +  theme_new
+zp1 <- zp1 + theme_new_top_legend
+# zp1 <- zp1 + theme(legend.position = c(0.5, 0.3))
+zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Vg ["~ms^{-1}~"])"))
+zp1 <- zp1 +
+  annotate("text",  x= layer_scales(zp1)$x$range$range[3],
+           y = layer_scales(zp1)$y$range$range[1], label = "(a)",
+           vjust= - 4, hjust= -2, size = 5)
+# zp1 <- zp1 + theme(legend.justification=c(0,0), legend.position=c(0,0))
+zp1
+
+ggsave(zp1, filename = "vg_model_coef_fig.svg", width = 6, height = 8,
+       units = "in")
+
+
+
+# Make model illustration thing (show curve + mayber dashed line for linear) for two species -----
+
+# Gulls
+
+
+wind.side <- 0
+wind.assist <- seq(-10,10,.1)
+birds <- unique(flights.gulls$ring_number)
+
+gg <- expand.grid(x=wind.assist,y=wind.side, z = birds)
+
+
+lbbg.new.data.df <- cbind.data.frame(
+  track_head_wind_10m = (gg$x),
+  track_cross_wind_10m = (gg$y),
+  ring_number = (gg$z)
+)
+
+
+# mean
+pred.vg_quad <- predict(mod.gull.5,
+                   newdata = lbbg.new.data.df[gg$z == birds[1],],
+                   re.form=NA)
+plot(pred.vg_quad~gg$x[gg$z == birds[1]])
+
+pred.vg_linear <- predict(mod.gull.6,
+                   newdata = lbbg.new.data.df[gg$z == birds[1],],
+                   re.form=NA)
+plot(pred.vg_linear~gg$x[gg$z == birds[1]])
+
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+cols.new <- gg_color_hue(2)
+
+
+
+fit.data <- cbind.data.frame(pred.vg_quad, pred.vg_linear, gg$x, gg$y, gg$z)
+names(fit.data) <- c("vg", "vg_linear", "track_head_wind_10m", "track_cross_wind_10m", "ring_number" )
+g_gulls <- ggplot(flights.gulls,aes(x = track_head_wind_10m , y = vg)) + 
+  geom_vline(xintercept = 0) +
+  geom_line(data = fit.data, alpha = 0.8,lwd = 1.2,
+            col = cols.new[2]) +
+  geom_line(aes(x = track_head_wind_10m , y = vg_linear),
+            data = fit.data, alpha = 0.8,lwd = 1.2,
+            lty = 2,
+            col = cols.new[2]) +
+  scale_x_continuous(breaks = seq(-10, 10, 2),
+                       minor_breaks = seq(-12, 12, 1),
+                       limits = c(-11 , 11)) +
+  geom_point(shape=21,na.rm=T, size=2, alpha = 0.5, col = "grey10") +
+  labs( y = expression("Vg"~~~~"Ground speed ("~ms^{-1}~")"),
+        x = expression("Vw"~~~~"Wind assistance ("~ms^{-1}~")"),
+        # fill = "Altitude\n(m)",
+        parse = TRUE) +
+  theme_new_top_legend 
+g_gulls + annotate("text",  x= -10,
+           y = layer_scales(g_gulls)$y$range$range[2], label = "(b)",
+           vjust= 2, hjust= 0, size = 5)
+# parse = TRUE) 
+ggsave("vg_gull_prediction.svg", width = 5, height = 4, units = "in")
+
+# Murres
+
+
+wind.side <- 0
+wind.assist <- seq(-10,10,.1)
+birds <- unique(flights.murres$ring_number)
+
+gg <- expand.grid(x=wind.assist,y=wind.side, z = birds)
+
+
+lbbg.new.data.df <- cbind.data.frame(
+  track_head_wind_10m = (gg$x),
+  track_cross_wind_10m = (gg$y),
+  ring_number = (gg$z)
+)
+
+
+# mean
+pred.vg_quad <- predict(mod.murre.3,
+                        newdata = lbbg.new.data.df[gg$z == birds[1],],
+                        re.form=NA)
+plot(pred.vg_quad~gg$x[gg$z == birds[1]])
+
+pred.vg_linear <- predict(mod.murre.2,
+                          newdata = lbbg.new.data.df[gg$z == birds[1],],
+                          re.form=NA)
+plot(pred.vg_linear~gg$x[gg$z == birds[1]])
+
+
+
+
+
+
+fit.data <- cbind.data.frame(pred.vg_quad, pred.vg_linear, gg$x, gg$y, gg$z)
+names(fit.data) <- c("vg", "vg_linear", "track_head_wind_10m", "track_cross_wind_10m", "ring_number" )
+g_murres <- ggplot(flights.murres,aes(x = track_head_wind_10m , y = vg)) + 
+  geom_vline(xintercept = 0) +
+  geom_line(data = fit.data, alpha = 0.8,lwd = 1.2,
+            col = cols.new[1]) +
+  geom_line(aes(x = track_head_wind_10m , y = vg_linear),
+            data = fit.data, alpha = 0.8,lwd = 1.2,
+            lty = 2,
+            col = cols.new[1]) +
+  scale_x_continuous(breaks = seq(-10, 10, 2),
+                     minor_breaks = seq(-12, 12, 1),
+                     limits = c(-11 , 11)) +
+  geom_point(shape=21,na.rm=T, size=2, alpha = 0.5, col = "grey10") +
+  labs( y = expression("Vg"~~~~"Ground speed ("~ms^{-1}~")"),
+        x = expression("Vw"~~~~"Wind assistance ("~ms^{-1}~")"),
+        # fill = "Altitude\n(m)",
+        parse = TRUE) +
+  theme_new_top_legend 
+g_murres + annotate("text",  x= -10,
+                   y = layer_scales(g_murres)$y$range$range[2], label = "(c)",
+                   vjust= 2, hjust= 0, size = 5)
+# parse = TRUE)
+# parse = TRUE) 
+ggsave("vg_murre_prediction.svg", width = 5, height = 4, units = "in")
+
+
+
+# plot(mod.murre.3)
+# qqmath(mod.murre.3)
