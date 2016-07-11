@@ -384,7 +384,6 @@ plot(flights.gulls$vg~flights.gulls$track_head_wind_10m,
 for(i in 1:length(birds)){
   f <- gg$z == birds[i]
   points(pred.va[f]~gg$x[f], col = as.numeric(gg$z[f]), type = "l")  
-  
   }
 
 # points(pred.va2~gg$x, lwd = 2, type = "l", lty = 2, col = addalpha("black", 0.5))
@@ -589,10 +588,10 @@ mod_gull_frame <- data.frame(Variable = rownames(summary(mod.gull.5)$coef)[-1],
                              CI_low = confint(mod.gull.5, method="Wald")[-c(1:3), 1],
                              CI_high = confint(mod.gull.5, method="Wald")[-c(1:3), 2],
                              modelName = "Lesser Black-backed Gulls")
-mod_murre_frame <- data.frame(Variable = rownames(summary(mod.murre.3)$coef)[-1],
-                              Coefficient = summary(mod.murre.3)$coef[-1, 1],
-                              CI_low = confint(mod.murre.3, method="Wald")[-c(1:3), 1],
-                              CI_high = confint(mod.murre.3, method="Wald")[-c(1:3), 2],
+mod_murre_frame <- data.frame(Variable = rownames(summary(mod.murre.2)$coef)[-1],
+                              Coefficient = summary(mod.murre.2)$coef[-1, 1],
+                              CI_low = confint(mod.murre.2, method="Wald")[-c(1:3), 1],
+                              CI_high = confint(mod.murre.2, method="Wald")[-c(1:3), 2],
                               modelName = "Common Murres")
 # Combine these data.frames
 allModelFrame <- data.frame(rbind(mod_gull_frame, mod_murre_frame))  
@@ -776,10 +775,10 @@ names(fit.data) <- c("vg", "vg_linear", "track_head_wind_10m", "track_cross_wind
 g_murres <- ggplot(flights.murres,aes(x = track_head_wind_10m , y = vg)) + 
   geom_vline(xintercept = 0) +
   geom_line(data = fit.data, alpha = 0.8,lwd = 1.2,
+            lty = 2,
             col = cols.new[1]) +
   geom_line(aes(x = track_head_wind_10m , y = vg_linear),
             data = fit.data, alpha = 0.8,lwd = 1.2,
-            lty = 2,
             col = cols.new[1]) +
   scale_x_continuous(breaks = seq(-10, 10, 2),
                      minor_breaks = seq(-12, 12, 1),
