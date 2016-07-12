@@ -331,6 +331,7 @@ flight_alt_ok_murre <- flight_alt_ok_murre_original[
   !(flight_alt_ok_murre_original$flight_id_combined %in% c("m1228", "m623",
                                                            "m515", "m676",
                                                            "m495", "m774")),]
+# flight_alt_ok_murre <- flight_alt_ok_murre_original
 
 
 # Fit possible models (8):
@@ -421,6 +422,7 @@ flight_alt_murre <- flight_alt_murre.original[
   !(flight_alt_murre.original$flight_id_combined %in% c("m1228", "m623",
                                                         "m515", "m676",
                                                         "m495", "m774")),]
+# flight_alt_murre <- flight_alt_murre.original 
 
 models.murre.flt_ht_no_filter <- list()
 
@@ -524,16 +526,16 @@ write.csv(models.murre.fit.all, file = "murre_alt_model_fit_table_influential_po
 
 # *********** Coef + p-values -----------
 # Calculate p values for dropping of terms from lowest AIC model -----
-murre_model_va <- models.murre[[21]]
-lbbg_model_va <- models.gull[[21]]
+murre_model_va <- models.murre[[8]]
+lbbg_model_va <- models.gull[[8]]
 
 # murre_model_va <- models.murre.new
 
 
-lbbg_model_va <- models.gull.flt_ht_no_filter[[21]]
+lbbg_model_va <- models.gull.flt_ht_no_filter[[8]]
 
 
-murre_model_va <- models.murre.flt_ht_no_filter[[21]]
+murre_model_va <- models.murre.flt_ht_no_filter[[8]]
 
 
 anova(models.gull[[14]], models.gull[[13]])
@@ -636,8 +638,8 @@ qqmath(lbbg_model_va)
 # Make forest plot to illustrate final model -----
 library(cowplot)
 
-murre_model_va <- models.murre[[21]]
-lbbg_model_va <- models.gull[[21]]
+murre_model_va <- models.murre[[5]]
+lbbg_model_va <- models.gull[[8]]
 
 # Adapted from: https://gist.github.com/dsparks/4332698
 
@@ -726,7 +728,7 @@ zp1
 ggsave(zp1, filename = "alt_model_coef_fig_combined_track.svg", width = 6, height = 8,
        units = "in")
 
-ggsave(zp1, filename = "alt_model_coef_fig_combined_track_horizontal.svg", width = 12, height = 4,
+ggsave(zp1, filename = "alt_model_coef_fig_combined_track_horizontal_new.svg", width = 12, height = 4,
        units = "in")
 
 # ?ggsave
@@ -800,7 +802,7 @@ flight_alt_ok_gg <- data.frame(
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
 # lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","Cross-wind"))
+lab.4 <- expression(atop("Vw"["c"]~"","Cross-wind"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -810,10 +812,12 @@ p <- ggplot(gg,aes(x,y)) +
                          flight_alt_ok_gg$z, na.rm = TRUE
                        ), space = "Lab",
                        na.value = "grey50", guide = "colourbar") +
-  scale_x_continuous(expand=c(0,0))+
-  scale_y_continuous(expand=c(0,0))+
+#   scale_x_continuous(expand=c(0,0))+
+#   scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(expand=c(0,0), breaks = seq(-10, 10, 2.5))+
+  scale_y_continuous(expand=c(0,0), breaks = c(0,2.5,5,7.5,10), limits = c(0, 12))+
   coord_fixed() +
-  geom_point(data = flight_alt_ok_gg,
+  geom_point(data = flight_alt_ok_gg[complete.cases(flight_alt_ok_gg),],
              aes(fill = z), 
              shape=21, alpha=1,na.rm=T, size=1.5) +
   labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
@@ -831,10 +835,10 @@ p <- ggplot(gg,aes(x,y)) +
            size = 4,
            vjust = 0.5) 
 p <- p + annotate("text",  x= -9,
-                  y = 9, label = "(b)",
+                  y = 11, label = "(b)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_gull_predication2_track2.svg", width = 6, height = 4, units = "in")
+ggsave("Alt_gull_predication2_track2_new.svg", width = 6, height = 4, units = "in")
 
 
 
@@ -893,7 +897,7 @@ flight_alt_ok_gg <- data.frame(
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
 # lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","Cross-wind"))
+lab.4 <- expression(atop("Vw"["c"]~"","Cross-wind"))
 
 
 p <- ggplot(gg,aes(x,y)) + 
@@ -903,10 +907,11 @@ p <- ggplot(gg,aes(x,y)) +
                          flight_alt_ok_gg$z, na.rm = TRUE
                        ), space = "Lab",
                        na.value = "grey50", guide = "colourbar") +
-  scale_x_continuous(expand=c(0,0))+
-  scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(expand=c(0,0), breaks = seq(-10, 10, 2.5))+
+  scale_y_continuous(expand=c(0,0), breaks = c(0,2.5,5,7.5,10), limits = c(0, 12))+
+  # ?scale_y_continuous
   coord_fixed() +
-  geom_point(data = flight_alt_ok_gg,
+  geom_point(data = flight_alt_ok_gg[complete.cases(flight_alt_ok_gg),],
              aes(fill = z), 
              shape=21, alpha=1,na.rm=T, size=2.5) +
   labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
@@ -924,9 +929,9 @@ p <- ggplot(gg,aes(x,y)) +
            size = 4,
            vjust = 0.5) 
 p <- p + annotate("text",  x= -9,
-                  y = 9, label = "(c)",
+                  y = 11, label = "(c)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("Alt_murre_predication2_track2.svg", width = 6, height = 4, units = "in")
+ggsave("Alt_murre_predication2_track2_new.svg", width = 6, height = 4, units = "in")
 
 
