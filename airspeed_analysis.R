@@ -1079,14 +1079,12 @@ zp1 <- zp1 + geom_pointrange(aes(x = Variable, y = Coefficient,
                              shape = 21, fill = NA,
                              show.legend = FALSE)
 zp1 <- zp1 + scale_x_discrete("",
-                              labels = c(expression("Vw"["c"]~" speed"),
-                                         expression("Vw"["c"]~" speed: type (to right)"),
-                                         expression("Vw"["c"]~" type (to right)"),
-                                         expression("Vw"["s"]~" speed"),
-                                         expression("Vw"["s"]~" speed: type (tail-wind)"),
-                                         expression("Vw"["s"]~" type (tail-wind)"),
-                                         "Distance (km)"
-                                         ))
+                              labels = c(
+                                expression("Vw"["c"]~" speed"),
+                                       expression("Vw"["s"]~" speed"),
+                                       expression("Vw"["s"]~" speed: type (tail-wind)"),
+                                       expression("Vw"["s"]~" type (tail-wind)"),
+                                       paste("Distance (km)")                                        ))
 
 # expression("Vw"["s"]+~"(tail-wind)")
 
@@ -1102,13 +1100,13 @@ zp1 <- zp1 + theme_new_top_legend
 # zp1 <- zp1 + theme(legend.position = c(0.5, 0.3))
 zp1 <- zp1 + labs(x = "", y = expression("Coefficient   ("~Delta~"Va ["~ms^{-1}~"])"))
 zp1 <- zp1 +
-  annotate("text",  x= layer_scales(zp1)$x$range$range[7],
+  annotate("text",  x= layer_scales(zp1)$x$range$range[5],
            y = layer_scales(zp1)$y$range$range[1], label = "(a)",
            vjust=-1, hjust=0, size = 5)
 # zp1 <- zp1 + theme(legend.justification=c(0,0), legend.position=c(0,0))
 zp1
 
-ggsave(zp1, filename = "va_model_coef_fig2.svg", width = 6, height = 6,
+ggsave(zp1, filename = "va_model_coef_fig2_new.svg", width = 5, height = 8,
        units = "in")
 # ?ggsave
 
@@ -1125,7 +1123,7 @@ ggsave(zp1, filename = "va_model_coef_fig2.svg", width = 6, height = 6,
 # - See: http://stackoverflow.com/a/27571412/1172358
 
 
-wind.side <- seq(-10,10,.1)
+wind.side <- seq(0,10,.1)
 wind.assist <- seq(-10,10,.1)
 dist.median <- median(flight_alt_ok$trunc_seg_dist_a_b_km[flight_alt_ok$species == "gull"])
 
@@ -1167,7 +1165,7 @@ gg$z3 <- v[gg$z2]
 
 flight_alt_ok_gg <- data.frame(
   x = flight_alt_ok_gull$head_wind_flt_ht_alt_filter,
-  y = flight_alt_ok_gull$cross_wind_flt_ht_alt_filter,
+  y = abs(flight_alt_ok_gull$cross_wind_flt_ht_alt_filter),
   z = flight_alt_ok_gull$va_flt_ht_alt_filter,
   z2 = findInterval(flight_alt_ok_gull$va_flt_ht_alt_filter, v)
 )
@@ -1180,10 +1178,10 @@ flight_alt_ok_gg <- data.frame(
 
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
-lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+# lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression("Vw"["c"])
 
-
+# hist(gg$y)
 p <- ggplot(gg,aes(x,y)) + 
   geom_raster(aes(fill=z3))+
   scale_fill_gradient2(low = muted("blue"), mid = "white",
@@ -1216,18 +1214,18 @@ p <- ggplot(gg,aes(x,y)) +
 #            colour = "black",
 #            size = 5,
 #            vjust = 0) 
-  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(2, 2 , 8, -7.5),
-           y = c(-10, 8.5, 0, 0),
+  annotate("text", label = c(paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c( 2 , 8, -7.5),
+           y = c( 10, 1, 1),
            parse=TRUE,
            colour = "grey40",
            size = 4,
            vjust = 0.5) 
 p <- p + annotate("text",  x= -9,
-                  y = 9, label = "(b)",
+                  y = 11, label = "(b)",
                   vjust = 1, hjust=0, size = 5)
 p
-ggsave("va_gull_predication2.svg", width = 5, height = 6, units = "in")
+ggsave("va_gull_predication2_new.svg", width = 5, height = 4, units = "in")
 
 
 
@@ -1271,7 +1269,7 @@ gg$z3 <- v[gg$z2]
 
 flight_alt_ok_gg <- data.frame(
   x = flight_alt_ok_murre$head_wind_flt_ht_alt_filter,
-  y = flight_alt_ok_murre$cross_wind_flt_ht_alt_filter,
+  y = abs(flight_alt_ok_murre$cross_wind_flt_ht_alt_filter),
   z = flight_alt_ok_murre$va_flt_ht_alt_filter,
   z2 = findInterval(flight_alt_ok_murre$va_flt_ht_alt_filter, v)
 )
@@ -1285,8 +1283,8 @@ flight_alt_ok_gg <- data.frame(
 
 lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
-lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
-lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
+# lab.3 <- expression(atop("Vw"["c"]^"-"~"","To left"))
+lab.4 <- expression("Vw"["c"])
 
 
 
@@ -1312,9 +1310,9 @@ p <- ggplot(gg,aes(x,y)) +
   theme(legend.title = element_text(size = 14)) +
   theme(legend.position = "top")+
   theme(legend.key.size = unit(0.25, "inch")) +
-  annotate("text", label = c(paste(lab.3),paste(lab.4),paste(lab.1),paste(lab.2)),
-           x = c(2, 2 , 8, -7.5),
-           y = c(-9, 8.5, 0, 0),
+  annotate("text", label = c(paste(lab.4),paste(lab.1),paste(lab.2)),
+           x = c( 2 , 8, -7.5),
+           y = c( 8.5, 1, 1),
            parse=TRUE,
            colour = "grey40",
            size = 4,
@@ -1324,7 +1322,7 @@ p <- p + annotate("text",  x= -9,
                   vjust = 1, hjust=0, size = 5)
 p
 
-ggsave("va_murre_predication2.svg", width = 5, height = 6, units = "in")
+ggsave("va_murre_predication2_new.svg", width = 5, height = 4, units = "in")
 
 
 
