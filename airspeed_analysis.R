@@ -1329,6 +1329,7 @@ ggsave("va_murre_predication2_new.svg", width = 5, height = 4, units = "in")
 # Predictions for no wind ----
 
 # Gulls
+dist.median <- median(flight_alt_ok_gull$trunc_seg_dist_a_b_km)
 
 lbbg.new.data.df <- cbind.data.frame(
   trunc_seg_dist_a_b_km = dist.median,
@@ -1347,6 +1348,7 @@ pred.va <- predict(lbbg_model_va,
                    newdata = lbbg.new.data.df,
                    re.form=NA)
 mean(pred.va)
+#11.03622
 
 pred.va <- predict(lbbg_model_va,
                    newdata = lbbg.new.data.df,
@@ -1362,7 +1364,13 @@ x <- ddply(df, .(ring_number),
 str(x)
 x[,2]
 
+# 11.91885 11.36472 11.28023 10.56731 10.94953 10.57653 11.33638 11.14906 10.97801 10.88252 11.26848 11.16238 11.47210 10.95305 10.45212 10.26821
 
+mean(x[,2])
+# 11.03622
+
+# Murres ***
+dist.median <- median(flight_alt_ok_murre$trunc_seg_dist_a_b_km)
 
 murre.new.data.df <- cbind.data.frame(
   trunc_seg_dist_a_b_km = dist.median,
@@ -1384,10 +1392,8 @@ pred.va <- predict(murre_model_va,
                    re.form=NA)
 
 mean(pred.va)
+# 13.68133
 
-pred.va <- predict(murre_model_va,
-                   newdata = murre.new.data.df,
-                   re.form=NULL)
 
 # library(plyr)
 df <- cbind.data.frame(pred.va,murre.new.data.df$ring_number)
@@ -1398,3 +1404,57 @@ x <- ddply(df, .(ring_number),
 )
 str(x)
 x[,2]
+# 14.66591 13.86643 15.52335 11.65145 13.17248 13.79279 13.25963 14.88026 15.76323 14.39630 11.57383 11.64208 12.05237 14.58168 15.45520 13.96711 14.63981 12.85711 11.86864 13.93918 13.75917
+
+mean(x[,2])
+#13.68133
+
+# Vg under low winds ----
+gull.vg.speed <- flight_alt_gull$vg[flight_alt_gull$ecmwf_wind_10m_speed < 2]
+gull.vg.birds <- flight_alt_gull$ring_number[flight_alt_gull$ecmwf_wind_10m_speed < 2]
+df <- cbind.data.frame(vg = gull.vg.speed, ring_number = gull.vg.birds)
+
+gull.vg.mean <- ddply(df, .(ring_number),
+           summarise,
+           mean = mean(vg),
+           n = length(vg)
+)
+
+#13.671850 14.937996 11.455421 11.188226  9.191042 11.956423 11.169780 11.666191 10.789200 11.267608 11.626858 11.247204  9.491904 10.553425
+
+mean(gull.vg.mean$mean)
+#11.44379
+sd(gull.vg.mean$mean)
+#1.463286
+
+# se
+sd(gull.vg.mean$mean)/sqrt(nrow(gull.vg.mean))
+#0.3910797
+# CI
+1.96*sd(gull.vg.mean$mean)/sqrt(nrow(gull.vg.mean))
+#0.3910797
+
+
+
+murre.vg.speed <- flight_alt_murre$vg[flight_alt_murre$ecmwf_wind_10m_speed < 2]
+murre.vg.birds <- flight_alt_murre$ring_number[flight_alt_murre$ecmwf_wind_10m_speed < 2]
+df <- cbind.data.frame(vg = murre.vg.speed, ring_number = murre.vg.birds)
+
+murre.vg.mean <- ddply(df, .(ring_number),
+                      summarise,
+                      mean = mean(vg),
+                      n = length(vg)
+)
+# 15.31111 15.05556 14.50000 11.86111 15.90005 10.44444
+mean(murre.vg.mean$mean)
+#13.84538
+sd(murre.vg.mean$mean)
+#2.180219
+
+# se
+sd(murre.vg.mean$mean)/sqrt(nrow(murre.vg.mean))
+#0.8900707
+
+# CI
+1.96*sd(murre.vg.mean$mean)/sqrt(nrow(murre.vg.mean))
+#1.414214
