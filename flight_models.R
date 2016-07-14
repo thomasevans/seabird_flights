@@ -352,6 +352,8 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
           legend.key.width = unit(3, "lines"),
           legend.title = element_blank()
     )
+  
+  
   # Airspeed prediction plots -----
   
   # Murres - according to track ----
@@ -621,6 +623,10 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   
   
   # Power curve plot -----
+  
+  # If resuming from here:
+  load("flight_models.RData")
+  
   powercurve.murre <- flightperf.murre$powercurve
   powercurve.gull <- flightperf.gull$powercurve
   
@@ -635,8 +641,8 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   
   
 
-  svg("flight_power_curves.svg",
-      width = 5, height = 5, family = "serif")
+  svg("flight_power_curves_new.svg",
+      width = 5, height = 4, family = "serif")
   
   par(mfrow = c(1,1))
   par(mar=c(4, 4, 1, 1) + 0.1)   
@@ -645,7 +651,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
          powercurve.murre$speed, type = "n",
        # cex.lab = 1.5,
        las = 1,
-       xlab = expression("Va"~~~~"Airspeed ("~ms^{-1}~")"),
+       xlab = expression("Airspeed ("~ms^{-1}~")"~~"Va"),
        ylab = "Aerodynamic power (W)",
        cex.lab = 1.3,
        xlim = c(0, 28),
@@ -745,11 +751,11 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   }
   
   
-  svg("flight_speeds_predicted_recorded_va_track_model.svg",
-      width = 5, height = 5, family = "serif")
+  svg("flight_speeds_predicted_recorded_va_track_model_new.svg",
+      width = 5, height = 6, family = "serif")
   
   par(mfrow = c(1,1))
-  par(mar=c(4, 7.4, 1, 1) + 0.1)   
+  par(mar=c(4, 7.5, 1, 1) + 0.1)   
   
   plot(powercurve.murre$power.aero ~
          powercurve.murre$speed, type = "n",
@@ -759,7 +765,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
        ylab = "",
        cex.lab = 1.3,
        xlim = c(5, 28),
-       ylim = c(0, 9),
+       ylim = c(0, 11),
        yaxt = "n",
        yaxs = "i",
        xaxs = "i")
@@ -777,52 +783,56 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   
 
   
-  points(birds_details$Vmr[1:19], rep(7, 19),
+  points(birds_details$Vmr[1:19], rep(9, 19),
          col = cols.new.08[1],
          cex = 1.5)
-  points(birds_mr[[1]]$speed, 7,
+  points(birds_mr[[1]]$speed, 9,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
-  points(birds_details$Vmr[20:46], rep(3, 46-19),
+  points(birds_details$Vmr[20:46], rep(4, 46-19),
          col = cols.new.08[2],
          cex = 1.5)
-  points(birds_mr[[4]]$speed, 3,
+  points(birds_mr[[4]]$speed, 4,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
-  points(birds_details$Vmp[1:19], rep(6, 19),
+  points(birds_details$Vmp[1:19], rep(8, 19),
          col = cols.new.08[1],
          cex = 1.5)
-  points(birds_mp[[1]]$speed, 6,
+  points(birds_mp[[1]]$speed, 8,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
-  points(birds_details$Vmp[20:46], rep(2, 46-19),
+  points(birds_details$Vmp[20:46], rep(3, 46-19),
          col = cols.new.08[2],
          cex = 1.5)
-  points(birds_mp[[4]]$speed, 2,
+  points(birds_mp[[4]]$speed, 3,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
   # ?mtext
   mtext("Lesser Black-\nbacked Gulls", side = 2,
-        las = 1, at = 8, line = 5, adj = 0.2)
+        las = 1, at = 10, line = 5, adj = 0.2)
   mtext("Vmr", side = 2,
-        las = 1, at = 7, line = 4, adj = 0.2)
+        las = 1, at = 9, line = 4, adj = 0.2)
   mtext("Vmp", side = 2,
-        las = 1, at = 6, line = 4, adj = 0.2)
+        las = 1, at = 8, line = 4, adj = 0.2)
   mtext("Va", side = 2,
-        las = 1, at = 5, line = 4, adj = 0.2)
+        las = 1, at = 7, line = 4, adj = 0.2)
+  mtext("Vg (calm)", side = 2,
+        las = 1, at = 6, line = 4, adj = 0.2)
   
   
   mtext("Common \nMurres", side = 2,
-        las = 1, at = 4, line = 5, adj = 0.2)
+        las = 1, at = 5, line = 5, adj = 0.2)
   mtext("Vmr", side = 2,
-        las = 1, at = 3, line = 4, adj = 0.2)
+        las = 1, at = 4, line = 4, adj = 0.2)
   mtext("Vmp", side = 2,
-        las = 1, at = 2, line = 4, adj = 0.2)
+        las = 1, at = 3, line = 4, adj = 0.2)
   mtext("Va", side = 2,
+        las = 1, at = 2, line = 4, adj = 0.2)
+  mtext("Vg (calm)", side = 2,
         las = 1, at = 1, line = 4, adj = 0.2)
   
   
@@ -840,10 +850,12 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
 #          cex = 2)
   
   # Track
-  points(c(11.68236, 11.17443, 11.04795, 10.42490, 10.84785, 10.63654, 11.36720, 10.99591, 10.73558, 10.58941, 11.17174, 11.09349, 11.17512, 10.89864, 10.44534, 10.06882),rep(5,length(c(11.68236, 11.17443, 11.04795, 10.42490, 10.84785, 10.63654, 11.36720, 10.99591, 10.73558, 10.58941, 11.17174, 11.09349, 11.17512, 10.89864, 10.44534, 10.06882))),
+  points(c(11.91885,11.36472,11.28023,10.56731,10.94953,10.57653,11.33638,11.14906,10.97801,10.88252,11.26848,11.16238,11.47210,10.95305,10.45212,10.26821
+),rep(7,length(c(11.91885,11.36472,11.28023,10.56731,10.94953,10.57653,11.33638,11.14906,10.97801,10.88252,11.26848,11.16238,11.47210,10.95305,10.45212,10.26821
+))),
          col = cols.new.08[1],
          cex = 1.5)
-  points(10.8972, 5,
+  points(11.03622, 7,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
@@ -861,10 +873,37 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
 #          cex = 2)
   
   # Track model
-  points(c(14.51659, 13.90763, 15.47492, 11.60889, 13.19780, 14.04954, 13.21611, 14.65621, 15.63218, 14.35419, 11.94333, 11.85689, 12.06912, 14.54855, 15.50250, 14.03046, 14.53534, 12.79665, 11.78864, 13.90724, 13.64110),rep(1,length(c(14.51659, 13.90763, 15.47492, 11.60889, 13.19780, 14.04954, 13.21611, 14.65621, 15.63218, 14.35419, 11.94333, 11.85689, 12.06912, 14.54855, 15.50250, 14.03046, 14.53534, 12.79665, 11.78864, 13.90724, 13.64110))),
+  points(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917),rep(2,length(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917))),
          col = cols.new.08[2],
          cex = 1.5)
-  points(13.6778, 1,
+  points(13.68133, 2,
+         bg = cols.new.05[2], pch = 21,
+         cex = 2)
+  
+  # Vg (wind < 2ms-1)
+  points(c(13.671850,14.937996,11.455421,11.188226,9.191042,11.956423,11.169780,11.666191,10.789200,11.267608,11.626858,11.247204,9.491904,10.553425),rep(6,length(c(13.671850,14.937996,11.455421,11.188226,9.191042,11.956423,11.169780,11.666191,10.789200,11.267608,11.626858,11.247204,9.491904,10.553425
+))),
+         col = cols.new.08[1],
+         cex = 1.5)
+  points(11.44379, 6,
+         bg = cols.new.05[1], pch = 21,
+         cex = 2)
+  
+#   # Track model
+#   points(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917),rep(1,length(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917))),
+#          col = cols.new.08[2],
+#          cex = 1.5)
+#   points(13.68133, 1,
+#          bg = cols.new.05[2], pch = 21,
+#          cex = 2)
+  
+  # Vg (low wind <2 ms-1)
+  points(c(15.31111,15.05556,14.50000,11.86111,15.90005,10.44444
+),rep(1,length(c(15.31111,15.05556,14.50000,11.86111,15.90005,10.44444
+))),
+         col = cols.new.08[2],
+         cex = 1.5)
+  points(13.84538, 1,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
