@@ -952,7 +952,7 @@ lbbg_model_va <- models.gull.10m_no_filter[[8]]
 murre_model_va <- models.murre.flt_ht_no_filter[[7]]
 
 
-murre_model_va <- models.murre.10m_no_filter[[4]]
+murre_model_va <- models.murre.10m_no_filter[[7]]
 
 
 
@@ -984,10 +984,10 @@ KRSumFun <- function(object, objectDrop, ...) {
 }
 
 # P values for gull model
-drop1(lbbg_model_va,test="user",sumFun=KRSumFun)
+drop1(lbbg_model_va, test="user",sumFun=KRSumFun)
 
 # p values for murre model
-drop1(murre_model_va,test="user",sumFun=KRSumFun)
+drop1(murre_model_va, test="user",sumFun=KRSumFun)
 
 # drop1(models.gull.stdz[[14]],test="user",sumFun=KRSumFun)
 
@@ -1385,12 +1385,14 @@ murre.new.data.df <- cbind.data.frame(
   ring_number = rep(unique(flight_alt_ok$ring_number[flight_alt_ok$species == "murre"]),4)
 )
 
-
+names(murre.new.data.df)[3] <- "cross_wind_10m_type" 
+names(murre.new.data.df)[4] <- "head_wind_10m_abs" 
+names(murre.new.data.df)[5] <- "head_wind_10m_type" 
 
 pred.va <- predict(murre_model_va,
                    newdata = murre.new.data.df,
-                   re.form=NA)
-
+                   re.form=NULL)
+hist(pred.va)
 mean(pred.va)
 # 13.68133
 
@@ -1408,6 +1410,9 @@ x[,2]
 
 mean(x[,2])
 #13.68133
+
+median(x[,2])
+#13.86643
 
 # Vg under low winds ----
 gull.vg.speed <- flight_alt_gull$vg[flight_alt_gull$ecmwf_wind_10m_speed < 2]
@@ -1436,8 +1441,8 @@ sd(gull.vg.mean$mean)/sqrt(nrow(gull.vg.mean))
 
 
 
-murre.vg.speed <- flight_alt_murre$vg[flight_alt_murre$ecmwf_wind_10m_speed < 2]
-murre.vg.birds <- flight_alt_murre$ring_number[flight_alt_murre$ecmwf_wind_10m_speed < 2]
+murre.vg.speed <- flight_alt_ok_murre$vg[flight_alt_ok_murre$ecmwf_wind_10m_speed < 2]
+murre.vg.birds <- flight_alt_ok_murre$ring_number[flight_alt_ok_murre$ecmwf_wind_10m_speed < 2]
 df <- cbind.data.frame(vg = murre.vg.speed, ring_number = murre.vg.birds)
 
 murre.vg.mean <- ddply(df, .(ring_number),
@@ -1445,12 +1450,17 @@ murre.vg.mean <- ddply(df, .(ring_number),
                       mean = mean(vg),
                       n = length(vg)
 )
+murre.vg.mean[,2]
 # 15.31111 15.05556 14.50000 11.86111 15.90005 10.44444
+# 3 ms-1
+# 15.311111 15.055556 13.444444 15.125000  8.361111 15.777778 16.096048 14.541667 10.444444
 mean(murre.vg.mean$mean)
 #13.84538
+# 3ms-1
+# 13.79524
 sd(murre.vg.mean$mean)
 #2.180219
-
+median(murre.vg.mean$mean)
 # se
 sd(murre.vg.mean$mean)/sqrt(nrow(murre.vg.mean))
 #0.8900707
