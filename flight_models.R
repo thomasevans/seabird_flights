@@ -651,7 +651,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
          powercurve.murre$speed, type = "n",
        # cex.lab = 1.5,
        las = 1,
-       xlab = expression("Airspeed ("~ms^{-1}~")"~~"Va"),
+       xlab = expression("Airspeed ("~italic(Va)~~ms^{-1}~")"),
        ylab = "Aerodynamic power (W)",
        cex.lab = 1.3,
        xlim = c(0, 28),
@@ -765,7 +765,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
        ylab = "",
        cex.lab = 1.3,
        xlim = c(5, 28),
-       ylim = c(0, 11),
+       ylim = c(0, 12),
        yaxt = "n",
        yaxs = "i",
        xaxs = "i")
@@ -783,54 +783,56 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   
 
   
-  points(birds_details$Vmr[1:19], rep(9, 19),
+  points(birds_details$Vmr[1:19], rep(10, 19),
          col = cols.new.08[1],
          cex = 1.5)
-  points(birds_mr[[1]]$speed, 9,
+  points(birds_mr[[1]]$speed, 10,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
-  points(birds_details$Vmr[20:46], rep(4, 46-19),
+  points(birds_details$Vmr[20:46], rep(5, 46-19),
          col = cols.new.08[2],
          cex = 1.5)
-  points(birds_mr[[4]]$speed, 4,
+  points(birds_mr[[4]]$speed, 5,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
-  points(birds_details$Vmp[1:19], rep(8, 19),
+  points(birds_details$Vmp[1:19], rep(9, 19),
          col = cols.new.08[1],
          cex = 1.5)
-  points(birds_mp[[1]]$speed, 8,
+  points(birds_mp[[1]]$speed, 9,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
-  points(birds_details$Vmp[20:46], rep(3, 46-19),
+  points(birds_details$Vmp[20:46], rep(4, 46-19),
          col = cols.new.08[2],
          cex = 1.5)
-  points(birds_mp[[4]]$speed, 3,
+  points(birds_mp[[4]]$speed, 4,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
   # ?mtext
   mtext("Lesser Black-\nbacked Gulls", side = 2,
-        las = 1, at = 10, line = 5, adj = 0.2)
+        las = 1, at = 11, line = 5, adj = 0.2)
   mtext("Vmr", side = 2,
-        las = 1, at = 9, line = 4, adj = 0.2)
+        las = 1, at = 10, line = 4, adj = 0.2)
   mtext("Vmp", side = 2,
-        las = 1, at = 8, line = 4, adj = 0.2)
+        las = 1, at = 9, line = 4, adj = 0.2)
   mtext("Va", side = 2,
-        las = 1, at = 7, line = 4, adj = 0.2)
+        las = 1, at = 8, line = 4, adj = 0.2)
   mtext("Vg (calm)", side = 2,
-        las = 1, at = 6, line = 4, adj = 0.2)
+        las = 1, at = 7, line = 4, adj = 0.2)
   
   
   mtext("Common \nMurres", side = 2,
-        las = 1, at = 5, line = 5, adj = 0.2)
+        las = 1, at = 6, line = 5, adj = 0.2)
   mtext("Vmr", side = 2,
-        las = 1, at = 4, line = 4, adj = 0.2)
+        las = 1, at = 5, line = 4, adj = 0.2)
   mtext("Vmp", side = 2,
-        las = 1, at = 3, line = 4, adj = 0.2)
+        las = 1, at = 4, line = 4, adj = 0.2)
   mtext("Va", side = 2,
+        las = 1, at = 3, line = 4, adj = 0.2)
+  mtext("Va*", side = 2,
         las = 1, at = 2, line = 4, adj = 0.2)
   mtext("Vg (calm)", side = 2,
         las = 1, at = 1, line = 4, adj = 0.2)
@@ -849,13 +851,13 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
 #          bg = cols.new.05[1], pch = 21,
 #          cex = 2)
   
-  # Track
+  # Track - Va for gulls
   points(c(11.91885,11.36472,11.28023,10.56731,10.94953,10.57653,11.33638,11.14906,10.97801,10.88252,11.26848,11.16238,11.47210,10.95305,10.45212,10.26821
-),rep(7,length(c(11.91885,11.36472,11.28023,10.56731,10.94953,10.57653,11.33638,11.14906,10.97801,10.88252,11.26848,11.16238,11.47210,10.95305,10.45212,10.26821
+),rep(8,length(c(11.91885,11.36472,11.28023,10.56731,10.94953,10.57653,11.33638,11.14906,10.97801,10.88252,11.26848,11.16238,11.47210,10.95305,10.45212,10.26821
 ))),
          col = cols.new.08[1],
          cex = 1.5)
-  points(11.03622, 7,
+  points(11.03622, 8,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
@@ -872,22 +874,38 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
 #          bg = cols.new.05[2], pch = 21,
 #          cex = 2)
   
-  # Track model
-  points(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917),rep(2,length(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917))),
+  # Track model - murres airspeed
+  points(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917),rep(3,length(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917))),
          col = cols.new.08[2],
          cex = 1.5)
-  points(13.68133, 2,
+  points(13.68133, 3,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
+#   points(13.86643, 2,
+#          bg = cols.new.05[2], pch = 23,
+#          cex = 2)
   
+  # Using fixed altitude (10m still model 7)
+  points(c(16.21770,15.60502,17.45417,14.35015,14.78810,14.35910,15.26232,15.75134,16.38967,15.62196,13.11194,12.72520,13.18415,15.82789,16.13410,15.55406,15.51106,14.14780,13.45607,15.14789,15.44444),rep(2,length(c(16.21770,15.60502,17.45417,14.35015,14.78810,14.35910,15.26232,15.75134,16.38967,15.62196,13.11194,12.72520,13.18415,15.82789,16.13410,15.55406,15.51106,14.14780,13.45607,15.14789,15.44444))),
+         col = cols.new.08[2],
+         cex = 1.5)
+  points(15.04972, 2,
+         bg = cols.new.05[2], pch = 21,
+         cex = 2)
+#   points(13.86643, 2,
+#          bg = cols.new.05[2], pch = 23,
+#          cex = 2)
+  
+  # Gulls Vg under calm conditions
   # Vg (wind < 2ms-1)
-  points(c(13.671850,14.937996,11.455421,11.188226,9.191042,11.956423,11.169780,11.666191,10.789200,11.267608,11.626858,11.247204,9.491904,10.553425),rep(6,length(c(13.671850,14.937996,11.455421,11.188226,9.191042,11.956423,11.169780,11.666191,10.789200,11.267608,11.626858,11.247204,9.491904,10.553425
+  points(c(13.671850,14.937996,11.455421,11.188226,9.191042,11.956423,11.169780,11.666191,10.789200,11.267608,11.626858,11.247204,9.491904,10.553425),rep(7,length(c(13.671850,14.937996,11.455421,11.188226,9.191042,11.956423,11.169780,11.666191,10.789200,11.267608,11.626858,11.247204,9.491904,10.553425
 ))),
          col = cols.new.08[1],
          cex = 1.5)
-  points(11.44379, 6,
+  points(11.44379, 7,
          bg = cols.new.05[1], pch = 21,
          cex = 2)
+  
   
 #   # Track model
 #   points(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917),rep(1,length(c(14.66591,13.86643,15.52335,11.65145,13.17248,13.79279,13.25963,14.88026,15.76323,14.39630,11.57383,11.64208,12.05237,14.58168,15.45520,13.96711,14.63981,12.85711,11.86864,13.93918,13.75917))),
@@ -897,6 +915,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
 #          bg = cols.new.05[2], pch = 21,
 #          cex = 2)
   
+  # Murres
   # Vg (low wind <2 ms-1)
   points(c(15.31111,15.05556,14.50000,11.86111,15.90005,10.44444
 ),rep(1,length(c(15.31111,15.05556,14.50000,11.86111,15.90005,10.44444
@@ -906,6 +925,11 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   points(13.84538, 1,
          bg = cols.new.05[2], pch = 21,
          cex = 2)
+  # Median
+  points(14.77778, 1,
+         bg = cols.new.05[2], pch = 23,
+         cex = 2)
+  
   
   legend("topleft", "(b)", bty="n", cex = 1.2) 
   
