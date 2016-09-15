@@ -782,7 +782,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
   cols.new.08 <- addalpha(cols.new, 0.6)
   
 
-  
+  # Gulls Vmr
   points(birds_details$Vmr[1:19], rep(10, 19),
          col = cols.new.08[1],
          cex = 1.5)
@@ -790,6 +790,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
+  # Murres Vmr
   points(birds_details$Vmr[20:46], rep(5, 46-19),
          col = cols.new.08[2],
          cex = 1.5)
@@ -797,6 +798,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
+  # Gulls Vmp
   points(birds_details$Vmp[1:19], rep(9, 19),
          col = cols.new.08[1],
          cex = 1.5)
@@ -804,6 +806,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
          bg = cols.new.05[1], pch = 21,
          cex = 2)
   
+  # Murres Vmp
   points(birds_details$Vmp[20:46], rep(4, 46-19),
          col = cols.new.08[2],
          cex = 1.5)
@@ -811,7 +814,7 @@ names(gull.mean.wind)[23:24] <- c("wind_speed", "wind_dir")
          bg = cols.new.05[2], pch = 21,
          cex = 2)
   
-  # ?mtext
+  # Labels
   mtext("Lesser Black-\nbacked Gulls", side = 2,
         las = 1, at = 11, line = 5, adj = 0.2)
   mtext("Vmr", side = 2,
