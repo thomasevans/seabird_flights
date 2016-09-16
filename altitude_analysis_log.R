@@ -7,6 +7,16 @@
 # Load flight summary data
 load("flight_details.RData")
 
+
+# GPS intervals ----
+summary(flight.details$interval_mean[flight.details$interval_mean < 1000 & flight.details$species == "gull"])
+summary(flight.details$interval_mean[flight.details$species == "murre"]*60)
+
+hist(flight.details$interval_mean[flight.details$interval_mean < 1000 & flight.details$species == "gull"], )
+hist(flight.details$interval_mean[flight.details$species == "murre"]*60)
+
+murre.data <- flight.details[flight.details$species == "murre",]
+
 # Make data subsets ----
 
 # Add species name column
