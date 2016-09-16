@@ -384,7 +384,7 @@ models.gull[[5]] <- glmer(va_flt_ht_alt_filter ~
 
 
 models.gull[[4]] <- glmer(va_flt_ht_alt_filter ~
-                            cross_wind_flt_ht_alt_filter_abs +
+                            head_wind_flt_ht_alt_filter_abs*head_wind_flt_ht_alt_filter_type +
                             (1|ring_number),
                           data = flight_alt_ok_gull)
 
