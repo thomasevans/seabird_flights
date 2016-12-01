@@ -124,7 +124,7 @@ load("SWE_adm0.RData")
 # Set limits
 c.xlim <- c(17.0, 18.1)
 
-c.ylim <- c(56.7, 57.8)
+c.ylim <- c(56.8, 57.7)
 
 # ?png
 png(filename = "surface_locations_map.png",
@@ -146,19 +146,19 @@ par(mfrow=c(1,3),cex=1)
 
 range.x <-  c.xlim[2]-c.xlim[1]
 range.y <-  c.ylim[2]-c.ylim[1]
-dif.co <- max(c(range.x,range.y))
+dif.co <- max(c(0.5*range.x,range.y))
 
-gadm_clip <- crop(gadm, extent(c.xlim[1]-1*(dif.co),
-                               c.xlim[2]+1*(dif.co),
-                               c.ylim[1]-1*(dif.co),
-                               c.ylim[2]+1*(dif.co)))
+gadm_clip <- crop(gadm, extent(c.xlim[1]-0.5*(dif.co),
+                               c.xlim[2]+0.5*(dif.co),
+                               c.ylim[1]-0.2*(dif.co),
+                               c.ylim[2]+0.2*(dif.co)))
 
 
 
 # Plot base map
 plot(gadm_clip, xlim = c.xlim,
      ylim = c.ylim, col="grey", bg = "white",
-     main = "Gulls - UvA BiTs GPS")
+     main = "Gulls - UvA BiTS GPS")
 
 points(points.uva.gulls$longitude, points.uva.gulls$latitude,
        col = addalpha("black", alpha = 0.2))
@@ -174,19 +174,20 @@ axis(side=(2), las=1, col="black", col.axis="black")
 
 range.x <-  c.xlim[2]-c.xlim[1]
 range.y <-  c.ylim[2]-c.ylim[1]
-dif.co <- max(c(range.x,range.y))
+dif.co <- max(c(0.5*range.x,range.y))
 
-gadm_clip <- crop(gadm, extent(c.xlim[1]-1*(dif.co),
-                               c.xlim[2]+1*(dif.co),
-                               c.ylim[1]-1*(dif.co),
-                               c.ylim[2]+1*(dif.co)))
+gadm_clip <- crop(gadm, extent(c.xlim[1]-0.5*(dif.co),
+                               c.xlim[2]+0.5*(dif.co),
+                               c.ylim[1]-0.2*(dif.co),
+                               c.ylim[2]+0.2*(dif.co)))
+
 
 
 
 # Plot base map
 plot(gadm_clip, xlim = c.xlim,
      ylim = c.ylim, col="grey", bg = "white",
-     main = "Murres - UvA BiTs GPS")
+     main = "Murres - UvA BiTS GPS")
 
 points(points.uva.murres$longitude, points.uva.murres$latitude,
        col = addalpha("black", alpha = 0.2))
@@ -213,13 +214,12 @@ axis(side=(2), las=1, col="black", col.axis="black")
 
 range.x <-  c.xlim[2]-c.xlim[1]
 range.y <-  c.ylim[2]-c.ylim[1]
-dif.co <- max(c(range.x,range.y))
+dif.co <- max(c(0.5*range.x,range.y))
 
-gadm_clip <- crop(gadm, extent(c.xlim[1]-1*(dif.co),
-                               c.xlim[2]+1*(dif.co),
-                               c.ylim[1]-1*(dif.co),
-                               c.ylim[2]+1*(dif.co)))
-
+gadm_clip <- crop(gadm, extent(c.xlim[1]-0.5*(dif.co),
+                               c.xlim[2]+0.5*(dif.co),
+                               c.ylim[1]-0.2*(dif.co),
+                               c.ylim[2]+0.2*(dif.co)))
 
 
 # Plot base map
@@ -293,7 +293,7 @@ par(mar=c(5,5,4,1))
 hist(points.uva.gulls$altitude[points.uva.gulls$altitude >= -100 &
                                  points.uva.gulls$altitude <= 100], xlim= c(-50,40),
      breaks = 100,
-     main = "Gulls - UvA BiTs GPS",
+     main = "Gulls - UvA BiTS GPS",
      ylab = "N GPS locations (2 m interval)",
      xlab = "GPS recorded altitude (m)")
 abline(v=gull.uva.alt.quant, lty = 2, col = "dark grey")
@@ -303,7 +303,7 @@ par(mar=c(5,5,4,1))
 hist(points.uva.murres$altitude[points.uva.murres$altitude >= -100 &
                                   points.uva.murres$altitude <= 100], xlim= c(-50,50),
      breaks = 100,
-     main = "Murres - UvA BiTs GPS",
+     main = "Murres - UvA BiTS GPS",
      ylab = "N GPS locations (2 m interval)",
      xlab = "GPS recorded altitude (m)")
 abline(v=murre.uva.alt.quant, lty = 2, col = "dark grey")
@@ -359,7 +359,7 @@ murre.igu.alt.0 <- points.igu$elev - murre.igu.alt.mean
 win.metafile(filename = "altitude_precision_quantile.wmf", width = 9, height = 4)
 
 # Set global par
-par(ps = 14, cex = 1.5, cex.lab = 2)
+par(ps = 9, cex = 1.5, cex.lab = 2)
 
 png(filename = "altitude_precision_quantile.png",
     units = "in",
@@ -377,10 +377,10 @@ par(mfrow=c(1,3),cex=1)
 
 # par(mfrow=c(1,3))
 plot_quantile(gull.uva.alt.0,
-              main = "Gulls - UvA BiTs GPS")
+              main = "Gulls - UvA BiTS GPS")
 
 plot_quantile(murre.uva.alt.0,
-              main = "Murres - UvA BiTs GPS")
+              main = "Murres - UvA BiTS GPS")
 
 plot_quantile(murre.igu.alt.0,
               main = "Murres - IGU GPS")
@@ -392,7 +392,7 @@ dev.off()
 # Altitude filtering ------
 
 # Set global par
-par(ps = 14, cex = 1.5, cex.lab = 2)
+par(ps = 9, cex = 1.5, cex.lab = 2)
 
 png(filename = "altitude_precision_sat_n_ext.png",
     units = "in",
@@ -437,7 +437,7 @@ plot(gull_sat$perc_val~gull_sat$sat_number,
      ylab = "Proportion of locations with error <5 m (%)",
      xlab = "Minimum number of satellites",
      type = "l", las = 1, lwd = 2,
-     main = "Gulls - UvA BiTs GPS")
+     main = "Gulls - UvA BiTS GPS")
 par(new = TRUE)
 plot(gull_sat$p_loc*100~gull_sat$sat_number,  axes=F, ylab = "", xlab = "", col = "red",
      type = "l", las = 1, lwd = 2, lty = 2)
@@ -475,7 +475,7 @@ murre_sat <- cbind.data.frame(sat_number,perc_val,n_loc,p_loc)
 par(mar = c(5,5,2,5))
 plot(murre_sat$perc_val~murre_sat$sat_number, ylab = "Proportion of locations with error <5 m (%)", xlab = "Minimum number of satellites",
      type = "l", las = 1, lwd = 2,
-     main = "Murres - UvA BiTs GPS")
+     main = "Murres - UvA BiTS GPS")
 par(new = TRUE)
 plot(murre_sat$p_loc*100~murre_sat$sat_number,  axes=F, ylab = "", xlab = "", col = "red",
      type = "l", las = 1, lwd = 2, lty = 2)
@@ -611,7 +611,7 @@ plot(gull_sat$perc_val~gull_sat$thresh,
      ylab = "Proportion of locations with error <5 m (%)",
      xlab = "EVPE error upper threshold (m)",
      type = "l", las = 1, lwd = 2,
-     main = "Gulls - UvA BiTs GPS")
+     main = "Gulls - UvA BiTS GPS")
 par(new = TRUE)
 plot(gull_sat$p_loc*100~gull_sat$thresh,  axes=F, ylab = "", xlab = "", col = "red",
      type = "l", las = 1, lwd = 2, lty = 2)
@@ -649,7 +649,7 @@ plot(murre_sat$perc_val~murre_sat$thresh,
      ylab = "Proportion of locations with error <5 m (%)",
      xlab = "EVPE error upper threshold (m)",
      type = "l", las = 1, lwd = 2,
-     main = "Murres - UvA BiTs GPS")
+     main = "Murres - UvA BiTS GPS")
 par(new = TRUE)
 plot(murre_sat$p_loc*100~murre_sat$thresh,  axes=F, ylab = "", xlab = "", col = "red",
      type = "l", las = 1, lwd = 2, lty = 2)
@@ -745,7 +745,7 @@ plot(gull_sat$perc_val~gull_sat$thresh,
      ylab = "Proportion of locations with error <5 m (%)",
      xlab = "Dilution of precision",
      type = "l", las = 1, lwd = 2,
-     main = "Gulls - UvA BiTs GPS")
+     main = "Gulls - UvA BiTS GPS")
 par(new = TRUE)
 plot(gull_sat$p_loc*100~gull_sat$thresh,  axes=F, ylab = "", xlab = "", col = "red",
      type = "l", las = 1, lwd = 2, lty = 2)
@@ -783,7 +783,7 @@ plot(murre_sat$perc_val~murre_sat$thresh,
      ylab = "Proportion of locations with error <5 m (%)",
      xlab = "Dilution of precision",
      type = "l", las = 1, lwd = 2,
-     main = "Murres - UvA BiTs GPS")
+     main = "Murres - UvA BiTS GPS")
 par(new = TRUE)
 plot(murre_sat$p_loc*100~murre_sat$thresh,  axes=F, ylab = "", xlab = "", col = "red",
      type = "l", las = 1, lwd = 2, lty = 2)
@@ -855,7 +855,7 @@ ggplot(data = points.igu.msv.merge, aes(x = as.factor(MSVs_QCN), y = abs(alt_0_a
   ylim(0,100) +
   theme_bw() +
   geom_abline(intercept = 4, alpha = 0.5, lty = 2, slope = 0, lwd = 1, col = "black") +
-  labs(title = 'Murres - UvA BiTs GPS',
+  labs(title = 'Murres - UvA BiTS GPS',
        x = 'MSVs_QCN',
        y = 'Altitude error (m)') +
   guides(colour=FALSE) +
@@ -915,7 +915,7 @@ sum(z$n[z$thresh_test])/sum(z$n)
 #65% <5m   83.4% retained
 
 
-# Murres - UvA BiTs
+# Murres - UvA BiTS
 summary(as.factor(points.uva.murres$satellites_used))
 
 
@@ -931,7 +931,7 @@ sum(points.uva.murres$satellites_used >= 8)/length(points.uva.murres$satellites_
 
 
 
-# Gulls - UvA BiTs - no sat
+# Gulls - UvA BiTS - no sat
 summary(as.factor(points.uva.gulls$satellites_used))
 points.uva.gulls_no_sat <- points.uva.gulls[is.na(points.uva.gulls$satellites_used),]
 unique(points.uva.gulls_no_sat$device_info_serial)
@@ -956,7 +956,7 @@ seq(0.01,0.99,0.001)[quantiles>10][1]
 sum(points.uva.gulls_no_sat$positiondop <=3)/length(points.uva.gulls_no_sat$positiondop)
 
 
-# Gulls - UvA BiTs - with sat
+# Gulls - UvA BiTS - with sat
 summary(as.factor(points.uva.gulls$satellites_used))
 points.uva.gulls_inc_sat <- points.uva.gulls[!is.na(points.uva.gulls$satellites_used),]
 unique(points.uva.gulls_inc_sat$device_info_serial)
@@ -1004,10 +1004,10 @@ plot_quantile(gull.uva.alt.0[(
   !is.na(points.uva.gulls$satellites_used) & points.uva.gulls$satellites_used >=7)|(
     is.na(points.uva.gulls$satellites_used) & points.uva.gulls$positiondop <=3
   )],
-              main = "Gulls - UvA BiTs GPS")
+              main = "Gulls - UvA BiTS GPS")
 
 plot_quantile(murre.uva.alt.0[points.uva.murres$satellites_used >= 8],
-              main = "Murres - UvA BiTs GPS")
+              main = "Murres - UvA BiTS GPS")
 
 plot_quantile(murre.igu.alt.0[(
   igu_2009)|(

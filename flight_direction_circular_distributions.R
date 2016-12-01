@@ -100,6 +100,7 @@ lines(density.circular(track.dir.gull.circ,
       lty = 2,
       shrink = 1)
 
+# ?rose.diag
 
 rose.diag(wind.dir.gull.circ,
           bins = 16,

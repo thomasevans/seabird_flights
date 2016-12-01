@@ -1,6 +1,8 @@
 # Calculations based on wind etc to get Va, alpha, cross/ tail wind components,
 # and wind at flight height (using wind-shear calculations)
 
+library(dplyr)
+
 # Load in flight and point data ----
 load("flights.RData")
 load("points_all.RData")
@@ -52,6 +54,44 @@ for(i in 1:length(flights.murres)){
 
 hist(points.info$direction_common)
 summary(is.na(points.info$direction_common))
+
+
+# Direction to island centre ('goal') -----
+
+
+# Get nest locations
+# Establish a connection to the database
+library(RODBC)
+gps.db <- odbcConnectAccess2007('D:/Dropbox/tracking_db/GPS_db.accdb')
+
+
+# Get DB table for deployment_info (including nest location and island location)
+dep.info <- sqlQuery(gps.db,
+                     query = "SELECT gps_ee_nest_limited.latitude, gps_ee_nest_limited.longitude, gps_ee_nest_limited.nest_id, gps_ee_nest_inhabitant_limited.ring_number, gps_ee_nest_inhabitant_limited.device_info_serial
+FROM gps_ee_nest_inhabitant_limited INNER JOIN gps_ee_nest_limited ON gps_ee_nest_inhabitant_limited.nest_id = gps_ee_nest_limited.nest_id;
+                     "
+                     ,as.is = TRUE)
+str(dep.info)
+# dep.info$device_info_serial <- as.character(dep.info$device_info_serial)
+points.all <- merge(points.all, dep.info, by = "device_info_serial",
+           all.x = TRUE)
+
+# Add nest location for IGU records
+# Find only device IDs starting with 'g' (IGU data)
+points.all$longitude.y[substr((points.all$device_info_serial),1,1) == "g"] <- 17.95829200
+points.all$latitude.y[substr((points.all$device_info_serial),1,1) == "g"] <- 57.28998600
+
+# Fix duplicate column names (long and lat etc?)
+names(points.all)[names(points.all) %in% c("latitude.x","longitude.x",
+                                           "latitude.y", "longitude.y")] <-
+  c("latitude","longitude",
+    "latitude.nest", "longitude.nest")
+
+str(points.all)
+
+points.all$longitude.nest <- as.numeric(points.all$longitude.nest)
+points.all$latitude.nest <- as.numeric(points.all$latitude.nest)
+
 
 # ** Wind shear calculations -----
 # Flight height for calculations (NA for extremes, and 1 m for <0.5 m)
@@ -301,14 +341,6 @@ hist(points.info$speed_2d, xlim = c(0,25), breaks = 1000)
 points.info$vg_v <- points.info$speed_2d*(cos(rad(points.info$direction_common)))
 hist(points.info$vg_v, xlim = c(-50,50), breaks = 400)
 
-# 
-# a1 <- points.info$speed_2d[test.na][2]*(cos(rad(points.info$direction_common[test.na][2])))
-# 
-# b1 <- points.info$speed_2d[test.na][2]*(sin(rad(points.info$direction_common[test.na][2])))
-# 
-# calc_hypotenuse(a1,b1)
-
-# (cos(rad(c(0,45,90,270,180))))
 
 points.info$vg_u <- points.info$speed_2d*(sin(rad(points.info$direction_common)))
 hist(points.info$vg_u, xlim = c(-50,50), breaks = 100)
@@ -434,6 +466,8 @@ hist((points.info$alpha_10m))
 wind_angle_dif_10m <- points.info$ecmwf_wind_10m_dir -points.info$va_flt_10m_bearing 
 hist(wind_angle_dif_10m, breaks = 72)
 
+# sin(rad(160))
+
 points.info$cross_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_10m))
 
 points.info$head_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_10m))
@@ -498,6 +532,67 @@ points.info$track_cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*s
 points.info$track_head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_track))
 
 hist(points.info$track_head_wind_flt_ht)
+
+
+# Relative to goal ------
+# And relative to goal, not heading or heading
+# Goal direction
+# ?geosphere::bearingRhumb
+
+points.info$goal_dir <- geosphere::bearingRhumb(
+  as.matrix(dplyr::select(points.all, longitude, latitude)),
+  as.matrix(dplyr::select(points.all, longitude.nest, latitude.nest)))
+hist(points.info$goal_dir)
+# hist(points.info$direction_common)
+
+wind_angle_dif_goal <- points.info$ecmwf_wind_10m_dir - points.info$goal_dir 
+# hist(wind_angle_dif_goal, breaks = 72)
+# hist(((wind_angle_dif_goal + 360) %% 360), breaks = 72)
+# hist(((wind_angle_dif_track + 360) %% 360), breaks = 72)
+# 
+# plot(((wind_angle_dif_goal + 360) %% 360)~((wind_angle_dif_track + 360) %% 360))
+
+# rad(-180)
+# rad(180)
+points.info$goal_cross_wind_10m <- points.info$ecmwf_wind_10m_speed*sin(rad(wind_angle_dif_goal))
+
+points.info$goal_head_wind_10m <- points.info$ecmwf_wind_10m_speed*cos(rad(wind_angle_dif_goal))
+
+hist(points.info$goal_cross_wind_10m)
+hist(points.info$goal_head_wind_10m)
+
+# points.info$ecmwf_wind_10m_speed_1m
+# new
+points.info$goal_cross_wind_1m <- points.info$ecmwf_wind_10m_speed_1m*sin(rad(wind_angle_dif_goal))
+
+points.info$goal_head_wind_1m <- points.info$ecmwf_wind_10m_speed_1m*cos(rad(wind_angle_dif_goal))
+
+
+points.info$goal_cross_wind_2m <- points.info$ecmwf_wind_10m_speed_2m*sin(rad(wind_angle_dif_goal))
+
+points.info$goal_head_wind_2m <- points.info$ecmwf_wind_10m_speed_2m*cos(rad(wind_angle_dif_goal))
+
+
+points.info$goal_cross_wind_5m <- points.info$ecmwf_wind_10m_speed_5m*sin(rad(wind_angle_dif_goal))
+
+points.info$goal_head_wind_5m <- points.info$ecmwf_wind_10m_speed_5m*cos(rad(wind_angle_dif_goal))
+
+
+
+hist(points.info$goal_cross_wind_1m)
+hist(points.info$goal_head_wind_1m)
+
+# hist(points.info$goal_cross_wind_10m - points.info$goal_cross_wind_1m)
+
+
+# wind_angle_dif_goal_flt_ht <- points.info$ecmwf_wind_10m_dir - points.info$va_flt_ht_bearing 
+
+
+points.info$goal_cross_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*sin(rad(wind_angle_dif_goal))
+
+points.info$goal_head_wind_flt_ht <- points.info$ecmwf_wind_10m_speed_flt_ht*cos(rad(wind_angle_dif_goal))
+
+hist(points.info$goal_head_wind_flt_ht)
 
 
 # Wind effect -----

@@ -123,16 +123,19 @@ for(i in 1:nrow(points.acc)){
 }
 # summary(is.na(z))
   
-  # Add to dataframe
-  points.acc$wing_beat_freq <- z
+
   
   # Output file
   save(points.acc, file = "points.acc.calc.RData")
   
+
   
   
   # Resume here
   load("acc_workspace_20160520.Rdata")
+  
+  # Add to dataframe
+  points.acc$wing_beat_freq <- z
   
   # Have a look at the data -----
   
@@ -244,12 +247,23 @@ flight.summary <- ddply(points.acc, .(device_info_serial, flight_id_combined.x),
       n = sum(!is.na(wing_beat_freq)),
       n.f = n.range(wing_beat_freq, 2, 5)
       )
+flight.summary$prop_flap <- flight.summary$n.f/flight.summary$n
 
-
-
+par(mfrow=c(1,1))
+hist(flight.summary$prop_flap, breaks = 20)
+hist(flight.summary$n, breaks = 100)
 hist(flight.summary$median, breaks = 100)
-
+sum(flight.summary$n)
 hist(flight.summary$median.f, breaks = 20)
+unique(flight.summary$device_info_serial)
+
+
+
+par(mfrow=c(4,1))
+f <- points.acc$flight_id_combined.x == "g2861"
+plot(points.acc$vg[f]~points.acc$date_time[f])
+plot(points.acc$altitude_callib[f]~points.acc$date_time[f])
+plot(points.acc$wing_beat_freq[f]~points.acc$date_time[f])
 
 
 # Combine above with ring_number
