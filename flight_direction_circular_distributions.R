@@ -47,10 +47,13 @@ wind.dir.gull.circ <- circular(flight.details$ecmwf_wind_10m_dir[gulls],
 # dir.fun <- 
 #   90-deg(atan2(1,-2))
 #   
-
-track.dir <- 90 - deg(atan2(flight.details$vg_v, flight.details$vg_u))
-track.dir[track.dir<0] <- 360 + track.dir[track.dir<0]
-# hist(track.dir)
+# 
+# track.dir <- 90 - deg(atan2(flight.details$vg_v, flight.details$vg_u))
+# track.dir[track.dir<0] <- 360 + track.dir[track.dir<0]
+# # hist(track.dir)
+track.dir <- flight.details$goal_dir
+# range(track.dir)
+track.dir <- (track.dir + 360) %% 360
 track.dir.circ <- circular(track.dir,
                          type = "angles",
                          units = "degrees",
@@ -61,10 +64,11 @@ track.dir.gull.circ <- track.dir.circ[gulls]
 
 par(ps = 14, cex = 1.5, cex.lab = 2)
 
-svg("circle_plots_new2.svg",
+svg("circle_plots_new2_GOAL.svg",
     width = 12, height = 4, family = "serif")
 # ?cairo_ps
 # Plot base map
+
 par(mfrow = c(1,3), cex = 1.0)
 
 
@@ -114,7 +118,7 @@ rose.diag(wind.dir.gull.circ,
 legend("topleft", "(c)", bty="n", cex = 1.2) 
 # legend("topright", expression(Vg), bty="n", cex = 1,
        # text.col = cols.new[2]) 
-text(x = 1.2, y = 1.2, labels = expression(Vg),
+text(x = 1.2, y = 1.2, labels = expression(atop("Goal","direction")),
      cex = 1.2, col = cols.new[2])
 text(x = 0.4, y = -0.4, labels = "Vw",
      col = "dark grey")
@@ -128,6 +132,7 @@ wind.dir.murre.circ <- circular(flight.details$ecmwf_wind_10m_dir[!gulls],
 )
 
 track.dir.murre.circ <- track.dir.circ[!gulls]
+
 
 
 plot(track.dir.murre.circ,
@@ -175,40 +180,42 @@ legend("topleft", "(d)", bty="n", cex = 1.2)
 #        text.col = cols.new[1]) 
 text(x = 0.4, y = -0.4, labels = "Vw",
      col = "dark grey")
-text(x = 1.2, y = 1.2, labels = expression(Vg),
+text(x = 1.2, y = 1.2, labels = expression(atop("Goal","direction")),
      cex = 1.2, col = cols.new[1])
 # ?legend
 
 # Directions of Vg (track) with respect to wind -------
-va.dir <- 90 - deg(atan2(flight.details$vg_v_alt_filter,
-                         flight.details$vg_u_alt_filter))
+# va.dir <- 90 - deg(atan2(flight.details$vg_v_alt_filter,
+                         # flight.details$vg_u_alt_filter))
+va.dir <- flight.details$wind_angle_dif_goal
+va.dir <- (va.dir + 360)%%360
 
-# flight.details$vg_v
-# warnings()
-fun2 <- function(x){
-  if(is.na(x))return(NA) else{
-    if(x<0)return(360 + x) else{
-      return(x)
-    }
-  }
-}
-# fun2(NA)
-va.dir <- sapply(va.dir, fun2)
+# # flight.details$vg_v
+# # warnings()
+# fun2 <- function(x){
+#   if(is.na(x))return(NA) else{
+#     if(x<0)return(360 + x) else{
+#       return(x)
+#     }
+#   }
+# }
+# # fun2(NA)
+# va.dir <- sapply(va.dir, fun2)
 
 
-range(flight.details$ecmwf_wind_10m_dir)
+range(va.dir)
 
-wind.dir.range <- flight.details$ecmwf_wind_10m_dir
-wind.dir.range[flight.details$ecmwf_wind_10m_dir < 0] <- 360 + flight.details$ecmwf_wind_10m_dir[flight.details$ecmwf_wind_10m_dir < 0]
-
-wind.dif <- wind.dir.range - va.dir
-# hist(wind.dif)
-
-wind.dif.new <- sapply(wind.dif, fun2)
-# hist(wind.dif.new)
+# wind.dir.range <- flight.details$ecmwf_wind_10m_dir
+# wind.dir.range[flight.details$ecmwf_wind_10m_dir < 0] <- 360 + flight.details$ecmwf_wind_10m_dir[flight.details$ecmwf_wind_10m_dir < 0]
 # 
+# wind.dif <- wind.dir.range - va.dir
+# # hist(wind.dif)
+# 
+# wind.dif.new <- sapply(wind.dif, fun2)
+# # hist(wind.dif.new)
+# # 
 
-wind.dif.new.circ <- circular(wind.dif.new,
+wind.dif.new.circ <- circular(va.dir,
                               type = "angles",
                               units = "degrees",
                               template = "none"
@@ -292,15 +299,15 @@ lines(density.circular(x,
 # ?lines.circular
 legend("topleft", "(e)", bty="n", cex = 1.2) 
 # legend("topright", expression(alpha), bty="n", cex = 1.2) 
-text(x = 1.2, y = 1.2, labels = expression(alpha),
+text(x = 1.2, y = 1.2, labels = expression("V"["w"]^"goal"),
      cex = 1.4)
-text(x = 0, y = -0.4, labels = expression("Vw"["s"]^"T -"),
+text(x = 0, y = -0.4, labels = expression("Vw"["s"]^"-"),
      col = "dark grey")
-text(x = 0, y = 0.4, labels = expression("Vw"["s"]^"T +"),
+text(x = 0, y = 0.4, labels = expression("Vw"["s"]^"+"),
      col = "dark grey")
-text(x = 0.4, y = 0, labels = expression("Vw"["c"]^"T +"),
+text(x = 0.4, y = 0, labels = expression("Vw"["c"]^"+"),
      col = "dark grey")
-text(x = -0.4, y = 0, labels = expression("Vw"["c"]^"T -"),
+text(x = -0.4, y = 0, labels = expression("Vw"["c"]^"-"),
      col = "dark grey")
 
 # # Directions of Va (heading) with respect to wind -------

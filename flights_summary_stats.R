@@ -1,6 +1,9 @@
 # Calculate summary statistics for each flight for statistical analysis and general
 # summary
 
+library(dplyr)
+
+
 # Get data -----
 
 # Flight info
@@ -11,50 +14,90 @@ load("points.detailed.incl.RData")
 
 load("points.detailed.RData")
 
-
+# points.detailed$goal
 
 # 
 # points.detailed$va_5m
 # points.detailed$va_v_5m
 # points.detailed$va_u_5m
 # points.detailed$va_flt_5m_bearing
+# x <- names(points.detailed)
+# x
+selected.cols <-c("flight_id_combined",
+                  "date_time",
+                  "track_head_wind_1m",
+                  "track_cross_wind_1m",
+                  "goal_head_wind_1m",
+                  "goal_cross_wind_1m",
+                  "va_1m",
+                  "va_v_1m",
+                  "va_u_1m",
+                  "va_flt_1m_bearing",
+                  "track_head_wind_2m",
+                  "track_cross_wind_2m",
+                  "goal_head_wind_2m",
+                  "goal_cross_wind_2m",
+                  "va_2m",
+                  "va_v_2m",
+                  "va_u_2m",
+                  "va_flt_2m_bearing",
+                  "track_head_wind_5m",
+                  "track_cross_wind_5m",
+                  "goal_head_wind_5m",
+                  "goal_cross_wind_5m",
+#                   "track_head_wind_10m",
+#                   "track_cross_wind_10m",
+                  "goal_head_wind_10m",
+                  "goal_cross_wind_10m",
+                  "va_5m",
+                  "va_v_5m",
+                  "va_u_5m",
+                  "va_flt_5m_bearing",
+                  "goal_cross_wind_flt_ht",
+                  "goal_head_wind_flt_ht",
+                  "wind_angle_dif_10m",
+                  "wind_angle_dif_flt_ht",
+                  "wind_angle_dif_track",
+                  "wind_angle_dif_goal",
+                  "goal_dir"
+)
 
-points.df_new <- merge(points.df, points.detailed[,c("flight_id_combined",
-                                                     "date_time",
-                                                     "track_head_wind_1m",
-                                                     "track_cross_wind_1m",
-                                                     "goal_head_wind_1m",
-                                                     "goal_cross_wind_1m",
-                                                     "va_1m",
-                                                     "va_v_1m",
-                                                     "va_u_1m",
-                                                     "va_flt_1m_bearing",
-                                                     "track_head_wind_2m",
-                                                     "track_cross_wind_2m",
-                                                     "goal_head_wind_2m",
-                                                     "goal_cross_wind_2m",
-                                                     "va_2m",
-                                                     "va_v_2m",
-                                                     "va_u_2m",
-                                                     "va_flt_2m_bearing",
-                                                     "track_head_wind_5m",
-                                                     "track_cross_wind_5m",
-                                                     "goal_head_wind_5m",
-                                                     "goal_cross_wind_5m",
-                                                     "va_5m",
-                                                     "va_v_5m",
-                                                     "va_u_5m",
-                                                     "va_flt_5m_bearing",
-                                                     "goal_cross_wind_flt_ht",
-                                                     "goal_head_wind_flt_ht")],
+
+# c(1:33)[!( selected.cols%in% names(points.detailed))]
+  
+points.detailed.sub <- dplyr::select(points.detailed, one_of(selected.cols))
+
+
+points.df_new <- merge(points.df, points.detailed.sub,
                        by = c("flight_id_combined", "date_time"))
+
 # ?merge
 # points.detailed$track_cross_wind_1m
 points.df <- points.df_new
 # points.df$track
-
-plot(points.df$track_cross_wind_flt_ht~points.df$goal_cross_wind_flt_ht)
-plot(points.df$track_cross_wind_flt_ht~points.df$track_cross_wind_10m)
+# 
+# plot(points.df$track_cross_wind_flt_ht~points.df$cross_wind_flt_ht)
+# 
+# plot(points.df$track_cross_wind_flt_ht~points.df$goal_cross_wind_flt_ht)
+# plot(points.df$track_cross_wind_flt_ht~points.df$track_cross_wind_10m)
+# plot(points.df$track_head_wind_flt_ht~points.df$goal_head_wind_flt_ht)
+# 
+# ggplot(points.df, aes(x=track_head_wind_flt_ht, y=goal_head_wind_flt_ht)) +
+#   geom_point(alpha = 0.1)
+# ggplot(points.df, aes(x=track_cross_wind_flt_ht, y=goal_cross_wind_flt_ht)) +
+#   geom_point(alpha = 0.1)
+# 
+# points.df$type <- "pos"
+# points.df$type[points.df$direction <0] <- "neg"
+# summary(as.factor(points.df$type))
+# hist(points.df$direction)
+# hist((points.df$direction + 360)%%360)
+# hist(points.df$direction_common)
+# range(points.df$direction, na.rm = TRUE)
+# points.x <- filter(points.df, track_cross_wind_flt_ht > 8 &
+#                      track_cross_wind_flt_ht <9 &
+#                      goal_cross_wind_flt_ht < -8 &
+#                      goal_cross_wind_flt_ht > -9)
 
 # points.df$va_u_2m[1:10]
 
@@ -129,6 +172,16 @@ df_names <- c("flight_id_combined",
               "track_head_wind_5m",
               "track_cross_wind_flt_ht",
               "track_head_wind_flt_ht",
+              "goal_cross_wind_10m",
+              "goal_head_wind_10m",
+              "goal_cross_wind_1m",
+              "goal_head_wind_1m",
+              "goal_cross_wind_2m",
+              "goal_head_wind_2m",
+              "goal_cross_wind_5m",
+              "goal_head_wind_5m",
+              "goal_cross_wind_flt_ht",
+              "goal_head_wind_flt_ht",
               "wind_effect_10m",
               "wind_effect_flt_ht",
               "ecmwf_wind_10m_dir_alt_filter",
@@ -174,8 +227,20 @@ df_names <- c("flight_id_combined",
               "track_head_wind_5m_alt_filter",
               "track_cross_wind_flt_ht_alt_filter",
               "track_head_wind_flt_ht_alt_filter",
+              "goal_cross_wind_10m_alt_filter",
+              "goal_head_wind_10m_alt_filter",
+              "goal_cross_wind_1m_alt_filter",
+              "goal_head_wind_1m_alt_filter",
+              "goal_cross_wind_2m_alt_filter",
+              "goal_head_wind_2m_alt_filter",
+              "goal_cross_wind_5m_alt_filter",
+              "goal_head_wind_5m_alt_filter",
+              "goal_cross_wind_flt_ht_alt_filter",
+              "goal_head_wind_flt_ht_alt_filter",
               "wind_effect_10m_alt_filter",
-              "wind_effect_flt_ht_alt_filter"
+              "wind_effect_flt_ht_alt_filter",
+              "goal_dir",
+              "wind_angle_dif_goal"
               
 )
 
@@ -194,9 +259,12 @@ for(i in 1:n_flights){
   f_id <- flight_summary_df$flight_id_combined[i]
   
   # get sub-set of points for flight, but only those included (after truncation)
-  points.flight <- points.df[points.df$flight_id_combined == f_id &
-                               points.df$included_points,]
+  points.flight <- filter(points.df, flight_id_combined == f_id &
+                            included_points)
   
+#   points.flight <- points.df[points.df$flight_id_combined == f_id &
+#                                points.df$included_points,]
+#   # points.df$tra
   # How many points?
   n_points <- nrow(points.flight)
   
@@ -406,6 +474,43 @@ for(i in 1:n_flights){
     
     flight_summary_df$track_head_wind_flt_ht[i] <-
       median(na.rm = TRUE, points.flight$track_head_wind_flt_ht[fp])                                                     
+    # From goal direction
+    
+    # points.flight$goal
+    flight_summary_df$goal_cross_wind_10m[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_10m[fp])  
+    
+    flight_summary_df$goal_head_wind_10m[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_10m[fp])  
+    
+    
+    flight_summary_df$goal_cross_wind_1m[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_1m[fp])  
+    # points.flight$goal
+    flight_summary_df$goal_head_wind_1m[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_1m[fp])  
+    
+    
+    flight_summary_df$goal_cross_wind_2m[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_2m[fp])  
+    # points.flight$goal
+    flight_summary_df$goal_head_wind_2m[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_2m[fp])  
+    
+    
+    flight_summary_df$goal_cross_wind_5m[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_5m[fp])  
+    # points.flight$goal
+    flight_summary_df$goal_head_wind_5m[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_5m[fp])  
+    
+    flight_summary_df$goal_cross_wind_flt_ht[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_flt_ht[fp])  
+    
+    flight_summary_df$goal_head_wind_flt_ht[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_flt_ht[fp])                            
+    
+    
     flight_summary_df$wind_effect_10m[i] <-
       median(na.rm = TRUE, points.flight$wind_effect_10m[fp])  
     
@@ -550,17 +655,62 @@ for(i in 1:n_flights){
       median(na.rm = TRUE, points.flight$track_cross_wind_flt_ht[alt_incl & fp])  
     
     flight_summary_df$track_head_wind_flt_ht_alt_filter[i] <-
-      median(na.rm = TRUE, points.flight$track_head_wind_flt_ht[alt_incl & fp])                                                     
+      median(na.rm = TRUE, points.flight$track_head_wind_flt_ht[alt_incl & fp])               
+    
+    # Goal
+    flight_summary_df$goal_cross_wind_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_10m[alt_incl & fp])  
+    
+    flight_summary_df$goal_head_wind_10m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_10m[alt_incl & fp])      
+    
+    flight_summary_df$goal_cross_wind_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_1m[alt_incl & fp])  
+    # points.flight$goal
+    flight_summary_df$goal_head_wind_1m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_1m[alt_incl & fp])  
+    
+    flight_summary_df$goal_cross_wind_2m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_2m[alt_incl & fp])  
+    # points.flight$goal
+    flight_summary_df$goal_head_wind_2m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_2m[alt_incl & fp])  
+    
+    flight_summary_df$goal_cross_wind_5m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_5m[alt_incl & fp])  
+    # points.flight$goal
+    flight_summary_df$goal_head_wind_5m_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_5m[alt_incl & fp])  
+    
+    
+    flight_summary_df$goal_cross_wind_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_cross_wind_flt_ht[alt_incl & fp])  
+    
+    flight_summary_df$goal_head_wind_flt_ht_alt_filter[i] <-
+      median(na.rm = TRUE, points.flight$goal_head_wind_flt_ht[alt_incl & fp])               
+    
+    
+    
     flight_summary_df$wind_effect_10m_alt_filter[i] <-
       median(na.rm = TRUE, points.flight$wind_effect_10m[alt_incl & fp])  
     
     flight_summary_df$wind_effect_flt_ht_alt_filter[i] <-
-      median(na.rm = TRUE, points.flight$wind_effect_flt_ht[alt_incl & fp])                                          
+      median(na.rm = TRUE, points.flight$wind_effect_flt_ht[alt_incl & fp])                    
+    
+    flight_summary_df$goal_dir[i] <-       deg(circ.mean(rad(points.flight$goal_dir[fp])))
+    flight_summary_df$wind_angle_dif_goal[i] <-       deg(circ.mean(rad(points.flight$wind_angle_dif_goal[fp])))
+#     
+#     
+#     "goal_dir",
+#     "wind_angle_dif_goal"
+#     
+    
                
     
     }
 
 
+# any(is.na(flight_summary_df[i,]))
 
 # See how many are lacking altitude
 summary(flight_summary_df$altitude_filter_n == 0)
