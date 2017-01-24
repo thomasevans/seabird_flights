@@ -3,7 +3,7 @@
 
 
 # Load in morphological data for birds ------
-birds <- read.csv("deployments_details_export.csv")
+birds <- read.csv("deployments_details.csv")
 
 
 # Load Marco's afpt package and other required packages -----
@@ -12,10 +12,12 @@ library(plyr)
 
 # Assemble data -----
 gulls <- birds$species == "gull"
-males <- birds$sex.morph. == "M"
-females <- birds$sex.morph. == "F"
+gulls.males <- birds$sex.new == "M"  & birds$species == "gull"
+gulls.females <- birds$sex.new == "F"  & birds$species == "gull"
 
 murres <- birds$species == "murre"
+murres.males <- birds$sex.new == "M"  & birds$species == "murre"
+murres.females <- birds$sex.new == "F" & birds$species == "murre"
 
 # Use individual specific wingbeat frequencies for the gulls that have them
 # Means for all others
@@ -33,11 +35,16 @@ gull.female.wingbeat.sd <- sd(birds$acc.median.f[gulls & females], na.rm = TRUE)
 murre.wingbeat.mean <- mean(birds$acc.median.f[murres], na.rm = TRUE)
 murre.wingbeat.sd <- sd(birds$acc.median.f[murres], na.rm = TRUE)
 
+murre.male.wingbeat.mean <- mean(birds$acc.median.f[murres & males], na.rm = TRUE)
+murre.male.wingbeat.sd <- sd(birds$acc.median.f[murres & males], na.rm = TRUE)
+
+murre.female.wingbeat.mean <- mean(birds$acc.median.f[murres & females], na.rm = TRUE)
+murre.female.wingbeat.sd <- sd(birds$acc.median.f[murres & females], na.rm = TRUE)
 
 
 # Then calculate also for means of gulls - male, gulls - female, gulls - both, and murres
 
-birds.means2 <- ddply(birds, .(species, sex.morph.),
+birds.means2 <- ddply(birds, .(species, sex.new),
                       summarise,
                      massTotal = mean(weight.kg., na.rm = TRUE),
                      wingSpan = mean(photo_wing_span, na.rm = TRUE),
@@ -54,11 +61,11 @@ spp.means <- ddply(birds, .(species),
                      wingbeatFrequency = mean(acc.median.f, na.rm = TRUE)
                )
 
-birds.means2$name <- paste(birds.means2$species, birds.means2$sex.morph., sep = "_")
+birds.means2$name <- paste(birds.means2$species, birds.means2$sex.new, sep = "_")
 spp.means$name <- spp.means$species
 
 # Combine
-birds.means <- rbind.data.frame(spp.means[1,2:6], birds.means2[,3:7])
+birds.means <- rbind.data.frame(spp.means[,2:6], birds.means2[,3:7])
 
 
 
@@ -71,7 +78,7 @@ birds_df <- data.frame(
   wingbeatFrequency = birds$acc.median.f,
   name = birds$ring_number,
   species = birds$species,
-  sex = birds$sex.morph.
+  sex = birds$sex.new
 )
 
 
@@ -82,7 +89,17 @@ birds_df$wingbeatFrequency[!birds_df$acc_data & birds$species == "gull" &
                              birds_df$sex == "M"] <- birds.means[3,4]
 birds_df$wingbeatFrequency[!birds_df$acc_data & birds$species == "gull" &
                              birds_df$sex == "F"] <- birds.means[2,4]
-birds_df$wingbeatFrequency[!birds_df$acc_data & birds$species == "murre"] <- birds.means[4,4]
+
+# birds_df$wingbeatFrequency[!birds_df$acc_data & birds$species == "murre"] <- birds.means[4,4]
+
+
+birds_df$wingbeatFrequency[!birds_df$acc_data & birds$species == "murre" &
+                             birds_df$sex == "M"] <- birds.means[6,4]
+birds_df$wingbeatFrequency[!birds_df$acc_data & birds$species == "murre" &
+                             birds_df$sex == "F"] <- birds.means[5,4]
+
+birds_df$wingbeatFrequency[is.na(birds_df$wingbeatFrequency) &
+                             birds$species == "murre"] <- birds.means[2,4]
 
 
 # Calculate Vmr and Vmp ------
@@ -110,9 +127,9 @@ str(birds_means_list)
 birds_mr <- list()
 for(i in 1:nrow(birds_means_list)){
   
-  fun_powerchem <- function(speed)computeChemicalPower(computeFlappingPower(birds_means_list[i,],speed),birds_means_list[i,])
-  maximumRangeSpeed.chem <- findMaximumRangePower(fun_powerchem, 3, 30)
-  birds_mr[[i]] <- maximumRangeSpeed.chem[1,]  
+  # fun_powerchem <- function(speed)computeChemicalPower(computeFlappingPower(birds_means_list[i,]),birds_means_list[i,])
+  # maximumRangeSpeed.chem <- findMaximumRangeSpeed(fun_powerchem, 3, 30)
+  birds_mr[[i]] <- findMaximumRangeSpeed(birds_means_list[i,]) 
   
 }
 
@@ -128,9 +145,11 @@ birds_list_filtered <- birds_list[!(is.na(birds_list$wingSpan)|
 birds_all_mr <- list()
 for(i in 1:nrow(birds_list_filtered)){
   
-  fun_powerchem <- function(speed)computeChemicalPower(computeFlappingPower(birds_list_filtered[i,],speed),birds_list_filtered[i,])
-  maximumRangeSpeed.chem <- findMaximumRangePower(fun_powerchem, 3, 30)
-  birds_all_mr[[i]] <- maximumRangeSpeed.chem[1,]  
+#   fun_powerchem <- function(speed)computeChemicalPower(computeFlappingPower(birds_list_filtered[i,],speed),birds_list_filtered[i,])
+#   maximumRangeSpeed.chem <- findMaximumRangePower(fun_powerchem, 3, 30)
+#   birds_all_mr[[i]] <- maximumRangeSpeed.chem[1,] 
+  birds_all_mr[[i]] <- findMaximumRangeSpeed(birds_list_filtered[i,]) 
+  
   
 }
 
@@ -145,11 +164,11 @@ birds_all_mr_df <- do.call(rbind , birds_all_mr)
 birds_mp <- list()
 for(i in 1:nrow(birds_means_list)){
   
-  fun_poweraero <- function(speed)computeFlappingPower(birds_means_list[i,],speed)
-
-    minimumPowerSpeed.aero <- findMinimumPower(fun_poweraero, 3, 30)
+#   fun_poweraero <- function(speed)computeFlappingPower(birds_means_list[i,],speed)
+# 
+#     minimumPowerSpeed.aero <- findMinimumPower(fun_poweraero, 3, 30)
   
-  birds_mp[[i]] <- minimumPowerSpeed.aero[1,]  
+  birds_mp[[i]] <- findMinimumPowerSpeed(birds_means_list[i,])  
   
 }
 
@@ -166,11 +185,11 @@ birds_all_mp <- list()
 for(i in 1:nrow(birds_list_filtered)){
   
   
-  fun_poweraero <- function(speed)computeFlappingPower(birds_list_filtered[i,],speed)
+#   fun_poweraero <- function(speed)computeFlappingPower(birds_list_filtered[i,],speed)
+#   
+#   minimumPowerSpeed.aero <- findMinimumPower(fun_poweraero, 3, 30)
   
-  minimumPowerSpeed.aero <- findMinimumPower(fun_poweraero, 3, 30)
-  
-  birds_all_mp[[i]] <- minimumPowerSpeed.aero[1,] 
+  birds_all_mp[[i]] <- findMinimumPowerSpeed(birds_list_filtered[i,])
 
 }
 
@@ -194,6 +213,10 @@ birds_df$vmp[!(is.na(birds_list$wingSpan)|
 birds.means$vmr <- birds_mr_df$speed
 
 birds.means$vmp <- birds_mp_df$speed
+
+
+
+
 
 
 # Wind calculations --------
