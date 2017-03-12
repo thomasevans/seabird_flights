@@ -63,6 +63,37 @@ theme_new_rt_legend <- theme_bw(base_size = 14, base_family = "serif") +
         legend.title = element_blank()
   )
 
+
+
+theme_new_poster <- theme_bw(base_size = 14) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1, 1),
+        legend.key.size =   unit(2, "lines"),
+        legend.key = element_rect(colour =NA),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 14),
+        legend.text.align = 0,
+        legend.key.width = unit(3, "lines"),
+        legend.title = element_blank()
+  )
+
+
+theme_new_rt_legend_poster <- theme_bw(base_size = 14) +
+  theme(legend.position = "right",
+        legend.justification = c(1, 1),
+        legend.key.size =   unit(2, "lines"),
+        legend.key = element_rect(colour =NA),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 14),
+        legend.text.align = 0,
+        legend.key.width = unit(2, "lines"),
+        legend.title = element_blank()
+  )
+
+
+
 # ********** Statistical analysis -----
 library(lme4)
 library(arm)
@@ -751,7 +782,8 @@ ggsave(zp1, filename = "alt_model_coef_fig_gull_log_GOAL.svg", width = 12, heigh
 
 
 
-
+# If resume here --------
+load("altitude_analysis_GOAL_data.Rdata.RData")
 
 # Figures to illustrate model predictions ------
 # Similar style to fig 4 or sup file 4 in Sapir et al. 2014 study
@@ -768,8 +800,8 @@ ggsave(zp1, filename = "alt_model_coef_fig_gull_log_GOAL.svg", width = 12, heigh
 
 
 
-wind.side <- seq(-10,10,.1)
-wind.assist <- seq(-10,10,.1)
+wind.side <- seq(-15,15,.1)
+wind.assist <- seq(-15,15,.1)
 dist.median <- median(flight_alt_ok_gull$trunc_seg_dist_a_b_km)
 
 gg <- expand.grid(x=wind.assist,y=wind.side)
@@ -823,7 +855,8 @@ lab.1 <- expression(atop("Vw"["s"]^"+"~"","Tail-wind"))
 lab.2 <- expression(atop("Vw"["s"]^"-"~"","Head-wind"))
 lab.3 <- expression(atop(paste("|Vw"["c"],"|", sep = ""),"Cross-wind"))
 # lab.4 <- expression(atop("Vw"["c"]^"+"~"","To right"))
-
+lab.4 <- expression("Tail-wind")
+lab.5 <- expression("Head-wind")
 
 p <- ggplot(gg,aes(x,y)) + 
   geom_raster(aes(fill=z3))+
@@ -862,11 +895,63 @@ ggsave("Alt_gull_predication2_log_GOAL.svg", width = 6, height = 4, units = "in"
 
 
 
+# For poster:
+
+p <- ggplot(gg,aes(x,y)) + 
+  geom_raster(aes(fill=z3))+
+  scale_fill_gradient2(low = muted("blue"), mid = "white",
+                       high = muted("red"), midpoint = median(
+                         flight_alt_ok_gg$z, na.rm = TRUE
+                       ), space = "Lab",
+                       na.value = "grey50", guide = "colourbar") +
+
+  scale_x_continuous(expand=c(0,0), breaks = seq(-10,10,2.5),
+                     limits = c(-10,10))+
+  #                    limits = c(min(flight_alt_ok_gg$x,
+  #                                   na.rm = TRUE),
+  #                               max(flight_alt_ok_gg$x,
+  #                                     na.rm = TRUE)))+
+  # # ?scale_x_continuous
+  scale_y_continuous(expand=c(0,0), breaks = seq(0,10,2.5),
+                     limits = c(0,max(flight_alt_ok_gg$y,
+                                                     na.rm = TRUE)))+
+  
+  # scale_x_continuous(expand=c(0,0))+
+  # scale_y_continuous(expand=c(0,0), breaks = c(0,2.5,5.0,7.5,10.0))+
+  
+  coord_fixed() +
+  geom_point(data = flight_alt_ok_gg[!is.na(flight_alt_ok_gg$z),],
+             aes(fill = z), 
+             shape = 21, alpha = 0.8, na.rm = T, size = 1.5) +
+  labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+        y = expression(paste("|Vw"["c"],"|", sep = "")~~~~"Cross wind ("~ms^{-1}~")"),
+        fill = "Altitude (m)",
+        parse = TRUE) +
+  # theme_new +
+  theme_new_rt_legend_poster +
+  theme(legend.title = element_text(size = 14)) +
+  annotate("text", label = c(paste(lab.4),paste(lab.5)),
+           x = c( 7, -7),
+           y = c(10, 10),
+           parse=TRUE,
+           colour = "grey50",
+           size = 5,
+           vjust = 0.5) 
+# p <- p + annotate("text",  x= -9,
+#                   y = 10.5, label = "(b)",
+#                   vjust = 1, hjust=0, size = 5)
+p
+ggsave("Alt_gull_predication2_log_GOAL_poster.pdf",
+       scale = 0.4, width = 420, height = 350, units = "mm",
+       dpi = 600)
+# ?ggsave
+
+
 
 # For Murres ------
 
-wind.side <- seq(-10,10,.1)
-wind.assist <- seq(-10,10,.1)
+wind.side <- seq(-15,15,.1)
+wind.assist <- seq(-15,15,.1)
 dist.median <- median(flight_alt_ok_murre$trunc_seg_dist_a_b_km)
 
 gg <- expand.grid(x=wind.assist,y=wind.side)
@@ -961,4 +1046,55 @@ p <- p + annotate("text",  x= -9,
 p
 ggsave("Alt_murre_predication2_log_GOAL.svg", width = 6, height = 4, units = "in")
 
+
+
+# For poster:
+
+p <- ggplot(gg,aes(x,y)) + 
+  geom_raster(aes(fill=z3))+
+  scale_fill_gradient2(low = muted("blue"), mid = "white",
+                       high = muted("red"), midpoint = median(
+                         flight_alt_ok_gg$z, na.rm = TRUE
+                       ), space = "Lab",
+                       na.value = "grey50", guide = "colourbar") +
+  
+  scale_x_continuous(expand=c(0,0), breaks = seq(-10,10,2.5),
+                     limits = c(-10,10))+
+  #                    limits = c(min(flight_alt_ok_gg$x,
+  #                                   na.rm = TRUE),
+  #                               max(flight_alt_ok_gg$x,
+  #                                     na.rm = TRUE)))+
+  # # ?scale_x_continuous
+  scale_y_continuous(expand=c(0,0), breaks = seq(0,10,2.5),
+                     limits = c(0,max(flight_alt_ok_gull$cross_wind_flt_ht,
+                                      na.rm = TRUE)))+
+  
+  # scale_x_continuous(expand=c(0,0))+
+  # scale_y_continuous(expand=c(0,0), breaks = c(0,2.5,5.0,7.5,10.0))+
+  
+  coord_fixed() +
+  geom_point(data = flight_alt_ok_gg[!is.na(flight_alt_ok_gg$z),],
+             aes(fill = z), 
+             shape = 21, alpha = 0.8, na.rm = T, size = 1.5) +
+  labs( x = expression("Vw"["s"]~~~~"Wind assitance ("~ms^{-1}~")"),
+        y = expression(paste("|Vw"["c"],"|", sep = "")~~~~"Cross wind ("~ms^{-1}~")"),
+        fill = "Altitude (m)",
+        parse = TRUE) +
+  # theme_new +
+  theme_new_rt_legend_poster +
+  theme(legend.title = element_text(size = 14)) +
+  annotate("text", label = c(paste(lab.4),paste(lab.5)),
+           x = c( 7, -7),
+           y = c(10, 10),
+           parse=TRUE,
+           colour = "grey50",
+           size = 5,
+           vjust = 0.5) 
+# p <- p + annotate("text",  x= -9,
+#                   y = 10.5, label = "(b)",
+#                   vjust = 1, hjust=0, size = 5)
+p
+ggsave("Alt_murre_predication2_log_GOAL_poster.pdf",
+       scale = 0.4, width = 420, height = 350, units = "mm",
+       dpi = 600)
 
